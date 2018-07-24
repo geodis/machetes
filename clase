@@ -19,7 +19,7 @@ a 2 secciones x semana: 4(34min), 5(55min) = Total efectivo: 3hs
 
 
 
-21,22, 23, 24 - 25, 27, 27, 28, 29, 30 (tarea muy facil),31,32,33,- 34,35,36,37
+21,22, 23, 24 - 25, 27, 27, 28, 29, 30 (tarea muy facil),31,32,33,- 34,35,36,37 - 38, 39, 40, 41, 42
 
 Tarea
 
@@ -67,3 +67,27 @@ docker container exec -it my_nginx ping new_nginx
 37 -  re tagear imagenes
 
 docker image tag nginx ctaglia/mi_nginx
+
+30 - Dockerfile
+
+FROM debian:stretch-slim --> Distribucion base
+
+ENV NGINX_VERSION 1.13.6-1~stretch -->  Variables de ambiente. Es la forma de pasar clave/valor
+
+RUN --> Comandos shell a correr dentro del contenedor en build time. Se corre todo el comando con && porque si no
+cada comando seria individual en cada layer. Al poner comando1 && comando2 && ...&& comando n, es un solo layer
+
+EXPOSE 80, exponemos puerto 80 a la red virtual docker
+
+CMD --> comando que se va a ejecutar c/vez que corramos restartiemos el contenedor
+
+39 - Buildear dockers
+
+En el lugar donde tenga definido el Dockerfile
+
+# docker image build -t nombre_imagen .
+
+Cuando docker buildea crea un hash por c/layer, asi en una rebuildeada ya usa esos layers y solo
+rebuildea los que cambiaron. CUando armo un dockerfile tengo que poner arriba o primero lo que menos cambia o 
+no cambia, y abajo lo que cambia. Cuando una linea cambia y es rebuildeada, todas las siguientes son rebuildeadas.
+
