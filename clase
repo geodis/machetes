@@ -13,13 +13,24 @@ docker container run --publish 8080:80 --name nombre_propio -d nginx:1.11 nginx 
 docker top
 
 son 91
-secciones 1,2,3,4,5,6,7,8,9,10
+secciones 
+1,2,3: (23/7)
+4:
+5:
+6:
+7:
+8:
+9:
+10
 
 a 2 secciones x semana: 4(34min), 5(55min) = Total efectivo: 3hs
 
 
 
-21,22, 23, 24 - 25, 27, 27, 28, 29, 30 (tarea muy facil),31,32,33,- 34,35,36,37 - 38, 39, 40, 41, 42
+
+
+21,22, 23, 24 - 25, 27, 27, 28, 29, 30 (tarea muy facil),31,32,33,- 34,35,36,37 - 38, 39, 40, 41, 42, 43 - 
+44, 45, 46,47
 
 Tarea
 
@@ -91,3 +102,22 @@ Cuando docker buildea crea un hash por c/layer, asi en una rebuildeada ya usa es
 rebuildea los que cambiaron. CUando armo un dockerfile tengo que poner arriba o primero lo que menos cambia o 
 no cambia, y abajo lo que cambia. Cuando una linea cambia y es rebuildeada, todas las siguientes son rebuildeadas.
 
+44 - Persistent Data
+
+Volumes: Crea un lugar fuera del Union Filesystem (UFS) del contenedor para guardar archivos. Cualquier contenedor
+lo podria ver. Se ve como un punto de montaje
+
+Bind Mounts: montar un share del host
+
+Volume en el dockerfile
+
+docker volume prune --> Borra volumenes no usados
+
+named volumes: permite asignar volumenes a contenedores
+
+docker volume create 
+
+Bind mounting:
+mapea un file o directorio a un file o directorio del contenedor. Es como un link duro
+No se configura en el dockerfile porque es propio del sistema donde esta corriendo
+Se pasa como param con container run
