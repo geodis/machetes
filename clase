@@ -17,8 +17,8 @@ secciones
 1,2,3: (23/7)
 4: (30/7)
 5: (15/8)
-6:
-7:
+6: (23/8)
+7: (23/8)
 8:
 9:
 10
@@ -33,6 +33,10 @@ a 2 secciones x semana: 4(34min), 5(55min) = Total efectivo: 3hs
 44, 45, 46,47 - 48, 49, 50
 51, 52, 53
 54, 55, 56
+57, 58, 59, 60, 61
+62,63
+
+
 
 Tarea
 
@@ -152,3 +156,44 @@ docker-compose.yml (es el nombre por defecto, pero se puede usar un alternativo:
 51
 docker-compose up: setup volumes/networks y levanta todos los containers
 docker-compose down: para todos los containers y remueve todos volumes/networks 
+
+
+56
+swarm
+======
+
+docker service create, reemplaza docker container run para clusters
+
+docker service create alpine ping 8.8.8.8
+docker service ps boring_goodall
+
+# aplico cambios a un servicio corriendo
+docker service update boring_goodall --replicas 3
+
+# elimino un servicio
+docker service rm boring_goodall
+
+docker swarm init --advertise-addr <ip address>  # Cuando tengo mas de una tengo que configurar por cual soy manager
+
+docker node ls
+docker node update --role manager node2
+
+docker swarm join-token manager 			# Esto lo ejecuto en el manager leader. Y me da el token para que un nodo se asocie directamente como manager
+
+
+Overlay Multi-host networking
+
+Crea un bridge para un swarm a travez de la red de contenedores
+Entonces todos los hosts estan en una "vlan". Es solo para 
+comunicacion entre swarms
+
+* --driver overlay cuando creo una network
+
+
+docker network create --driver overlay mydrupal
+docker service create --name psql --network mydrupal -e POSTGRES_PASSWORD=mypass postgresm
+
+routing Mesh
+============
+
+es el router que asocia las ips con el nodo/s que tienen el servicio
