@@ -35,7 +35,8 @@ a 2 secciones x semana: 4(34min), 5(55min) = Total efectivo: 3hs
 54, 55, 56
 57, 58, 59, 60, 61
 62,63
-
+63
+64,65,66
 
 
 Tarea
@@ -197,3 +198,13 @@ routing Mesh
 ============
 
 es el router que asocia las ips con el nodo/s que tienen el servicio
+
+
+ejemplo integral swarm
+======================
+
+docker network create --driver overlay nombre
+
+
+Stacks
+=======
