@@ -1,0 +1,230 @@
+
+
+SINTAXIS
+--------
+ansible [opciones] [serv1,serv2,..,servn:grp1,grp2,...,grpn,:all] [-m modulo] [-a argumentos]
+
+[opciones]
+--limit filtro: --limit server1,server2
+--user username
+--become
+-f 2: aplica de a 2 servidores en paralelo (por defecto 5)
+--list-hosts: Lista los host a los que aplica el inventario
+-C: No aplica las opciones en los servers, solo nos dice si lo puede lograr
+-v: verbose
+
+[modulos]
+- setup : para obtener la info de un servidor (facts)
+- copy  : Si quiero copiar archivos desde un server al resto de los servers: -m copy "src=/etc/hosts dest=/etc/hosts"
+ansible all -m copy -a "src=/etc/hosts dest=/etc/hosts"; copia el hosts (local donde ejecuto ansible) a "all"
+
+- yum/apt: para instalaciones:  "name=vim state=present/absent" el estado es en el que quiero que quede
+
+
+
+
+
+ansible [servidores:grupos] -m ping
+ansible all -m ping
+
+ansible [servidores:grupos] -u usuario_remoto -m ping
+
+--become : hace sudo en el remoto
+ansible [servidores:grupos] -u usuario_remoto --become -m ping
+
+
+Ejemplo
+
+[ubuntu]
+1.1.1.1
+[debian]
+2.2.2.2
+
+# Subgrupos (children palabra clave)
+
+[apt:children]
+ubuntu
+debian
+
+Ej: ansible apt -m "ping"
+
+# Variables. Pueden ser a grupo, grupo padre, host. (vars palabra clave)
+[apt:vars]
+ansible_become=True
+
+Las variables del host tienen precedencia sobre las variables del grupo
+
+Se pueden separar variables
+
+/etc/ansible/group_vars/grupo
+/etc/ansible/host_vars/servidor
+
+El formato de esos archivos (YML) es nombre_variable: valor
+
+Patrones:
+
+hosts: web1.test.xyz, web2.test.xyz, web3.test.xyz....web20.test.xyz
+
+web[1:20].test.xyz
+web[a:d].test.xyz
+
+
+# Puedo usar otro archivo de inventario alternativo para correr un comando
+ansible -i archivo_hosts_alternativo
+
+archivo_hosts_alternativo: se usa cuando tengo un archivo de test, devel, produccion
+
+
+# parametros variables
+
+ansible_connection = ssh
+						-> ansible_host
+						-> ansible_port
+						-> ansible_user
+						-> ansible_ssh_private_key_file
+					 local
+
+ansible_become = True | False
+ansible_become_method = su | sudo
+ansible_become_user = pepe
+
+
+# Inventario Dinamico
+=====================
+La lista dinamica de servers la baja de un 
+
+- Cloud: AWS, Google Cloud Platform, DigitalOcean
+
+- Entorno Propio: Openstack, Ovirt, OpenShift, Zabbix
+
+# Nombre virtual
+
+[ubuntu]
+ubuntu1 ansible_host=1.1.1.1
+
+
+# Combinar inventarios
+======================
+
+ansible -i inventarios/ all ..... (en inventarios van archivos como el hosts o plugins.py/ini 
+								   de los plugins de ansible para generar inventarios)
+
+Puedo combinar inventarios y filtrar por servers, grupos, etc. Igual que antes pero 
+armando la base de servers desde todos los inventarios que haya en inventarios
+
+
+# Playbooks (jugadas)
+=====================
+Tareas a realizar en una lista de servidores determinada
+Dentro de un file puede haber distintos playbooks
+
+
+La primer linea arranca con: ---
+
+---
+- name: Mi primer playbook
+  hosts: all
+  remote_user: usuario
+  become: True # si lo pongo aca se hace a nivel de playbook, para todas las tareas
+  tasks: 
+  	- name: Copiar archivos hosts
+  	  copy: src=/etc/hosts dest=/etc/hosts owner=root group=root mode=0644
+  	  # ---- Otra sintaxis mas comoda ----
+  	  copy: 
+  	    src: /etc/hosts 
+  	    dest: /etc/hosts 
+  	    owner: root 
+  	    group: root 
+  	    mode: 0644
+
+
+  	- name: 
+  	  become:	# Si lo pongo aca se hace a nivel tarea
+
+# Opciones del playbook:
+---------------------
+become_user
+become_method
+check_mode
+--syntax-check: comprueba la sintaxis del playbook
+--list-tasks
+--step: pregunta paso a paso para continuar
+--start-at-task="nombre de una tarea" arrancar directamente de una tarea especifica de un playbook
+--forks=n / -f n: Limita a n tareas en paralelo (def: 5)
+-v (vvv) niveles de verbose
+
+
+
+Ejecucion:
+ansible-playbook [-i inventario] [opciones] playbook.yml
+
+
+& (and) ! (negacion)  : (separador)
+
+Ejemplos:
+
+hosts: servers_web
+hosts: servers_web:&madrid (todos los servers que esten en ambos grupos - servers_web y madrid - )
+hosts: servers_web:!madrid (todos los servers_webque no esten en madrid)
+hosts: grp1:grp2 (ambos grupos completos)
+
+ansible-playbook --limit 'servers_web:&madrid'
+
+# Variables
+===========
+
+Sintaxis: "{{variable}}"
+
+Pueden ser definidass en Facts (obtenidas del server), playbook, linea de comandos (-e)
+
+Pueden ser usadas en 
+- Tareas
+- Plantillas
+- otros (condiciones, bucles, etc)
+
+
+Ejemplo plantilla: hosts.j2
+
+{{ miip }} {{ ansible_hostname }} {{ ansible_fqdn }}
+
+
+Ejemplo playbook:
+
+- name: ejemplo variables
+  hosts: localhost
+  connection: local
+  vars:
+    - miip: "1.1.1.1"
+    - milista: ["apache2","mariadb","php5"]
+    - otra_sintaxis_lista:
+		- apache2
+		- mariadb
+		- php5    
+  tasks:
+    - name: Crear archivo hosts
+      template: src=hosts.j2 dest=/etc/hosts # Este es el copy
+
+
+# Obtengo la lista de todas las variables del servidor
+
+ansible localhost -m setup 
+
+# Sobrecargo las variables del playbook con -e miip="5.6.7.8"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
