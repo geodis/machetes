@@ -1,0 +1,11 @@
+---
+- name: Actualizar conf sshd.config
+  hosts: repo
+  tasks: 
+    - name: Copiar file
+      copy: src=temporal dest=/tmp/temporal
+      notify: listar
+  handlers:  
+    - name: listar
+      service: name=sshd state=restarted
+...

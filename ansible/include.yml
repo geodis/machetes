@@ -1,0 +1,9 @@
+- name: Primer play
+  hosts: repo
+  tasks:
+    - name: Instalar vim
+      yum:  name=vim state=latest
+    - import_tasks: instalar2.yml
+
+- name: Segundo play
+  import_playbook: segundo_play.yml

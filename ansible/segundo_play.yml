@@ -1,0 +1,4 @@
+- hosts: repo
+  tasks:
+    - name: Instalar tmux
+      yum: name=tmux state=latest
