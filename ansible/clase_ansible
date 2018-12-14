@@ -236,6 +236,7 @@ ansible localhost -m setup
 
 
 # Diccionario
+==============
 
 instalar:
   web: apache2
@@ -356,6 +357,210 @@ web
     │   └── main.yml
     ├── tasks
     │   └── main.yml
-    └── templates
-        └── index.html.j2
+    ├── templates
+    │   └── index.html.j2
+    └── defaults
+        └── main.yml
+
+
+# Templates
+===========
+
+Expresiones: {{variable}} --> {{ansible_fqdn}}
+
+Control: {%...%} --> 
+
+{% if ansible_distribution == "Debian" %}
+  ejecutar en debian
+{% endif %}
+
+{% for usuario in lista_de_usuarios %}  # En defaults/main.yml se define lista_de_usuarios: ["pepe","paco"]
+usuario
+{% endfor %}
+
+
+#Puedo sobrecargar el defaults, por ejemplo en instalar.yml
+ roles:
+  - {role: rol1, lista_de_usuarios: ["usr1", "usr2"] }
+
+#Sobrecargo desde linea de comandos
+$ ansible-playbook -e { "lista_de_usuarios": ["usr1", "usr2"] }
+
+Comentario: {# este es un comentario #}
+
+
+Ejemplo: index.html.j2
+
+Hola server {{ansible_fqdn}}
+{% if ansible_distribution == "CentOS" %}
+Es Centos
+{% endif %}
+
+
+cat index.html.j2
+Hola server repo.issys.gov.ar
+Es Centos
+
+
+
+# Variables
+============
+menor: ---> mayor prioridad
+
+MENOR PRIORIDAD
+
+1.  defaults/ definidas en un role
+2.  variables de grupo ( +(prioridad) inventario -> group_vars/all -> group_vars/<grupo> -(prioridad))
+3.  variables de servidor (inventario -> host_vars/<servidor> )
+4.  "Facts" del servidor
+5.  variables del playbook (vars_prompt -> vars_files)
+6.  variables del rol (definidas en /roles/rol/vars/main.yml)
+7.  variables de bloque -> variables de tareas
+8.  parametros de rol --> include_params --> include_vars
+9.  set_facts / registered_vars
+10. extra vars especificados en la linea de comandos
+
+MAYOR PRIORIDAD
+
+
+# Condiciones
+=============
+
+Es posible condicionar:
+  - la ejecucion de una tarea
+  - la inclusion de un archivo
+  - el uso de un rol
+
+usando la expresion "when"
+
+En el playbook
+
+- name: Tareas para debians
+  apt: name=apache2 state=latest
+  when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+
+- name: Tareas para redhats
+  yum: name=httpd state=latest
+  when: ansible_distribution == "Debian" or ansible_distribution == "CentOS"
+
+
+En roles/rol1/tasks
+  # Archivo
+  main.yml
+    - name: Tareas para debians
+      include: instalar_apache2.yml
+      when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu"
+
+    - name: Tareas para redhats
+      include: instalar_httpd.yml
+      when: ansible_distribution == "Debian" or ansible_distribution == "CentOS"
+
+    - name: tarea para todo server
+      ............................
+  
+    # O por rol
+    roles:
+      - {role: apache2, lista_de_usuarios: ["usr1", "usr2"], when: ansible_distribution == "Debian" or ansible_distribution == "Ubuntu" }
+      - {role: httpd, lista_de_usuarios: ["usr1", "usr2"], when: ansible_distribution == "CentOS" }
+
+
+  # Archivo
+  instalar_apache2.yml
+    - name: Tareas para debians
+      apt: name=apache2 state=latest
+
+  # Archivo
+  instalar_httpd.yml
+    - name: Tareas para redhats
+      yum: name=httpd state=latest
+
+
+
+
+# Bucles
+========
+
+para listas y diccionarios uso "with_items"
+
+- name: instalar soft
+  apt: name={{item}} state=latest
+  with_items:
+    - mariadb
+    - php5
+    - phpmyadmin
+
+  otro ejemplo
+
+
+
+- name: crear usuarios
+  user: name={{item.nombre}} state=present groups={{item.grupo}}
+  with_items:
+    - {nombre: usuario1, grupo: grupo1}
+    - {nombre: usuario2, grupo: grupo2}
+
+
+si uso with_items: {{lista_de_usuarios}} (va a ir a buscar al defaults la definicion de "lista_de_usuarios")
+
+
+# Register
+==========
+
+La expresion register permite guardar en una variable el resultado de una accion realizada
+por un modulo en una tarea
+
+Ejemplo:
+
+- name: Ejecutar comando
+  command: uptime
+  register: salida
+
+
+
+Archivo register.yml
+
+- name: ejemplo register
+  hosts: all
+  tasks:
+    - name: Ejecutar uptime
+      command: uptime
+      register: salida_uptime
+
+    - name: Visualizar variable
+      debug: var=salida_uptime
+      debug: var=salida_uptime.stdout
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

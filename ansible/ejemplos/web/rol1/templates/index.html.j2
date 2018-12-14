@@ -1,1 +1,8 @@
 Hola server {{ansible_fqdn}}
+{% if ansible_distribution == "CentOS" %}
+Es Centos
+{% endif %}
+
+{% for usuario in lista_de_usuarios %}
+soy {{usuario}}
+{% endfor %}
