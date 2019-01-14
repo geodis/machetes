@@ -513,7 +513,7 @@ Ejemplo:
 
 - name: Ejecutar comando
   command: uptime
-  register: salida
+  register: salida  <-- este es el nombre de la variable donde se guarda la salida del comando
 
 
 
@@ -532,14 +532,47 @@ Archivo register.yml
 
 
 
+Valores devueltos:
+ - changed
+ - failed
+ - skipped
+ - rc    -> return code
+ - stout/stderr/stdout_lines/stderr_lines
+
+
+Es posible utilizar (ver tasks/main.yml)
+
+- when: salida|changed
+
+salida.rc != 0 --> fallo
+salida.rc == 0 --> bien
 
 
 
+Ignorar Errores
+===============
+
+No se recomienda utilizar 
+
+Ejemplo:
+  - name:  comprobar si existe archivo
+    command: ls /no_existe.conf
+    register: existe
+    ignore_errors: true
+
+  - name: Visualizar variable
+    debug: var=register.stdout
+    when: not register|failed
+
+  - name: Visualizar variable
+    debug: var=register.stderr
+    when: register|failed
 
 
 
+failed_when y changed_when
 
-
+Podemos marcar una tarea como fallida o cambiada
 
 
 

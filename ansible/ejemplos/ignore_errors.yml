@@ -1,0 +1,15 @@
+- name: ignorar error
+  hosts: repo
+  tasks:
+    - name: Ejecutar uptime
+      command: cat /etc/fstab2
+      register: salida_uptime
+      ignore_errors: true
+
+    - name: Visualizar variable
+      debug: var=salida_uptime.stdout
+      when: not salida_uptime|failed
+
+    - name: Visualizar errores
+      debug: var=salida_uptime.stderr
+      when: salida_uptime|failed

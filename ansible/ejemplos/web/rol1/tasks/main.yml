@@ -3,4 +3,14 @@
   notify: notificar
 
 - name: copiar template
-  template: src=index.html.j2 dest=/tmp/  #Directamente busca en templates
+  template: src=index.html.j2 dest=/tmp/index.html  #Directamente busca en templates
+  register: copiado
+
+- name: mostrar contenido
+  command: cat /tmp/index.html
+  register: salida
+  when: copiado|changed
+
+- debug: var=salida.stdout
+  when: copiado|changed
+

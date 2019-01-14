@@ -1,0 +1,9 @@
+- name: playbook para register
+  hosts: repo
+  tasks:
+    - name: Ejecutar uptime
+      command: cat /etc/fstab
+      register: salida_uptime
+
+    - name: Visualizar variable
+      debug: var=salida_uptime.stdout
