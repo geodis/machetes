@@ -1,0 +1,17 @@
+
+- hosts: repo
+  tasks:
+    - name: obtener uname
+      command: uname -a
+      register: salida
+
+    - debug: var=salida
+
+
+    - name: ejecuto bash
+      shell: uname -a | tee archivo.log
+      register: salida_bash
+      args:
+        executable: /bin/bash   # Por defecto usa /bin/sh
+        chdir: /tmp
+

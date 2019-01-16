@@ -1,0 +1,10 @@
+- name: Modulos para instalaciones
+  hosts: repo
+  tasks:
+    - name: Instalar mc
+      yum: name=mc state=latest
+    - name: Instalar alpine
+      yum: name=alpine state=latest
+
+    - name: instalar nginx
+      yum: name=nginx state=latest

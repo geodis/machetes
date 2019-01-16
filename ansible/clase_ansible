@@ -575,8 +575,93 @@ failed_when y changed_when
 Podemos marcar una tarea como fallida o cambiada
 
 
+- name: Uso de failed_when
+  hosts: repo
+  tasks:
+    - name: Obtener interfaces de red
+      command: ip a
+      register: salida
+      failed_when: "'eth2' not in salida.stdout"
+
+    - name: No marcar nunca como cambiada
+      command: uptime
+      changed_when: false
 
 
+Modulos
+=========
+
+Realizan las acciones en los servers
+
+
+lista de modulos utiles:
+
+https://docs.ansible.com/ansible/latest/modules/list_of_all_modules.html
+Aca basicamente hay que usar la doc y los Ejemplos
+
+archive: crea un comprimido de otros archivos
+unarchive: extrae un comprimido luego de copiarlo
+blockinfile: inserta/actualiza/elimina un bloque de texto en un archivo
+copy: copia archivos a servers
+fetch: obtiene archivos de servers
+file: setea atributos a archivos
+find: hace lo mismo que find pero remoto
+lineinfile: asegura que una linea este en un archivo o lo reemplaza usando regex
+patch: aplica parches usando GNU patch
+replace: reemplaza un texto por otro
+stat: igual que stat
+  ej:
+    register: datos
+    - debug: msg="es directorio"
+      when: datos.stat.isdir
+
+synchronize: usa rsync
+tempfile: crea archivos/carpetas temporales
+template: copia y procesa una plantilla a un nodo remoto
+assert: asegura que se cumplan ciertas condiciones
+fail: falla con un mensaje especifico
+include: incluye un playbook/tareas
+include_rol:
+include_vars: incluye vars desde un archivo
+pause: pausa por tiempo la ejecucion de un playbook
+
+
+
+
+ejemplo yum
+===========
+
+- name: instalar la ultima version de apache2
+  yum: 
+    name: httpd
+    state: latest
+
+- name: actualizar todos los paquetes
+  yum:
+    name: "*"
+    state: latest
+
+- name: instalar grupo
+  yum:
+    name: "@Development Tools"
+    state: present
+
+- name: añadir repo EPEL
+  yum_repository:
+    name: epel
+    description: EPEL repo
+    state: present
+    baseurl: http://bla.bla.bla
+
+
+
+La siguiente lista permite ejecutar comandos en el nodo remoto
+
+- command
+- expect -> ejecuta un comando y responde a la introduccion de datos
+- raw -> envia comandos sin filtrar por ssh
+- script -> transfiere un script y lo ejecuta
+- shell -> como command pero usando /bin/sh o /bin/bash (vale && || >> que en command no)
 
 
 

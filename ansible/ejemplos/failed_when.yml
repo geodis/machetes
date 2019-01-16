@@ -1,0 +1,11 @@
+- name: Uso de failed_when
+  hosts: repo
+  tasks:
+    - name: Obtener interfaces de red
+      command: ip a
+      register: salida
+      failed_when: "'eth2' not in salida.stdout"
+
+    - name: No marcar nunca como cambiada
+      command: uptime
+      changed_when: false
