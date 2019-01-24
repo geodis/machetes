@@ -1,0 +1,11 @@
+- hosts: repo
+  vars:
+    - numero: 10
+  tasks:
+    - debug: msg="Hostname {{ansible_hostname}} y FQDN {{ansible_fqdn}}" 
+    - assert:
+        msg: "el numero tiene que estar entre 0 y 100"
+        that: 
+          - numero <= 100
+          - numero > 0
+

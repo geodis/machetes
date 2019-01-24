@@ -619,13 +619,26 @@ synchronize: usa rsync
 tempfile: crea archivos/carpetas temporales
 template: copia y procesa una plantilla a un nodo remoto
 assert: asegura que se cumplan ciertas condiciones
+  ej:
+    - assert: {that: "ansible_os_family != redhat"}
+
 fail: falla con un mensaje especifico
+  - fail: msg="dato incorrecto"
+    when: valor not in ['y','Y']
+
 include: incluye un playbook/tareas
 include_rol:
 include_vars: incluye vars desde un archivo
 pause: pausa por tiempo la ejecucion de un playbook
+  - pause:
+  - pause: minutes=2
+  - pause: seconds=2
+  - pause: prompt="compruebe acceso a la app"
 
-
+set_fact:
+wait_for:
+delegate_to:
+local_action:
 
 
 ejemplo yum
@@ -666,19 +679,122 @@ La siguiente lista permite ejecutar comandos en el nodo remoto
 
 
 
+include
+========
+Buena practica:
+tasks/main.yml 
+          |_ 1. configure.yml
+          |_ 2. install.yml
+          |_ 3. postinstall.yml
+          (los traigo con includes)
+}
+
+- include (otro playbook)
+- include_vars
+- include_role --> -name: nombre (Obligatorio)
 
 
 
+set_fact: para establecer variables para un servidor
+
+- set_fact:
+    clave1: valor1
+    clave2: valor2
+
+
+- wait_for:
+    - state: (present, started, stopped, absent)
+
+
+Se queda indefinidamente esperando hasta poder conectar con el puerto.
+Cuando conecta lo hace por 2 seg.
+- hosts: repo
+  tasks:
+    - wait_for: port=22 delay=2
+
+    - name: esperar hasta que archivo exista
+      wait_for: path=/tmp/exista
 
 
 
+Notificaciones
+==============
+Ver cap si hace falta. El unico que conozco es jabber
 
 
 
+Bases de datos -- (mirar el video en caso de usarlo)
+==============
+
+Mysql
+
+mysql_db --> añade o elimina bases de datos
+mysql_replication --> administra replicaciones
+mysql_user --> abm usuarios
+mysql_variables --> variables globales del config de mysql
+
+Postgresql
+
+postgresql_db     --> ABM DB
+postgresql_ext    --> extensiones
+postgresql_lang   --> procedimientos almacenados
+postgresql_privs  --> privilegios
+postgresql_schema --> ABM esquemas
+postgresql_user   --> ABM usuarios
 
 
+  - Misc
+    =====
+    elasticsearch_plugin 
+    kibana_plugin
+    redis
+    riak
 
+Modulos para gestionar el sistema
+=================================
 
+alternatives: gestionar alternativas para un comando. Modifica el /etc/alternatives (que son links) al path del binario que querramos
+  alternatives:
+    name: java
+    path: path_especifico_del_binario_que_quiero_usar
+at:
+authorized_keys: gestiona las claves
+  name: añadir clave ansible a usuario root. La copia en el/los server/s en el authorized_key
+  authorized_key:
+    user: root
+    key: "ssh-rsa asdasdasd"
 
+known_hosts:
+cron: Instala un cron
+  cron:
+    name: "copia de seguridad"
+    minute: 0
+    hour: 2
+    job: /path/script.sh
+    cron_file: mi_backup # Si no especifico nombre lo pone dentro del cron del usuario
+    user: root
+
+crypttab:
+filesystem:
+  name: Crear filesystem xfs
+  filesystem:
+    
+
+firewalld:
+iptables:
+glulster_volume: glusterfs
+user:
+group:
+hostname:
+lvg: lvm
+lvol: lvm
+mount:
+ping:
+varios para selinux
+service: habilita/desabilita servicios
+setup: obtiene info del sistema
+sysctl:
+systemd:
+timezone:
 
 

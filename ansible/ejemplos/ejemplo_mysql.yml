@@ -1,0 +1,14 @@
+- hosts: repo
+  tasks:
+    # - yum: name=python2-pip state=latest
+    # - yum: name=mysql-server state=latest
+    # - pip: name=MySQL-python state=latest
+    # - mysql_db: name=nginx state=present  # creo la bd
+    # - mysql_db: name=all state=dump target=/tmp/{{ansible_hostname}}.sql #
+    # - mysql_user: name=test password=test state=present priv="nginx.*:ALL"
+    - yum: name=postgresql-server state=latest
+    - pip: name=psycopg2 state=latest
+    - postgresql_db: name=test state=present encoding="UTF-8"
+      become_user: postgres 
+    - postgresql_user: name=user_test state=present password=1234 db=test priv=ALL
+      become_user: postgres 
