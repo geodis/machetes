@@ -1,0 +1,5 @@
+- name: ejemplo debug
+  hosts: repo
+  tasks:
+    - debug: var=ansible_host verbosity=4
+      # verbosity: 1

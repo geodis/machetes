@@ -2,5 +2,6 @@
 *.pdf
 comandos
 *.sh
+*.retry
 udemy-docker-mastery/
 

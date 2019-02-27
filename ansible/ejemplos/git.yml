@@ -1,0 +1,16 @@
+- name: modulo git
+  hosts: repo
+  tasks:
+    - name: yum
+      yum: name=git state=latest
+    - name: descargar ejemplos ansible
+      git:
+        repo: https://github.com/ansible/ansible-examples.git
+        dest: /tmp/ansible-examples
+
+    - name: usar vim como editor
+      git_config:
+        name: core.editor
+        value: vim
+        scope: global
+

@@ -1,0 +1,36 @@
+
+# en /etc/alternatives hay links a los bin que se usan por defecto
+- name: Modulos del sistema
+  hosts: repo
+  tasks:
+    - name: usar java 9
+      alternatives:
+        name: java
+        path: path por el bin java que va a ser el default de ahora en mas en el server
+
+    - name: Usar cron
+      cron:
+        name: "script cada x tiempo"
+        hour: 2
+        minute: 0
+        job: "path local al script"
+        cron_file: "nombre_archivo"  # Si no especifico nombre lo pone dentro del cron del usuario. Queda en /etc/cron.d
+        user: root
+
+    - name: crear grupo
+      group: name=jboss state=present gid=1234
+
+    - name: iptables
+      iptables:
+        chain: INPUT
+        source: 0.0.0.0
+        destination_port: 80
+        jump: ACCEPT
+        protocol: tcp
+
+    - name: LVM
+      lvg: vg=datavg pvs=/dev/sda1 state=present
+      lvol: vg=datavg lv=web size=2G state=present
+      # Montar
+      mount: src=/dev/sda1 dest=/path state=mounted
+      

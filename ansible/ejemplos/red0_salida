@@ -1,0 +1,1055 @@
+
+PLAY [Collect only facts returned by facter] ************************************************************************************************************************************************************************************************
+
+TASK [Gathering Facts] **********************************************************************************************************************************************************************************************************************
+fatal: [192.168.0.130]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.130 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.132]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.132 port 22: Connection refused\r\n", "unreachable": true}
+ok: [192.168.0.139]
+fatal: [192.168.0.137]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.137 port 22: No route to host\r\n", "unreachable": true}
+ok: [192.168.0.131]
+ok: [192.168.0.135]
+ok: [192.168.0.140]
+ok: [192.168.0.141]
+fatal: [192.168.0.145]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.145 port 22: No route to host\r\n", "unreachable": true}
+fatal: [192.168.0.142]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.142 port 22: Connection timed out\r\n", "unreachable": true}
+fatal: [192.168.0.150]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.150 port 22: Connection refused\r\n", "unreachable": true}
+ok: [192.168.0.147]
+fatal: [192.168.0.149]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.149 port 22: No route to host\r\n", "unreachable": true}
+ok: [192.168.0.152]
+ok: [192.168.0.148]
+ok: [192.168.0.153]
+ok: [192.168.0.143]
+ok: [192.168.0.156]
+fatal: [192.168.0.157]: UNREACHABLE! => {"changed": false, "msg": "Authentication failure.", "unreachable": true}
+ok: [192.168.0.158]
+ok: [192.168.0.159]
+fatal: [192.168.0.161]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.161 port 22: No route to host\r\n", "unreachable": true}
+fatal: [192.168.0.164]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.164 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.165]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.165 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.166]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.166 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.167]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.167 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.169]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.169 port 22: No route to host\r\n", "unreachable": true}
+ok: [192.168.0.168]
+fatal: [192.168.0.170]: UNREACHABLE! => {"changed": false, "msg": "Authentication failure.", "unreachable": true}
+ok: [192.168.0.160]
+ok: [192.168.0.172]
+fatal: [192.168.0.177]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.177 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.162]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.162 port 22: Connection timed out\r\n", "unreachable": true}
+fatal: [192.168.0.175]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.175 port 22: No route to host\r\n", "unreachable": true}
+fatal: [192.168.0.178]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: IsFailTooManey=47\nToo many unsuccessful login attempts.\nYou have currently been locked for 47 seconds.\nPlease contact system administrator for any further questions\n\r\nReceived disconnect from 192.168.0.178: 2: Too many authentication failures for root\r\n", "unreachable": true}
+fatal: [192.168.0.176]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: Too many unsuccessful login attempts.\nYou have currently been locked for 119 seconds.\nPlease contact system administrator for any further questions\n\r\nReceived disconnect from 192.168.0.176: 2: Too many authentication failures for root\r\n", "unreachable": true}
+fatal: [192.168.0.179]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: IsFailTooManey=46\nToo many unsuccessful login attempts.\nYou have currently been locked for 46 seconds.\nPlease contact system administrator for any further questions\n\r\nReceived disconnect from 192.168.0.179: 2: Too many authentication failures for root\r\n", "unreachable": true}
+ok: [192.168.0.185]
+ok: [192.168.0.174]
+ok: [192.168.0.186]
+fatal: [192.168.0.189]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: IsFailTooManey=119\nToo many unsuccessful login attempts.\nYou have currently been locked for 119 seconds.\nPlease contact system administrator for any further questions\n\r\nReceived disconnect from 192.168.0.189: 2: Too many authentication failures for root\r\n", "unreachable": true}
+fatal: [192.168.0.196]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh_exchange_identification: Connection closed by remote host\r\n", "unreachable": true}
+ok: [192.168.0.181]
+fatal: [192.168.0.201]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.201 port 22: Connection refused\r\n", "unreachable": true}
+ok: [192.168.0.180]
+fatal: [192.168.0.204]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.204 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.206]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.206 port 22: No route to host\r\n", "unreachable": true}
+ok: [192.168.0.192]
+fatal: [192.168.0.209]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh_exchange_identification: Connection closed by remote host\r\n", "unreachable": true}
+ok: [192.168.0.188]
+fatal: [192.168.0.213]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.213 port 22: No route to host\r\n", "unreachable": true}
+ok: [192.168.0.197]
+fatal: [192.168.0.218]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.218 port 22: Connection refused\r\n", "unreachable": true}
+ok: [192.168.0.202]
+fatal: [192.168.0.212]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.212 port 22: Connection timed out\r\n", "unreachable": true}
+ok: [192.168.0.207]
+fatal: [192.168.0.219]: UNREACHABLE! => {"changed": false, "msg": "Authentication failure.", "unreachable": true}
+ok: [192.168.0.217]
+ok: [192.168.0.223]
+fatal: [192.168.0.220]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.220 port 22: Connection timed out\r\n", "unreachable": true}
+fatal: [192.168.0.234]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.234 port 22: Connection refused\r\n", "unreachable": true}
+fatal: [192.168.0.235]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.235 port 22: No route to host\r\n", "unreachable": true}
+ok: [192.168.0.222]
+fatal: [192.168.0.237]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.237 port 22: Connection refused\r\n", "unreachable": true}
+ok: [192.168.0.221]
+ok: [192.168.0.230]
+ok: [192.168.0.226]
+ok: [192.168.0.242]
+fatal: [192.168.0.245]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.245 port 22: Connection refused\r\n", "unreachable": true}
+ok: [192.168.0.236]
+ok: [192.168.0.244]
+fatal: [192.168.0.243]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.243 port 22: Connection timed out\r\n", "unreachable": true}
+fatal: [192.168.0.238]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.238 port 22: Connection timed out\r\n", "unreachable": true}
+ok: [192.168.0.248]
+fatal: [192.168.0.249]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.249 port 22: Connection timed out\r\n", "unreachable": true}
+fatal: [192.168.0.251]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.251 port 22: Connection timed out\r\n", "unreachable": true}
+fatal: [192.168.0.252]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.0.252 port 22: Connection timed out\r\n", "unreachable": true}
+
+TASK [dmidecode de placa base] **************************************************************************************************************************************************************************************************************
+changed: [192.168.0.139]
+changed: [192.168.0.143]
+changed: [192.168.0.147]
+changed: [192.168.0.131]
+changed: [192.168.0.135]
+changed: [192.168.0.140]
+changed: [192.168.0.141]
+changed: [192.168.0.148]
+changed: [192.168.0.152]
+changed: [192.168.0.153]
+changed: [192.168.0.156]
+changed: [192.168.0.158]
+changed: [192.168.0.159]
+changed: [192.168.0.168]
+changed: [192.168.0.172]
+changed: [192.168.0.181]
+changed: [192.168.0.185]
+changed: [192.168.0.188]
+changed: [192.168.0.186]
+changed: [192.168.0.197]
+changed: [192.168.0.202]
+changed: [192.168.0.192]
+changed: [192.168.0.207]
+changed: [192.168.0.160]
+changed: [192.168.0.217]
+changed: [192.168.0.180]
+changed: [192.168.0.223]
+changed: [192.168.0.222]
+changed: [192.168.0.221]
+changed: [192.168.0.174]
+changed: [192.168.0.226]
+changed: [192.168.0.230]
+changed: [192.168.0.236]
+changed: [192.168.0.242]
+changed: [192.168.0.244]
+changed: [192.168.0.248]
+
+TASK [debug] ********************************************************************************************************************************************************************************************************************************
+ok: [192.168.0.131] => {
+    "placa_base.stdout": "Lenovo C225"
+}
+ok: [192.168.0.135] => {
+    "placa_base.stdout": "HP Compaq dx2200 MT "
+}
+ok: [192.168.0.139] => {
+    "placa_base.stdout": "10QH000BAC"
+}
+ok: [192.168.0.140] => {
+    "placa_base.stdout": "18-2003LA"
+}
+ok: [192.168.0.141] => {
+    "placa_base.stdout": "18-2003LA"
+}
+ok: [192.168.0.143] => {
+    "placa_base.stdout": "Compaq 100B SFF PC (Adina)"
+}
+ok: [192.168.0.147] => {
+    "placa_base.stdout": "MS-7817"
+}
+ok: [192.168.0.148] => {
+    "placa_base.stdout": "Compaq 100B SFF PC (Adina)"
+}
+ok: [192.168.0.152] => {
+    "placa_base.stdout": "10QH000BAC"
+}
+ok: [192.168.0.153] => {
+    "placa_base.stdout": "System Product Name"
+}
+ok: [192.168.0.156] => {
+    "placa_base.stdout": "System Product Name"
+}
+ok: [192.168.0.158] => {
+    "placa_base.stdout": "System Product Name"
+}
+ok: [192.168.0.159] => {
+    "placa_base.stdout": "System Product Name"
+}
+ok: [192.168.0.160] => {
+    "placa_base.stdout": "Compaq 100B SFF PC (Adina)"
+}
+ok: [192.168.0.168] => {
+    "placa_base.stdout": "System Product Name"
+}
+ok: [192.168.0.172] => {
+    "placa_base.stdout": "10160"
+}
+ok: [192.168.0.174] => {
+    "placa_base.stdout": "Lenovo C225"
+}
+ok: [192.168.0.180] => {
+    "placa_base.stdout": "10160"
+}
+ok: [192.168.0.181] => {
+    "placa_base.stdout": "Lenovo C225"
+}
+ok: [192.168.0.185] => {
+    "placa_base.stdout": "System Product Name"
+}
+ok: [192.168.0.186] => {
+    "placa_base.stdout": "System Product Name"
+}
+ok: [192.168.0.188] => {
+    "placa_base.stdout": "HP Compaq dx2200 MT "
+}
+ok: [192.168.0.192] => {
+    "placa_base.stdout": "18-2001LA"
+}
+ok: [192.168.0.197] => {
+    "placa_base.stdout": "Lenovo C225"
+}
+ok: [192.168.0.202] => {
+    "placa_base.stdout": "18-2003LA"
+}
+ok: [192.168.0.207] => {
+    "placa_base.stdout": "HP Compaq dx2200 MT "
+}
+ok: [192.168.0.217] => {
+    "placa_base.stdout": "empty"
+}
+ok: [192.168.0.221] => {
+    "placa_base.stdout": "                                "
+}
+ok: [192.168.0.222] => {
+    "placa_base.stdout": "Lenovo C225"
+}
+ok: [192.168.0.223] => {
+    "placa_base.stdout": "10B4A04DAC"
+}
+ok: [192.168.0.226] => {
+    "placa_base.stdout": "HP Compaq dx2200 MT "
+}
+ok: [192.168.0.230] => {
+    "placa_base.stdout": "                                "
+}
+ok: [192.168.0.236] => {
+    "placa_base.stdout": "HP Compaq dx2200 MT "
+}
+ok: [192.168.0.242] => {
+    "placa_base.stdout": "10160"
+}
+ok: [192.168.0.244] => {
+    "placa_base.stdout": "empty"
+}
+ok: [192.168.0.248] => {
+    "placa_base.stdout": "AHV"
+}
+
+TASK [dmidecode de serial] ******************************************************************************************************************************************************************************************************************
+changed: [192.168.0.131]
+changed: [192.168.0.139]
+changed: [192.168.0.135]
+changed: [192.168.0.140]
+changed: [192.168.0.141]
+changed: [192.168.0.143]
+changed: [192.168.0.147]
+changed: [192.168.0.152]
+changed: [192.168.0.148]
+changed: [192.168.0.153]
+changed: [192.168.0.156]
+changed: [192.168.0.158]
+changed: [192.168.0.159]
+changed: [192.168.0.168]
+changed: [192.168.0.160]
+changed: [192.168.0.172]
+changed: [192.168.0.174]
+changed: [192.168.0.180]
+changed: [192.168.0.185]
+changed: [192.168.0.186]
+changed: [192.168.0.181]
+changed: [192.168.0.188]
+changed: [192.168.0.192]
+changed: [192.168.0.197]
+changed: [192.168.0.202]
+changed: [192.168.0.207]
+changed: [192.168.0.217]
+changed: [192.168.0.223]
+changed: [192.168.0.222]
+changed: [192.168.0.221]
+changed: [192.168.0.226]
+changed: [192.168.0.230]
+changed: [192.168.0.236]
+changed: [192.168.0.242]
+changed: [192.168.0.244]
+changed: [192.168.0.248]
+
+TASK [debug] ********************************************************************************************************************************************************************************************************************************
+ok: [192.168.0.131] => {
+    "serial_number.stdout": "QS00441140"
+}
+ok: [192.168.0.135] => {
+    "serial_number.stdout": "MXL6430FBX"
+}
+ok: [192.168.0.139] => {
+    "serial_number.stdout": "S1H050WD"
+}
+ok: [192.168.0.140] => {
+    "serial_number.stdout": "5CM23705ZC"
+}
+ok: [192.168.0.141] => {
+    "serial_number.stdout": "5CM237076G"
+}
+ok: [192.168.0.143] => {
+    "serial_number.stdout": "4CE1320GTN"
+}
+ok: [192.168.0.147] => {
+    "serial_number.stdout": "To be filled by O.E.M."
+}
+ok: [192.168.0.148] => {
+    "serial_number.stdout": "4CE1320FPY"
+}
+ok: [192.168.0.152] => {
+    "serial_number.stdout": "S1H050XL"
+}
+ok: [192.168.0.153] => {
+    "serial_number.stdout": "System Serial Number"
+}
+ok: [192.168.0.156] => {
+    "serial_number.stdout": "System Serial Number"
+}
+ok: [192.168.0.158] => {
+    "serial_number.stdout": "System Serial Number"
+}
+ok: [192.168.0.159] => {
+    "serial_number.stdout": "System Serial Number"
+}
+ok: [192.168.0.160] => {
+    "serial_number.stdout": "4CE1320GHM"
+}
+ok: [192.168.0.168] => {
+    "serial_number.stdout": "System Serial Number"
+}
+ok: [192.168.0.172] => {
+    "serial_number.stdout": "CS02595644"
+}
+ok: [192.168.0.174] => {
+    "serial_number.stdout": "QS00466940"
+}
+ok: [192.168.0.180] => {
+    "serial_number.stdout": "CS01730699"
+}
+ok: [192.168.0.181] => {
+    "serial_number.stdout": "QS00467103"
+}
+ok: [192.168.0.185] => {
+    "serial_number.stdout": "System Serial Number"
+}
+ok: [192.168.0.186] => {
+    "serial_number.stdout": "System Serial Number"
+}
+ok: [192.168.0.188] => {
+    "serial_number.stdout": "MXL6210PT8"
+}
+ok: [192.168.0.192] => {
+    "serial_number.stdout": "5CM31509ZM"
+}
+ok: [192.168.0.197] => {
+    "serial_number.stdout": "QS00466947"
+}
+ok: [192.168.0.202] => {
+    "serial_number.stdout": "5CM23706MM"
+}
+ok: [192.168.0.207] => {
+    "serial_number.stdout": "MXL6450KJ2"
+}
+ok: [192.168.0.217] => {
+    "serial_number.stdout": "ABCD1234567890"
+}
+ok: [192.168.0.221] => {
+    "serial_number.stdout": "                                "
+}
+ok: [192.168.0.222] => {
+    "serial_number.stdout": "QS00474232"
+}
+ok: [192.168.0.223] => {
+    "serial_number.stdout": "MJ01ED2A"
+}
+ok: [192.168.0.226] => {
+    "serial_number.stdout": "MXL6340J7H"
+}
+ok: [192.168.0.230] => {
+    "serial_number.stdout": "                                "
+}
+ok: [192.168.0.236] => {
+    "serial_number.stdout": "MXL70603TG"
+}
+ok: [192.168.0.242] => {
+    "serial_number.stdout": "CS02595750"
+}
+ok: [192.168.0.244] => {
+    "serial_number.stdout": "ABCD1234567890"
+}
+ok: [192.168.0.248] => {
+    "serial_number.stdout": "To be filled by O.E.M."
+}
+
+TASK [obtener usuario que se loguea frecuentemente] *****************************************************************************************************************************************************************************************
+changed: [192.168.0.139]
+changed: [192.168.0.131]
+changed: [192.168.0.135]
+changed: [192.168.0.140]
+changed: [192.168.0.141]
+changed: [192.168.0.147]
+changed: [192.168.0.143]
+changed: [192.168.0.152]
+changed: [192.168.0.148]
+changed: [192.168.0.153]
+changed: [192.168.0.156]
+changed: [192.168.0.158]
+changed: [192.168.0.159]
+changed: [192.168.0.168]
+changed: [192.168.0.160]
+changed: [192.168.0.172]
+changed: [192.168.0.174]
+changed: [192.168.0.180]
+changed: [192.168.0.185]
+changed: [192.168.0.186]
+changed: [192.168.0.181]
+changed: [192.168.0.188]
+changed: [192.168.0.192]
+changed: [192.168.0.197]
+changed: [192.168.0.202]
+changed: [192.168.0.207]
+changed: [192.168.0.217]
+changed: [192.168.0.223]
+changed: [192.168.0.221]
+changed: [192.168.0.222]
+changed: [192.168.0.226]
+changed: [192.168.0.230]
+changed: [192.168.0.236]
+changed: [192.168.0.242]
+changed: [192.168.0.244]
+changed: [192.168.0.248]
+
+TASK [debug] ********************************************************************************************************************************************************************************************************************************
+ok: [192.168.0.131] => {
+    "salida.stdout": "lgvelard"
+}
+ok: [192.168.0.135] => {
+    "salida.stdout": "cdovejer"
+}
+ok: [192.168.0.139] => {
+    "salida.stdout": "mgcomper"
+}
+ok: [192.168.0.140] => {
+    "salida.stdout": ""
+}
+ok: [192.168.0.141] => {
+    "salida.stdout": ""
+}
+ok: [192.168.0.143] => {
+    "salida.stdout": "agmunoz"
+}
+ok: [192.168.0.147] => {
+    "salida.stdout": "jlperezd"
+}
+ok: [192.168.0.148] => {
+    "salida.stdout": "mhcurill"
+}
+ok: [192.168.0.152] => {
+    "salida.stdout": "darobert"
+}
+ok: [192.168.0.153] => {
+    "salida.stdout": "mvrowlan"
+}
+ok: [192.168.0.156] => {
+    "salida.stdout": "mjviola"
+}
+ok: [192.168.0.158] => {
+    "salida.stdout": "jfyunes"
+}
+ok: [192.168.0.159] => {
+    "salida.stdout": "lpbueno"
+}
+ok: [192.168.0.160] => {
+    "salida.stdout": "srrestuc"
+}
+ok: [192.168.0.168] => {
+    "salida.stdout": "mdpaz"
+}
+ok: [192.168.0.172] => {
+    "salida.stdout": "gpmonti"
+}
+ok: [192.168.0.174] => {
+    "salida.stdout": "cifurnar"
+}
+ok: [192.168.0.180] => {
+    "salida.stdout": "mapintos"
+}
+ok: [192.168.0.181] => {
+    "salida.stdout": "nfdebast"
+}
+ok: [192.168.0.185] => {
+    "salida.stdout": "vvsantan"
+}
+ok: [192.168.0.186] => {
+    "salida.stdout": "afabdala"
+}
+ok: [192.168.0.188] => {
+    "salida.stdout": "ibartolo"
+}
+ok: [192.168.0.192] => {
+    "salida.stdout": "geregojo"
+}
+ok: [192.168.0.197] => {
+    "salida.stdout": "nvblanco"
+}
+ok: [192.168.0.202] => {
+    "salida.stdout": ""
+}
+ok: [192.168.0.207] => {
+    "salida.stdout": "crbalbi"
+}
+ok: [192.168.0.217] => {
+    "salida.stdout": "gtnazaru"
+}
+ok: [192.168.0.221] => {
+    "salida.stdout": "gnardi"
+}
+ok: [192.168.0.222] => {
+    "salida.stdout": "agbigrev"
+}
+ok: [192.168.0.223] => {
+    "salida.stdout": "joiralde"
+}
+ok: [192.168.0.226] => {
+    "salida.stdout": "candrade"
+}
+ok: [192.168.0.230] => {
+    "salida.stdout": "jsdebell"
+}
+ok: [192.168.0.236] => {
+    "salida.stdout": "jgsepulv"
+}
+ok: [192.168.0.242] => {
+    "salida.stdout": "vjspaciu"
+}
+ok: [192.168.0.244] => {
+    "salida.stdout": "mcsastre"
+}
+ok: [192.168.0.248] => {
+    "salida.stdout": "myvernet"
+}
+
+TASK [Version de firefox] *******************************************************************************************************************************************************************************************************************
+changed: [192.168.0.139]
+changed: [192.168.0.131]
+changed: [192.168.0.140]
+changed: [192.168.0.141]
+changed: [192.168.0.147]
+changed: [192.168.0.135]
+changed: [192.168.0.143]
+changed: [192.168.0.152]
+changed: [192.168.0.153]
+changed: [192.168.0.148]
+changed: [192.168.0.156]
+changed: [192.168.0.158]
+changed: [192.168.0.159]
+changed: [192.168.0.168]
+changed: [192.168.0.160]
+changed: [192.168.0.172]
+changed: [192.168.0.180]
+changed: [192.168.0.174]
+changed: [192.168.0.185]
+changed: [192.168.0.186]
+changed: [192.168.0.181]
+changed: [192.168.0.188]
+changed: [192.168.0.192]
+changed: [192.168.0.197]
+changed: [192.168.0.202]
+changed: [192.168.0.207]
+changed: [192.168.0.217]
+changed: [192.168.0.223]
+changed: [192.168.0.222]
+changed: [192.168.0.221]
+changed: [192.168.0.226]
+changed: [192.168.0.230]
+changed: [192.168.0.236]
+changed: [192.168.0.242]
+changed: [192.168.0.244]
+changed: [192.168.0.248]
+
+TASK [debug] ********************************************************************************************************************************************************************************************************************************
+ok: [192.168.0.131] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.135] => {
+    "firefox.stdout": "firefox 16.0.2"
+}
+ok: [192.168.0.139] => {
+    "firefox.stdout": "firefox 57.0.1"
+}
+ok: [192.168.0.140] => {
+    "firefox.stdout": "firefox 11.0"
+}
+ok: [192.168.0.141] => {
+    "firefox.stdout": "firefox 11.0"
+}
+ok: [192.168.0.143] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.147] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.148] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.152] => {
+    "firefox.stdout": "firefox 57.0.1"
+}
+ok: [192.168.0.153] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.156] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.158] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.159] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.160] => {
+    "firefox.stdout": "firefox 16.0.2"
+}
+ok: [192.168.0.168] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.172] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.174] => {
+    "firefox.stdout": "firefox 16.0.2"
+}
+ok: [192.168.0.180] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.181] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.185] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.186] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.188] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.192] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.197] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.202] => {
+    "firefox.stdout": "firefox 11.0"
+}
+ok: [192.168.0.207] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.217] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.221] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.222] => {
+    "firefox.stdout": "firefox 16.0.2"
+}
+ok: [192.168.0.223] => {
+    "firefox.stdout": "firefox 65.0"
+}
+ok: [192.168.0.226] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+ok: [192.168.0.230] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.236] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.242] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.244] => {
+    "firefox.stdout": "firefox 61.0.1"
+}
+ok: [192.168.0.248] => {
+    "firefox.stdout": "firefox 52.0.2"
+}
+
+TASK [distro de sistema operativo] **********************************************************************************************************************************************************************************************************
+changed: [192.168.0.131]
+changed: [192.168.0.139]
+changed: [192.168.0.135]
+changed: [192.168.0.140]
+changed: [192.168.0.141]
+changed: [192.168.0.147]
+changed: [192.168.0.143]
+changed: [192.168.0.152]
+changed: [192.168.0.148]
+changed: [192.168.0.153]
+changed: [192.168.0.156]
+changed: [192.168.0.158]
+changed: [192.168.0.159]
+changed: [192.168.0.160]
+changed: [192.168.0.168]
+changed: [192.168.0.172]
+changed: [192.168.0.174]
+changed: [192.168.0.180]
+changed: [192.168.0.181]
+changed: [192.168.0.185]
+changed: [192.168.0.186]
+changed: [192.168.0.188]
+changed: [192.168.0.192]
+changed: [192.168.0.197]
+changed: [192.168.0.202]
+changed: [192.168.0.207]
+changed: [192.168.0.217]
+changed: [192.168.0.223]
+changed: [192.168.0.222]
+changed: [192.168.0.221]
+changed: [192.168.0.226]
+changed: [192.168.0.230]
+changed: [192.168.0.236]
+changed: [192.168.0.242]
+changed: [192.168.0.244]
+changed: [192.168.0.248]
+
+TASK [debug] ********************************************************************************************************************************************************************************************************************************
+ok: [192.168.0.131] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.135] => {
+    "so.stdout": "Ubuntu 11.04"
+}
+ok: [192.168.0.139] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.140] => {
+    "so.stdout": "Ubuntu 12.04"
+}
+ok: [192.168.0.141] => {
+    "so.stdout": "Ubuntu 12.04"
+}
+ok: [192.168.0.143] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.147] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.148] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.152] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.153] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.156] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.158] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.159] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.160] => {
+    "so.stdout": "Ubuntu 11.04"
+}
+ok: [192.168.0.168] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.172] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.174] => {
+    "so.stdout": "Ubuntu 11.04"
+}
+ok: [192.168.0.180] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.181] => {
+    "so.stdout": "Ubuntu 17"
+}
+ok: [192.168.0.185] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.186] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.188] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.192] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.197] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.202] => {
+    "so.stdout": "Ubuntu 12.04"
+}
+ok: [192.168.0.207] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.217] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.221] => {
+    "so.stdout": "Ubuntu 17"
+}
+ok: [192.168.0.222] => {
+    "so.stdout": "Ubuntu 11.04"
+}
+ok: [192.168.0.223] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.226] => {
+    "so.stdout": "Linuxmint 13"
+}
+ok: [192.168.0.230] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.236] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.242] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.244] => {
+    "so.stdout": "Ubuntu 18"
+}
+ok: [192.168.0.248] => {
+    "so.stdout": "Linuxmint 13"
+}
+
+TASK [dmidecode de memoria] *****************************************************************************************************************************************************************************************************************
+changed: [192.168.0.131]
+changed: [192.168.0.139]
+changed: [192.168.0.135]
+changed: [192.168.0.140]
+changed: [192.168.0.141]
+changed: [192.168.0.147]
+changed: [192.168.0.143]
+changed: [192.168.0.152]
+changed: [192.168.0.148]
+changed: [192.168.0.153]
+changed: [192.168.0.156]
+changed: [192.168.0.158]
+changed: [192.168.0.159]
+changed: [192.168.0.168]
+changed: [192.168.0.160]
+changed: [192.168.0.172]
+changed: [192.168.0.180]
+changed: [192.168.0.174]
+changed: [192.168.0.185]
+changed: [192.168.0.181]
+changed: [192.168.0.186]
+changed: [192.168.0.188]
+changed: [192.168.0.192]
+changed: [192.168.0.197]
+changed: [192.168.0.202]
+changed: [192.168.0.207]
+changed: [192.168.0.217]
+changed: [192.168.0.223]
+changed: [192.168.0.222]
+changed: [192.168.0.221]
+changed: [192.168.0.226]
+changed: [192.168.0.230]
+changed: [192.168.0.236]
+changed: [192.168.0.242]
+changed: [192.168.0.244]
+changed: [192.168.0.248]
+
+TASK [debug] ********************************************************************************************************************************************************************************************************************************
+ok: [192.168.0.131] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.135] => {
+    "memoria.stdout": "1GB"
+}
+ok: [192.168.0.139] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.140] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.141] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.143] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.147] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.148] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.152] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.153] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.156] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.158] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.159] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.160] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.168] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.172] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.174] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.180] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.181] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.185] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.186] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.188] => {
+    "memoria.stdout": "1GB"
+}
+ok: [192.168.0.192] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.197] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.202] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.207] => {
+    "memoria.stdout": "0.75GB"
+}
+ok: [192.168.0.217] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.221] => {
+    "memoria.stdout": "1.25GB"
+}
+ok: [192.168.0.222] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.223] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.226] => {
+    "memoria.stdout": "0.75GB"
+}
+ok: [192.168.0.230] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.236] => {
+    "memoria.stdout": "2GB"
+}
+ok: [192.168.0.242] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.244] => {
+    "memoria.stdout": "4GB"
+}
+ok: [192.168.0.248] => {
+    "memoria.stdout": "4GB"
+}
+
+TASK [debug] ********************************************************************************************************************************************************************************************************************************
+fatal: [192.168.0.131]: FAILED! => {"msg": "The task includes an option with an undefined variable. The error was: None is undefined\n\nThe error appears to have been in '/home/cjtagliapietra/udemy/docker/machetes/ansible/ejemplos/authorized_key.yml': line 51, column 7, but may\nbe elsewhere in the file depending on the exact syntax problem.\n\nThe offending line appears to be:\n\n\n    - debug:\n      ^ here\n"}
+
+NO MORE HOSTS LEFT **************************************************************************************************************************************************************************************************************************
+	to retry, use: --limit @/home/cjtagliapietra/udemy/docker/machetes/ansible/ejemplos/authorized_key.retry
+
+PLAY RECAP **********************************************************************************************************************************************************************************************************************************
+192.168.0.130              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.131              : ok=13   changed=6    unreachable=0    failed=1   
+192.168.0.132              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.135              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.137              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.139              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.140              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.141              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.142              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.143              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.145              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.147              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.148              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.149              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.150              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.152              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.153              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.156              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.157              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.158              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.159              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.160              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.161              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.162              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.164              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.165              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.166              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.167              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.168              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.169              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.170              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.172              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.174              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.175              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.176              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.177              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.178              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.179              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.180              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.181              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.185              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.186              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.188              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.189              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.192              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.196              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.197              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.201              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.202              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.204              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.206              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.207              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.209              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.212              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.213              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.217              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.218              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.219              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.220              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.221              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.222              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.223              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.226              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.230              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.234              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.235              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.236              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.237              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.238              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.242              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.243              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.244              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.245              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.248              : ok=13   changed=6    unreachable=0    failed=0   
+192.168.0.249              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.251              : ok=0    changed=0    unreachable=1    failed=0   
+192.168.0.252              : ok=0    changed=0    unreachable=1    failed=0   
+

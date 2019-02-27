@@ -1,0 +1,7 @@
+- name: crear usuarios ldap en ambos ldap's tw. 
+  # Esto es, el ldap master actual en trelew y el ldap master en rawson 
+  # que actualiza el ldap-samba-slave trelew
+  hosts: repo
+  tasks:
+    - name: echo hosts
+      shell: 'echo {{ansible_hostname}}'

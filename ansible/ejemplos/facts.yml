@@ -1,0 +1,7 @@
+- name: Collect only facts returned by facter
+  hosts: repo
+  tasks:
+    - name: asd
+      setup:
+        gather_subset:
+          - 'all'

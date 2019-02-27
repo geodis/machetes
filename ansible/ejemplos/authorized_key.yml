@@ -1,0 +1,69 @@
+# ansible-playbook -vv authorized_key.yml --ssh-common-args='-o StrictHostKeyChecking=no'
+# ansible-playbook  authorized_key.yml --ssh-common-args='-o StrictHostKeyChecking=no'
+# ansible-playbook  authorized_key.yml --ssh-common-args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+- name: El colectador
+  # hosts: red_0
+  hosts: desarrollo
+  # hosts: usuarios_red_13
+  tasks:
+    - name: dmidecode de placa base
+      shell: 'dmidecode -s system-product-name'
+      register: placa_base
+      args:
+        executable: /bin/bash
+    - debug: var=placa_base.stdout
+  
+    - name: dmidecode de serial
+      shell: dmidecode -s system-serial-number
+      register: serial_number
+      args:
+        executable: /bin/bash
+    - debug: var=serial_number.stdout
+
+    - name: obtener usuario que se loguea frecuentemente
+      # shell: 'last -w | grep -viE system\|root | head -n1 | cut -d " "  -f1'
+      shell: 'last | grep -viE system\|root | head -n1 | cut -d " "  -f1'
+      register: usuario
+      args:
+        executable: /bin/bash
+    - debug: var=usuario.stdout
+
+    - name: Version de firefox
+      shell: echo firefox $(dpkg -l | grep  -w firefox |  grep -v firefox- | awk '{print $3}' | cut -d "+" -f1)
+      register: firefox
+      args:
+        executable: /bin/bash
+    - debug: var=firefox.stdout
+
+    - name: distro de sistema operativo
+      shell: 'echo {{ansible_distribution}} {{ansible_distribution_version}}'
+      register: so
+    - debug: var=so.stdout
+
+    - name: dmidecode de memoria
+      shell: echo $(dmidecode -t 17 | grep "Size.*MB" | awk '{s+=$2} END {print s / 1024}')GB
+      register: memoria
+      args:
+        executable: /bin/bash
+    - debug: var=memoria.stdout
+
+    - copy:
+        content: "{{ [placa_base.stdout, serial_number.stdout, inventory_hostname, usuario.stdout, firefox.stdout, so.stdout, memoria.stdout ] | to_nice_json }}"
+        dest: /root/ariel/desarrollo/{{ usuario.stdout }}.json
+      delegate_to: localhost
+
+  
+    # - file:
+    #     path: /tmp/{{ inventory_hostname }}
+    #     state: directory
+    #   delegate_to: localhost
+
+    # - copy:
+    #     content: "{{ cmd_res | to_nice_json }}"
+    #     dest: /tmp/{{ inventory_hostname }}/cmd.json
+    #   delegate_to: localhost
+
+
+    # - debug:
+    #     msg: "{{ ansible_play_hosts | map('extract', hostvars, 'result') | map(attribute='stdout_lines') | list }}"
+    #   run_once: yes

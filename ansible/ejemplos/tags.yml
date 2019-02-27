@@ -1,0 +1,9 @@
+- name: ejemplo de etiquetas
+  hosts: repo
+  tasks:
+    - debug: msg="Tarea con tag PROD"
+      tags: prod
+    - debug: msg="Tarea con tag DEV"
+      tags: dev
+    - debug: msg="Tarea con varios tags"
+      tags: [qa,prod]

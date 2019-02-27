@@ -151,8 +151,10 @@
     
     # Devolver la lista (find) de carpetas/archivos con ese grupo    
 
-    - name: Devolver la lista de archivos afectados (que quedaron sin grupo)
     
+    # Previamente debo obtener en una variable: gidNumber, con task "busco un gidNumber"
+    - name: Devolver la lista de archivos afectados (que quedaron sin grupo)
+
 
 
 

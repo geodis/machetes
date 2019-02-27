@@ -777,13 +777,14 @@ cron: Instala un cron
 crypttab:
 filesystem:
   name: Crear filesystem xfs
-  filesystem:
-    
+  filesystem: /dev/sda1
+  fstype: ext4
+
 
 firewalld:
 iptables:
 glulster_volume: glusterfs
-user:
+user: gestiona usuarios
 group:
 hostname:
 lvg: lvm
@@ -792,9 +793,163 @@ mount:
 ping:
 varios para selinux
 service: habilita/desabilita servicios
-setup: obtiene info del sistema
-sysctl:
-systemd:
+setup: obtiene info del sistema. Hace como un get. Si uso variables como ansible_hostname y la modifico y ejecuto setup despues se refresca
+    gather_subset: all/hardware/network/virtual
+    fact_path: /etc/ansible/fact.d
+
+
+sysctl: configurar el sysctl.conf
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+systemd: gestiona servicios en systemd
+  systemd:
+    name: httpd
+    enabled: yes
+    state: started
+    daemon_reload: yes
 timezone:
+
+
+
+git:
+  - name: obtener Ejemplos
+    git: 
+      repo: http://....
+      dest: /root/path
+
+Otros
+git_config: # modifica el .gitconfig
+  name:
+  value: pass 
+  scope: local/global/system
+  repo: path
+  list_all: yes/no
+
+
+apache2_mod_proxy: establece/obtiene atributos de apache2
+apache2_module: habilita/desabilita modulos de apache2
+deploy_helper: administra algunos pasos para desplegar aplicaciones
+ejabberd_user: gestiona usuarios ejabber
+htpasswd: 
+  - name: instalar libreria passlib
+    yum: name=python_passlib state=present
+  - name: añadir usuario
+    htpasswd:
+      name: oforte
+      path: /var/www/html/.htpasswd
+      password: 1234
+
+jenkins_*
+jira:
+letsencrypt:
+
+
+
+
+
+# Evita que ansible por defecto cargue todas las variables de sistema ansible_* en cada 
+# coneccion lo que hace que se ejecute mas rapido. Si en algun momento de la ejecucion
+# de la tarea necesito que se carguen, ejecuto "setup"
+gather_facts=false
+
+
+Monitoring
+==========
+
+monit: investigar este soft https://mmonit.com/monit
+nagios:
+
+
+
+Ansible Galaxy https://galaxy.ansible.com
+==============
+es un repo online de roles
+
+ansible-galaxy [accion] [opciones] argumentos
+
+delete: borra un rol de la web
+import: desde github a galaxy
+info:
+init: incializa la Estructura de directorio
+install: descarga un rol. Por defecto /etc/ansible/roles/ (se puede modificar en ansible.cfg)
+list: listo los instalados
+login:
+remove: elimina rol del servidor
+search:
+setup: integra con travis Ci
+
+
+Ansible Tower
+================
+
+Por lo visto es solo la UI y paga. Nada que ver aca por ahora
+La alternativa es semaphore
+
+
+Debug
+=====
+
+- debug:
+  msg: "mensaje"
+
+- debug:
+  var: variable_a_inspeccionar verbosity:1
+
+verbosity [1-4], se ejecuta ese debug solo cuando llamo ansible-playbook con tantas -v como numero de verbosity
+
+Tags
+=====
+Las etiquetas nos permiten especificar selectivamente que tareas se ejecutaran o se omitiran
+Se ejcutan todas las tareas que coincidan con las tags que especifico en el ansible-playbook
+
+
+
+sintaxis
+--------
+  
+
+  - modulo: acciones
+    tags: etiqueta1
+
+
+  - modulo: acciones
+    tags: [etiqueta1, etiqueta2, etiqueta3]
+
+
+ansible-playbook --tags etiqueta3,etiqueta1 play.yml
+                 --skip-tags etiqueta1,etiqueta2
+
+--tags etiqueta3,etiqueta1 play.yml
+
+Se ejecutan todas las tareas, menos las que tengan estos tags
+--skip-tags etiqueta1,etiqueta2
+
+
+La etiqueta "always" es una palabra reservada, se ejecuta siempre
+
+
+Se pueden utilizar tambien para incluir o no incluir roles
+roles:
+  - { name: rol1, tags: etiqueta1 }
+
+
+lookup
+=======
+
+Nos permite obtener datos desde el server que esta ejecutando el playbook
+
+
+
+
+
+
+
+
+
 
 
