@@ -1,0 +1,17 @@
+- name: tarea asincronica
+  hosts: repo
+  tasks:
+    - command: sleep 15
+      # async: 60
+      # poll: 5
+      async: 60
+      poll: 0
+      register: estado_sleep
+    - debug: msg="Otra tarea"
+    - debug: msg="Otra tarea mas"
+    - async_status: 
+      # jid -> job id
+        jid: "{{ estado_sleep.ansible_job_id }}"
+      register: estado
+      until: estado.finished
+      retries: 30

@@ -1,0 +1,8 @@
+- name: uso de lookup
+  hosts: repo
+  tasks:
+    # - set_fact: etc_mod="{{ lookup('file', '/etc/motd') }}"
+    # - copy: 
+    #     dest: "/tmp/etc_mod"
+    #     content: "{{etc_mod}}"
+    - debug: msg="{{ lookup('dig', 'intranet.issys.gov.ar')}}"

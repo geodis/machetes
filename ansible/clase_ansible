@@ -941,14 +941,68 @@ roles:
 lookup
 =======
 
-Nos permite obtener datos desde el server que esta ejecutando el playbook
+Nos permite obtener datos desde el server que esta ejecutando el comando  ansible-playbook
+sirve por si quiero mandar archivos desde el server hacia los hosts destinos
 
 
 
+- debug: msg="{{ lookup('file', '/etc/motd') }}"
+
+Si lo quiero guardar en una variable
+
+- set_fact: etc_mod="{{ lookup('file', '/etc/motd') }}" # Guardo el contenido en etc_mod
+# Si lo quiero copiar en un archivo
+- copy:
+  dest: "/tmp/ejemplo"
+  content: "{{etc_mod}}"
 
 
+- debug: msg="{{ lookup('dig', 'intranet.issys.gov.ar')}}"
+- debug: msg="{{ lookup('dig', 'intranet.issys.gov.ar/MX')}}"
+- debug: msg="{{ lookup('dig', 'intranet.issys.gov.ar', 'qtype=MX')}}"
+- debug: msg="{{ lookup('dig', 'intranet.issys.gov.ar/MX', wantlist=True)}}"
 
 
+ansible-vault
+==============
+permite cifrar archivos con una password para proteger datos sensibles
+
+ansible-vault create archivo_a_proteger.yml # abre vim y crea el archivo_a_proteger.yml
+ansible-vault edit archivo_a_proteger.yml
+ansible-vault encrypt archivo_a_proteger.yml # encripta un archivo que ya existe
+ansible-vault deencrypt archivo_a_proteger.yml # desencripta un archivo que ya existe
+ansible-vault view archivo_a_proteger.yml # desencripta un archivo que ya existe
+
+
+ansible-playbook --ask-vault-pass ó --vault-password-file=file_con_la_pass
+
+Tareas Asincronas
+=================
+
+Cuando realizo una tarea en un servidor a traves de un modulo, la conexion permanece
+abierta esperando su finalizacion. Ansible da la opcion de realizarla en background
+y consultar el estado periodicamente
+
+Metodo 1:
+---------
+  - modulo: argumentos
+    async: tiempomax
+    poll: tiempo consulta
+
+Metodo 2:
+---------
+  - command: sleep 15
+    async: 60
+    poll: 0
+    register: estado_sleep
+  - debug: msg="Otra tarea"
+  - debug: msg="Otra tarea mas"
+  - async_status: 
+    # jid -> job id
+      jid: "{{ esstado_sleep.ansible_job_id }}"
+    register: estado
+    until: estado.finished
+    retries: 30
 
 
 
