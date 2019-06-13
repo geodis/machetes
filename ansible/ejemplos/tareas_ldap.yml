@@ -1,4 +1,6 @@
-- hosts: ldap
+
+- name: ejemplos ldap
+  hosts: ldap
   vars:
     ldap_auth:
       bind_dn: "cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar"
@@ -7,226 +9,223 @@
     grupos: [tecnologia, computos, personal]
   tasks:
 
+  # Ejecutar sss_cache -u
 
+  # - name: limpiar cache del sssd - usuario
+  #   shell: 'sss_cache -u USUARIO'
+  #   args:
+  #     executable: /bin/bash
 
+  # - name: limpiar cache del sssd - grupo
+  #   shell: 'sss_cache -g GRUPO'
+  #   args:
+  #     executable: /bin/bash
 
-    # Ejecutar sss_cache -u
 
-    # - name: limpiar cache del sssd - usuario
-    #   shell: 'sss_cache -u USUARIO'
-    #   args:
-    #     executable: /bin/bash
 
-    # - name: limpiar cache del sssd - grupo
-    #   shell: 'sss_cache -g GRUPO'
-    #   args:
-    #     executable: /bin/bash
 
+  - name: busco un gidNumber
+    # -LLL -Y EXTERNAL -H ldapi:///
+    shell: 'ldapsearch \
+            -H ldap://localhost -x \
+            -b "ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar" \
+            "(&(objectClass=posixGroup)(cn=computos))" gidNumber \
+            | grep gidNumber\: \
+            | cut -d " " -f2'
 
+    register: banana_id
+    args:
+      executable: /bin/bash
+  - debug: msg="{{banana_id.stdout_lines}}"
 
 
-    # - name: busco un gidNumber
-    #   # -LLL -Y EXTERNAL -H ldapi:///
-    #   shell: 'ldapsearch \
-    #           -H ldap://localhost -x \
-    #           -b "ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar" \
-    #           "(&(objectClass=posixGroup)(cn=computos))" gidNumber \
-    #           | grep gidNumber\: \
-    #           | cut -d " " -f2'
 
-    #   register: banana_id
-    #   args:
-    #     executable: /bin/bash
-    # - debug: msg="{{banana_id.stdout_lines}}"
 
 
 
+    - name: siguiente gid libre
+      shell: 'echo $( expr $(ldapsearch -H ldap://localhost -x -b \
+              "dc=ldap-server,dc=issys,dc=gov,dc=ar" "(objectclass=posixGroup)" gidNumber  \
+              | grep gidNumber\: \
+              | cut -d " " -f2 \
+              | sort -nu \
+              | tail -n1) + 1)'
 
+      register: siguiente_gid_libre
+      args:
+        executable: /bin/bash      
+    - debug: msg="{{siguiente_gid_libre}}"
 
 
-    # - name: siguiente gid libre
-    #   shell: 'echo $( expr $(ldapsearch -H ldap://localhost -x -b \
-    #           "dc=ldap-server,dc=issys,dc=gov,dc=ar" "(objectclass=posixGroup)" gidNumber  \
-    #           | grep gidNumber\: \
-    #           | cut -d " " -f2 \
-    #           | sort -nu \
-    #           | tail -n1) + 1)'
 
-    #   register: siguiente_g id_libre
-    #   args:
-    #     executable: /bin/bash      
-    # - debug: msg="{{siguiente_gid_libre}}"
 
+  # - name: siguiente uid libre
+  #   shell: 'echo $( expr $(ldapsearch -H ldap://localhost -x -b \
+  #          "dc=ldap-server,dc=issys,dc=gov,dc=ar" "(objectclass=posixAccount)" uidNumber \
+  #          | grep uidNumber\: \
+  #          | cut -d  " " -f2 \
+  #          | sort -nu \
+  #          | tail -n1) + 1)'
 
+  #   register: siguiente_uid_libre
+  #   args:
+  #     executable: /bin/bash      
+  # - debug: msg="{{siguiente_uid_libre}}"
 
 
-    # - name: siguiente uid libre
-    #   shell: 'echo $( expr $(ldapsearch -H ldap://localhost -x -b \
-    #          "dc=ldap-server,dc=issys,dc=gov,dc=ar" "(objectclass=posixAccount)" uidNumber \
-    #          | grep uidNumber\: \
-    #          | cut -d  " " -f2 \
-    #          | sort -nu \
-    #          | tail -n1) + 1)'
 
-    #   register: siguiente_uid_libre
-    #   args:
-    #     executable: /bin/bash      
-    # - debug: msg="{{siguiente_uid_libre}}"
 
 
 
+  # - name: Elimino un usuario de un grupo
+  #   ldap_attr:
+  #     dn: cn=computos,ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     name: memberUid
+  #     values: [cjtagliapietra]
+  #     state: absent
+  #     params: "{{ldap_auth}}"
 
 
 
-    # - name: Elimino un usuario de un grupo
-    #   ldap_attr:
-    #     dn: cn=computos,ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     name: memberUid
-    #     values: [cjtagliapietra]
-    #     state: absent
-    #     params: "{{ldap_auth}}"
 
 
 
+  # Usuarios por parametro en []
+  # El grupo busco el gidNumber dado su nombre
+  # - name: varios usuarios a un grupo
+  #   ldap_attr:
+  #     dn: cn=computos,ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     name: memberUid
+  #     values: [cjtagliapietra, test]
+  #     params: "{{ldap_auth}}"
 
 
 
-    # Usuarios por parametro en []
-    # El grupo busco el gidNumber dado su nombre
-    # - name: varios usuarios a un grupo
-    #   ldap_attr:
-    #     dn: cn=computos,ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     name: memberUid
-    #     values: [cjtagliapietra, test]
-    #     params: "{{ldap_auth}}"
 
 
+  # - name: varios grupos a un usuario
+  #   ldap_attr:
+  #     dn: "cn={{item}},ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar"
+  #     name: memberUid
+  #     values: "banana"
+  #     params: "{{ldap_auth}}"        
+  #   loop: "{{grupos}}"
+      
+
+
+
+
+
+  # - name: cambio sector
+  #   ldap_attr:
+  #     dn: uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     name: gidNumber
+  #     values: "{{banana_id}}" # Tomo el gidNumber dado por el resultado de la busqueda del gidNumber
+  #     state: exact
+  #     params: "{{ldap_auth}}"
+  
+
+
+
+
+  # Crear nuevo grupo
+  # - name: inserto un nuevo grupo
+  #   ldap_entry:
+  #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     bind_pw: qwerty
+  #     dn: cn=racimo_de_banana,ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     objectClass:
+  #       - top
+  #       - posixGroup
+  #     attributes:
+  #       cn: racimo_de_banana
+  #       gidNumber: 22222
 
+  # - name: borro grupo
+  #   ldap_entry:
+  #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     bind_pw: qwerty
+  #     dn: uid=racimo_de_banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     state: absent
+  
+  # Devolver la lista (find) de carpetas/archivos con ese grupo    
 
+  
+  # Previamente debo obtener en una variable: gidNumber, con task "busco un gidNumber"
+  # - name: Devolver la lista de archivos afectados (que quedaron sin grupo)
 
-    # - name: varios grupos a un usuario
-    #   ldap_attr:
-    #     dn: "cn={{item}},ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar"
-    #     name: memberUid
-    #     values: "banana"
-    #     params: "{{ldap_auth}}"        
-    #   loop: "{{grupos}}"
-        
-
-
-
-
-
-    # - name: cambio sector
-    #   ldap_attr:
-    #     dn: uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     name: gidNumber
-    #     values: "{{banana_id}}" # Tomo el gidNumber dado por el resultado de la busqueda del gidNumber
-    #     state: exact
-    #     params: "{{ldap_auth}}"
-    
-
-
-
-
-    # Crear nuevo grupo
-    # - name: inserto un nuevo grupo
-    #   ldap_entry:
-    #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     bind_pw: qwerty
-    #     dn: cn=racimo_de_banana,ou=grupos,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     objectClass:
-    #       - top
-    #       - posixGroup
-    #     attributes:
-    #       cn: racimo_de_banana
-    #       gidNumber: 22222
-
-    # - name: borro grupo
-    #   ldap_entry:
-    #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     bind_pw: qwerty
-    #     dn: uid=racimo_de_banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     state: absent
-    
-    # Devolver la lista (find) de carpetas/archivos con ese grupo    
-
-    
-    # Previamente debo obtener en una variable: gidNumber, con task "busco un gidNumber"
-    - name: Devolver la lista de archivos afectados (que quedaron sin grupo)
-
-
-
-
-    # - name: inserto usuario ldap
-    #   ldap_entry:
-    #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     bind_pw: qwerty
-    #     dn: uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     objectClass: 
-    #       - top
-    #       - person
-    #       - organizationalPerson
-    #       - inetOrgPerson
-    #       - posixAccount
-    #       - postfixUser
-    #       - shadowAccount
-    #       - sambaSamAccount
-    #     attributes:
-    #       cn: Banana Pi
-    #       sn: Banana Pi
-    #       uid: banana
-    #       uidNumber: 59595
-    #       gidNumber: 509
-    #       displayName: Banana Pi
-    #       givenName: Banana Pi
-    #       gecos: Banana Pi,,,,
-    #       homeDirectory: /home/users/banana
-    #       loginShell: /bin/bash
-    #       mail: banana@issys.gov.ar
-    #       mailDomain: banana@issys.gob.ar
-    #       mailHomeDir: /produccion/usuarios/banana
-    #       telephoneNumber: 0
-    #       sambaSID: S-1-5-21-2797552002-818222531-1877314704-513
-    #       sambaAcctFlags: [U]
-    #       sambaKickoffTime: 2147483647
-    #       sambaLMPassword: 19FE4717A7C8B55DAAD3B435B51404EE
-    #       sambaLogoffTime: 2147483647
-    #       sambaLogonTime: 0
-    #       sambaNTPassword: F2C0C177DE720154D024A26E09F0FEB3
-    #       sambaPwdCanChange: 0
-    #       sambaPwdLastSet: 1456146003
-    #       sambaPwdMustChange: 1460034003
-    #       shadowLastChange: -1
-    #       shadowMax: -1
-    #       userPassword: 'e1NTSEF9d3FiVjJMem1XalNZU3dXemgzS29SSk11cU9zdlZHaHU='
-
-
-
-
-
-    # - name: borro usuario
-    #   ldap_entry:
-    #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     bind_pw: qwerty
-    #     dn: uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     state: absent
-
-    # - name: Devolver la lista de archivos afectados (que quedaron sin grupo)
-
-
-
-
-
-    # - name: Set a password for the admin user
-    #   ldap_passwd:
-    #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
-    #     bind_pw: qwerty
-    #     dn: "uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar"
-    #     passwd: "1234"
-
-
-    
-
-
-    
+
+
+
+  - name: inserto usuario ldap
+    ldap_entry:
+      bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
+      bind_pw: qwerty
+      dn: uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
+      objectClass: 
+        - top
+        - person
+        - organizationalPerson
+        - inetOrgPerson
+        - posixAccount
+        - postfixUser
+        - shadowAccount
+        - sambaSamAccount
+      attributes:
+        cn: Banana Pi
+        sn: Banana Pi
+        uid: banana
+        uidNumber: 59595
+        gidNumber: 509
+        displayName: Banana Pi
+        givenName: Banana Pi
+        gecos: Banana Pi,,,,
+        homeDirectory: /home/users/banana
+        loginShell: /bin/bash
+        mail: banana@issys.gov.ar
+        mailDomain: banana@issys.gob.ar
+        mailHomeDir: /produccion/usuarios/banana
+        telephoneNumber: 0
+        sambaSID: S-1-5-21-2797552002-818222531-1877314704-513
+        sambaAcctFlags: [U]
+        sambaKickoffTime: 2147483647
+        sambaLMPassword: 19FE4717A7C8B55DAAD3B435B51404EE
+        sambaLogoffTime: 2147483647
+        sambaLogonTime: 0
+        sambaNTPassword: F2C0C177DE720154D024A26E09F0FEB3
+        sambaPwdCanChange: 0
+        sambaPwdLastSet: 1456146003
+        sambaPwdMustChange: 1460034003
+        shadowLastChange: -1
+        shadowMax: -1
+        userPassword: 'e1NTSEF9d3FiVjJMem1XalNZU3dXemgzS29SSk11cU9zdlZHaHU='
+
+
+
+
+
+  # - name: borro usuario
+  #   ldap_entry:
+  #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     bind_pw: qwerty
+  #     dn: uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     state: absent
+
+  # - name: Devolver la lista de archivos afectados (que quedaron sin grupo)
+
+
+
+
+
+  # - name: Set a password for the admin user
+  #   ldap_passwd:
+  #     bind_dn: cn=Manager,dc=ldap-server,dc=issys,dc=gov,dc=ar
+  #     bind_pw: qwerty
+  #     dn: "uid=banana,ou=usuarios,ou=rawson,dc=ldap-server,dc=issys,dc=gov,dc=ar"
+  #     passwd: "1234"
+
+
+  
+
+
+  

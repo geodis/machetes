@@ -1,0 +1,73 @@
+
+Horizon 
+---------
+Dashboard provee una interfaz a los usuarios finales y al administrador a los otros servicios. 
+Es el servicio en el que actualmente me encuentro trabajando ;)
+
+Nova Compute 
+------------
+recupera imágenes y metadatos asociados, y transforma los pedidos de los usuarios en máquinas virtuales.
+
+
+1. El cliente nova-api acepta y responde a las llamadas del usuario final.
+2. La virtualización es administrada por nova-compute. Crea/finaliza las instancias de VMs a través de la API del hipervisor utilizado.
+3. El almacenamiento es controlado por nova-volume (ahora reemplazado por Cinder). Administra la creación, 
+vinculación y desvinculación de volúmenes de almacenamiento persistente a instancias.
+4. Las redes son gestionadas por nova-network (ahora reemplazado por Neutron). Acepta tareas relacionadas a redes y las ejecuta.
+5. La planificación es realizada por nova-schedule. Toma los pedidos de VMs de la cola y determina dónde debería ejecutarse.
+6. La cola, por defecto RabbitMQ, es el nodo central para el pasaje de mensajes entre daemons.
+7. También dispone de una base de datos que almacena la mayoría de los datos de estado de compilación y ejecución.
+nova-consoleauth, nova-novncproxy, nova-console permiten a los usuarios acceder a las instancias virtuales a través de un proxy.
+8. Al crear una instancia deberán seleccionar entre las opciones de configuraciones de recursos virtuales disponibles, llamadas flavors. 
+Luego, pueden agregarse recursos como volúmenes de almacenamiento persistente y direcciones IP públicas.
+
+
+
+
+
+Neutron Network 
+---------------
+provee redes virtuales como servicio entre dispositivos administrados por otros servicios de OpenStack, 
+como puede ser una máquina virtual de Nova. Permite a los usuarios crear sus propias redes y luego 
+vincularlas con los dispositivos que deseen.
+
+- neutron-server acepta pedidos de la API y los enruta hacia los plugins de Neutron que correspondan.
+- Los plugins y agentes de Neutron son los encargados de realizar las tareas, como enchufar/desenchufar puertos,
+crear redes y subredes y direccionamiento de IPs.
+
+
+
+Cinder Block Storage 
+---------------------
+provee almacenamiento persistente a las VMs alojadas en la nube.
+
+- Cinder permite la manipulación de volúmenes, tipos de volúmenes y snapshots.
+
+
+
+Glance Image 
+------------
+provee un catálogo y un repositorio para las imágenes.
+
+Swift Object Store 
+------------------
+provee almacenamiento de objetos. Esto no es un sistema de archivos, es más bien como un contenedor 
+en el que se pueden almacenar archivos y recuperarlos luego.
+
+podemos mencionar
+
+- El servidor proxy se encarga de aceptar los pedidos entrantes, como archivos para subir, modificaciones a los metadatos o 
+creación de contenedores; también provee archivos y un listado de los contenedores.
+- El servidor de cuentas maneja las cuentas asociadas con el servicio.
+- El servidor de contenedores realiza un mapeo de los contenedores, carpetas, dentro del servicio.
+- El servidor de objectos administra los objectos, archivos.
+- También se corren servicios de replicación, para proveer consistencia y disponibilidad a través del cluster, auditoría y actualización.
+
+
+
+
+
+Keystone Identity
+-----------------
+provee autenticación y autorización para todos los servicios de OpenStack, y también un
+catálogo de estos servicios de una nube en particular.

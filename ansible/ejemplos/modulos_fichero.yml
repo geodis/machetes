@@ -1,17 +1,18 @@
 - name: ejemplos de modulo de archivos y ssl
-  hosts: repo
+  hosts: dns_pre
   tasks:
     - name: crear archivo en destino con contenido
-      copy: content="ejemplo2 de copy" dest="/tmp/prueba.txt" owner="operator" backup="yes"
+      #copy: content="ejemplo2 de copy" dest="/tmp/prueba.txt" owner="operator" backup="yes"
+      copy: src="ejemplo2" dest="/tmp/prueba.txt" owner="operator" backup="yes"
 
-    - name: utilizando stat
-      stat: path=/etc
-      register: salida
-    - debug: var=salida
-
-    - debug: msg="es un archivo"
-      when: salida.stat.isdir
-
-    - name: Altero el config de selinux
-      lineinfile: path="/etc/selinux/config" regexp="^SELINUX=" line="SELINUX=disabled"
+#    - name: utilizando stat
+#      stat: path=/etc
+#      register: salida
+#    - debug: var=salida
+#
+#    - debug: msg="es un archivo"
+#      when: salida.stat.isdir
+#
+#    - name: Altero el config de selinux
+#      lineinfile: path="/etc/selinux/config" regexp="^SELINUX=" line="SELINUX=disabled"
   

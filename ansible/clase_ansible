@@ -314,21 +314,21 @@ copio un archivo de configuracion
 Estructura de directorios:
 roles/
     common/               # this hierarchy represents a "role"
-        tasks/            #
-            main.yml      #  <-- tasks file can include smaller files if warranted
-        handlers/         #
-            main.yml      #  <-- handlers file
-        templates/        #  <-- files for use with the template resource
-            ntp.conf.j2   #  <------- templates end in .j2
+        defaults/         #
+            main.yml      #  <-- default lower priority variables for this role
         files/            #
             bar.txt       #  <-- files for use with the copy resource
             foo.sh        #  <-- script files for use with the script resource
-        vars/             #
-            main.yml      #  <-- variables associated with this role
-        defaults/         #
-            main.yml      #  <-- default lower priority variables for this role
+        handlers/         #
+            main.yml      #  <-- handlers file
         meta/             #
             main.yml      #  <-- role dependencies
+        tasks/            #
+            main.yml      #  <-- tasks file can include smaller files if warranted
+        templates/        #  <-- files for use with the template resource
+            ntp.conf.j2   #  <------- templates end in .j2
+        vars/             #
+            main.yml      #  <-- variables associated with this role
         library/          # roles can also include custom modules
         module_utils/     # roles can also include custom module_utils
         lookup_plugins/   # or other types of plugins, like lookup in this case
@@ -558,7 +558,7 @@ Ejemplo:
   - name:  comprobar si existe archivo
     command: ls /no_existe.conf
     register: existe
-    ignore_errors: true
+    ignore_errors: True
 
   - name: Visualizar variable
     debug: var=register.stdout
@@ -743,12 +743,12 @@ postgresql_schema --> ABM esquemas
 postgresql_user   --> ABM usuarios
 
 
-  - Misc
-    =====
-    elasticsearch_plugin 
-    kibana_plugin
-    redis
-    riak
+- Misc
+  =====
+  elasticsearch_plugin 
+  kibana_plugin
+  redis
+  riak
 
 Modulos para gestionar el sistema
 =================================
@@ -1006,4 +1006,78 @@ Metodo 2:
 
 
 
++--------------------------------------------------------------------------------------------------+
+|                                             EJEMPLOS                                             |
++--------------------------------------------------------------------------------------------------+
 
+-- Variables
+
+vars:
+  # Array
+  hello:
+    - World
+    - Asia
+    - South America
+    - North America
+    - Artic
+    - Antartic
+    - Oceania
+    - Europe
+    - Africa
+
+  # Diccionario
+  python:
+    Designer: 'Guido van Rosum'
+    Developer: 'Python Software Foundation'
+    OS: 'Cross-platform'
+
+
+  include_newlines_example: |
+            The new line charaters
+            will appear 
+
+  ignore_newlines_example2: >
+            The new line character will 
+            be removed. Useful when editing 
+            lines
+
+tasks:
+  - name: Arreglo completo
+    debug: 
+      msg: "{{ item }}"
+    with_items:
+      - "{{ hello }}"
+
+  - name: Un elemento del arreglo
+    debug:
+      msg: "{{ hello[2] }}"
+
+  - name: Diccionario
+    debug:
+      msg: "{{ python }}"
+
+  - name: Acceso a  Hash Example1
+    debug:
+      msg: "{{python['Designer'] }}"
+        
+  - name: Ansible Find Example2
+    debug:
+      msg: "{{python.Designer }}"
+
+  - name: Ansible Dictionary variable Example
+    debug:
+      msg: "Key is {{ item.key}} and value is {{item.value}}"
+    with_dict: "{{ python }}"
+
+  - name: Ansible Dictionary variable Example
+    debug:
+      msg: "Key is {{ item.key}} and value is {{item.value}}"
+    with_dict: "{{ python }}"
+
+  - name: Ansible varible multiple line Example
+    debug:
+      msg: "{{ include_newlines_example }}"
+
+  - name: Ansible variables multiline Example
+    debug:
+      msg: "{{ ignore_newlines_example2 }}"

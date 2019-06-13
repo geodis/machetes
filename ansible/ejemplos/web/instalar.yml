@@ -1,5 +1,5 @@
 - name: instalar y configurar apache2
-  hosts: repo
+  hosts: mail
   roles:
     - rol1
    
