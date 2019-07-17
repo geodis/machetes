@@ -1,0 +1,192 @@
+
+====================================
+Los 3 modelos del Cloud Computing
+====================================
+
+	Capas de IT:
+	------------
+	application
+	data
+	runtime
+	middleware
+	operating system
+	hypervisor
+	compute 
+	storage
+	network
+
+	SAAS: Software as a Service
+	---------------------------
+	Son basicamente las cloud applications: Aplicaciones corriendo en 
+	datacenters propietarios de un operador de cloud accedido a traves
+	de internet
+
+	Abstrae todas las capas
+								+---------------------+
+								|  Cloud applications |
+								-----------------------
+								network-compute-storage
+								+---------------------+
+
+
+
+
+	PAAS: Plataform as a Service (redhat openshift)
+	---------------------------
+	Cloud Development software (paas) para los desarrolladores
+	quienes consumen las herramientas desde la nube
+
+	Abstrae las capas: network, storage, compute, hipervisor, operating system,
+	middleware, runtime  
+								+---------------------+
+								|  app |  app |  app  |
+								-----------------------
+								development enviroment
+								+---------------------+
+								network-compute-storage
+								+---------------------+
+
+	IAAS: Infrastructure as a Service
+	----------------------------------
+	Abstrae las capas: network, storage, compute, hipervisor, para 
+	no tener que meternos con la red, storage, etc...
+	El resto de las capas (SO, middleware...) quedan libres de eleccion
+
+								+---------------------+
+								|  app |  	  |  app  |
+								|  VM  |  	  |  VM   |
+								-----------------------
+								network-compute-storage
+								+---------------------+
+
+Cloud Computing - Caracteristicas
+=================================
+
+1. On-demand self-service: Creo que es la caracteristica de poder consumir hard a
+peticion de manera automatica sin interaccion humana con el proveedor del servicio.
+
+2. Broad network acces: Acceso a los servicios 
+
+3. Resource pooling: Recursos virtuales, o fisicos pueden ser asignados dinamicamente
+de acuerdo a la demanda del consumer. Hay unas ensacion de independencia del lugar
+donde se encuentran los recursos asignados. En algun server. Pero se pueden especificar
+lugares en otro nivel mas alto de abstraccion: (pais, estado, datacenter....)
+	Recursos: memoria, capacidad de procesamiento, storage, ancho de banda
+
+4. Rapid elasticity:  Los recursos pueden ser proveidos automaticamente. Escalar 
+hacia afuera/dentro, dependiendo de la demanda
+
+5. Measured service:  Todos los servicios son medidos, controlados, monitoreados y reportados
+ y asi te los cobran
+
+
+====================================
+Cloud deployment models
+====================================
+
+private: Opera para una sola organizacion, puede ser manejada on/off premise
+
+public: Tiene una infraestructura disponible al publico. Casi seguro que pertenece a una
+compañia de cloud
+
+hybrid: 
+
+
+====================================
+OpenStack - 
+====================================
+
+Es IaaS. 
+
+Core services:
+--------------
+Nova: compute
+Glance: image
+Neutron: networking
+Swift: object storage
+keystone: identity
+cinder: block storage
+
+Optional services: son un monton
+
+Pacstack es una tool que usa modulos de puppet para
+desplegar varias partes de RDO en servers pre instalados
+por ssh automaticamente
+
+
+
+
+
+
+
+
+
+
+
+====================================
+KeyStone CLI  
+====================================
+
+
+openstack endpoint list
+
+openstack endpoint show 8cb4dbef5f4349bbabb5184d8df653a2
++--------------+----------------------------------+
+| Field        | Value                            |
++--------------+----------------------------------+
+| enabled      | True                             |
+| id           | 8cb4dbef5f4349bbabb5184d8df653a2 |
+| interface    | internal                         |
+| region       | RegionOne                        |
+| region_id    | RegionOne                        |
+| service_id   | 6730e07245194a81a52115f8b0a48dcb |
+| service_name | keystone                         |
+| service_type | identity                         |
+| url          | http://192.168.122.32:5000/v3    |
++--------------+----------------------------------+
+
+
+openstack catalog list
+
+La lista de como cada servicio puede alcanzar otro
+
+| gnocchi    | metric       | RegionOne                                                                       |
+|            |              |   internal: http://192.168.122.32:8041                                          |
+|            |              | RegionOne                                                                       |
+|            |              |   public: http://192.168.122.32:8041                                            |
+|            |              | RegionOne                                                                       |
+|            |              |   admin: http://192.168.122.32:8041                                             |
+
+
+
+openstack project create newproject
+openstack project show newproject
+openstack project list
+
+# Seteo un atributo del proyecto
+openstack project set --description "para testing" newproject 
+
+# Los usuarios deben ser asignados a un proyecto en su creacion. No puede haber
+# usuarios sin proyecto
+openstack user create --project newproject --password-prompt developer01
+
+openstack role list
+# Que roles tiene asignados el usuario enel proyecto
+openstack role assignment list --project newproject --user developer01
+
+# Agrego rol member
+
+openstack role add --project newproject --user developer01 _member_
+
+# Buscando los comandos de openstack ... mmmm
+
+openstack command list | grep openstack.identity -A40
+
+
+====================================
+Glance CLI  - Virtual Machine Disks
+====================================
+Cuando queremos levantar una VM con Nova, no 
+instalamos de 0 una imagen del so.
+
+Nova le pide una copia de la imagen a Glance y bootea de ella
