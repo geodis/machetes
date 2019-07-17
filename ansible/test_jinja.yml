@@ -1,0 +1,13 @@
+- hosts: 127.0.0.1
+  gather_facts: false
+  vars:
+    # - device1: "eth034"
+    - device1: "eth03as4bc198"
+    - device2: "enp2s0"
+    - bridge: "br"
+
+  tasks:
+    - name: test jinja2 template
+      template: src="test.j2" dest="_test_j.j2" 
+
+

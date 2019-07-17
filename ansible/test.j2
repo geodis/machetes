@@ -1,0 +1,10 @@
+DEVICE1={{device1}}
+DEVICE2={{device2}}
+
+__BRIDGE__={{bridge}}
+
+
+BRIDGE1="{{ bridge }}{{ device1 | regex_replace('.*[^0-9]')}}"
+
+BRIDGE2="{{ bridge }}{{ device2 | regex_replace('.*[^0-9]')}}"
+

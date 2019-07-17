@@ -136,10 +136,14 @@ La primer linea arranca con: ---
         owner: root 
         group: root 
         mode: 0644
-
-
     - name: 
       become: # Si lo pongo aca se hace a nivel tarea
+
+ post_tasks:
+  - name: Reboot servers
+    command: reboot
+
+
 
 # Opciones del playbook:
 ---------------------
@@ -175,7 +179,7 @@ ansible-playbook --limit 'servers_web:&madrid'
 
 Sintaxis: "{{variable}}"
 
-Pueden ser definidass en Facts (obtenidas del server), playbook, linea de comandos (-e)
+Pueden ser definidas en Facts (obtenidas del server), playbook, linea de comandos (-e)
 
 Pueden ser usadas en 
 - Tareas
