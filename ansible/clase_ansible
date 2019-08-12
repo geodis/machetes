@@ -974,7 +974,7 @@ permite cifrar archivos con una password para proteger datos sensibles
 ansible-vault create archivo_a_proteger.yml # abre vim y crea el archivo_a_proteger.yml
 ansible-vault edit archivo_a_proteger.yml
 ansible-vault encrypt archivo_a_proteger.yml # encripta un archivo que ya existe
-ansible-vault deencrypt archivo_a_proteger.yml # desencripta un archivo que ya existe
+ansible-vault decrypt archivo_a_proteger.yml # desencripta un archivo que ya existe
 ansible-vault view archivo_a_proteger.yml # desencripta un archivo que ya existe
 
 

@@ -3,6 +3,7 @@
   gather_facts: false
   vars:
     - interfaces: [eth0, eth1, eth2]
+    
   tasks:
     # - name: print interfaces
     #   debug:
@@ -16,81 +17,32 @@
     #   debug:
     #     msg: "{{ ansible_interfaces + [\"VETH-1\", \"VETH-2\"] }}"
 
-    
-
-    - name: sleep
-      shell: "ifdown eth0 down && wall pre sleep && sleep 1 && wall post sleep && ifup eth0 192.168.0.24 up && wall post up"
-      # shell: "sleep 1000"
-      become: true
-      async: 1
-      poll: 0
-      # timeout: 10
-      # notify: nueva_ip
-      # register: continuar
-     
-    # - name: get the task status using ansible async_status
-    #   async_status:
-    #     jid: "{{ my_task.ansible_job_id }}"
-    #   register: result
-    #   until: result.finished
-    #   retries: 30
-    
-
-    # - name: cambio ip
-    #   command: ifconfig eth0 192.168.0.24 up
-    #   async: 10
+    # - name: sleep
+    #   shell: "ifdown eth0 down && wall pre sleep && sleep 1 && wall post sleep && ifup eth0 192.168.0.24 up && wall post up"
+    #   become: true
+    #   async: 1
     #   poll: 0
-    #   register: sleeper
 
-    # - name: sigo
-    #   debug:
-    #     msg: "sigo"
+    # - name: nueva_ip
+    #   local_action:
+    #     module: set_fact
+    #     ansible_host: 192.168.0.24
+    #     ansible_user: root
+    #     ansible_password: qwerty
     #   delegate_to: localhost
 
-    - name: nueva_ip
-      local_action:
-        module: set_fact
-        ansible_host: 192.168.0.24
-        ansible_user: root
-        ansible_password: qwerty
-      delegate_to: localhost
-    # # #   setup:
-    # # #   key_value: ansible_ssh_host={{host_ip}}
 
+    # - name: Wait for system to become reachable
+    #   wait_for_connection:
 
-    - name: Wait for system to become reachable
-      wait_for_connection:
-
-    - name: Gather facts for first time
-      setup:
+    # - name: Gather facts for first time
+    #   setup:
     
+    # - name: test include_vars 23
+    #   include_vars: 
+    #     file: mis_variables.yml
 
-    # - name: Name for wait_for module.
-    #   wait_for:
-    #    connect_timeout: "5"
-    #    delay: "5"
-    #    host: "192.168.0.206"
-    #    port: 22
-    #    timeout: 30
-    #    msg: "fallo la conexion"
+    - name: test include_vars 
+      debug: 
+        msg: "{{ mi_variable }}"
 
-    # - name: test
-    #   debug:
-    #     msg: "Test {{ansible_ssh_host}} {{ansible_ssh_user}}"
-
-    # - name: wait for new network settings
-    #   local_action: 
-    #     module: wait_for host=192.168.0.24 port=22 delay=10 timeout=30
-    #   delegate_to: localhost
-
-
-    # - handler:
-    #   - name: test
-    #     debug:
-    #       msg: "Test"
-
-
-
-    # - name: 
-    #   ping:
-    #     retry: 30
