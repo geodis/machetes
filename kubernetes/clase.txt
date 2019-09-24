@@ -12,4 +12,9 @@ kubectl rollout history deployment tomcat-deployment --revision=2
 
 kubectl get nodes
 # Le pongo ssd de nombre al nodo minikube
-https://github.com/geodis/machetes.git
+kubectl label node minikube storageType=ssd
+
+# storageType=ssd es todo el nombre de lo que entiendo. Clave/valor son los labels
+
+kubectl describe node minikube
+
