@@ -109,7 +109,8 @@ En el lugar donde tenga definido el Dockerfile
 
 Cuando docker buildea crea un hash por c/layer, asi en una rebuildeada ya usa esos layers y solo
 rebuildea los que cambiaron. CUando armo un dockerfile tengo que poner arriba o primero lo que menos cambia o 
-no cambia, y abajo lo que cambia. Cuando una linea cambia y es rebuildeada, todas las siguientes son rebuildeadas.
+no cambia, y abajo lo que cambia. Cuando una linea cambia y es rebuildeada, todas las capas siguientes son rebuildeadas.
+Entonces es importante poner arriba lo mas estatico y lo mas abajo posible lo que pueda cambiar.
 
 44 - Persistent Data
 
