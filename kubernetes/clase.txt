@@ -1,0 +1,14 @@
+kubectl get deployments
+
+kubectl rollout status
+kubectl rollout history
+kubectl set image
+	- kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
+
+kubectl rollout history deployment tomcat-deployment --revision=2
+
+-- Labels / selectors --
+
+kubectl get nodes
+# Le pongo ssd de nombre al nodo minikube
+https://github.com/geodis/machetes.git
