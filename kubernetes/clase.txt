@@ -1,5 +1,6 @@
 kubectl get deployments
 
+
 kubectl rollout status
 kubectl rollout history
 kubectl set image
