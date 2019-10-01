@@ -276,3 +276,21 @@ minikube addons open heapster
 
 # Namespace
 # pueden ser asignados a un objeto ResourceQuota
+# Podemos limitar
+# - compute
+# - storage
+# - memory
+# - cuantos objetos pueden existir
+
+ejemplo:
+
+spec:
+  hard:
+    pods: 4 # max
+    requests.cpu: 1
+    requests.memory: 1Gi
+    limits.cpu: 2       # en todo el namespace no puede exceder
+    limits.memory: 2Gi  # en todo el namespace no puede exceder
+
+kubectl create namespace <nombre>
+kubectl get namespace 
