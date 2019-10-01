@@ -1,3 +1,195 @@
+
+# En VM con 
+# cpu: host-passtrougth
+# kvm instalado. No hace falta, bridge
+# docker-machine-driver-kvm2 instalado
+# curl -LO https://storage.googleapis.com/minikube/releases/latest/docker-machine-driver-kvm2
+# chmod +x docker-machine-driver-kvm2
+# sudo mv docker-machine-driver-kvm2 /usr/local/bin/
+# kubectl instalado
+# minikube
+# yum install bash-completion bash-completion-extras
+# echo 'source <(kubectl completion bash)' >>~/.bashrc
+# kubectl completion bash >/etc/bash_completion.d/kubectl
+
+# k8s deployments son las contrucciones que definen una aplicacion
+
+# PODS: son las instancias de un contenedor en un deployment. Puede contener mas de un contenedor
+
+# SERVICES: son los endpoints que exportan puertos al mundo exterior
+# ----> Todos se administran con kubectl
+
+
+
+
+minikube start --vm-driver kvm2 --logtostderr
+
+kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+kubectl create deployment mimongo --image=mongo --port=27017
+
+# run esta casi obsoleto
+kubectl run hello-minikube --image=gcr.io/google_containers/echoserver:1.4 --port=8080
+#
+kubectl expose deployment hello-minikube --type=NodePort
+kubectl get pod
+curl  $(minikube service hello-minikube --url)
+
+kubectl delete deployment hello-minikube
+minikube stop
+
+
+# Aplica las directivas del manifiesto al cluster
+# Crea el servicio
+# 
+ kubectl apply -f ./deployment.yaml -
+--> deployment.apps/tomcat-deployment created
+
+# Luego: Expongo el deployment como un servicio
+
+kubectl expose deployment tomcat-deployment --type=NodePort
+
+# Ip interna del servicio dentro del cluster y puerto expuesto
+minikube service tomcat-deployment --url 
+
+==========
+= kubectl
+==========
+
+# Todos los pods en un namespace
+kubectl get pods
+
+# tomcat-deployment-75cc77755c-q7hmb --> sale de get pods
+kubectl describe pod tomcat-deployment-75cc77755c-q7hmb
+
+# Exporta puertos tcp/udp
+kubectl expose deployment hello-minikube --type=NodePort
+
+# Port forward
+# Forwardea un puerto de la maquina local donde esta corriendo kubectl
+# a un POD en un host remoto al que kubectl se esta conectando
+kubectl port-forward tomcat2-deployment-75cc77755c-bgh5j 31115:9000
+
+# Permite attachearme a un pod para ver su salida
+kubectl attach <pod-name>
+
+# Exec
+kubectl exec -it pod-name [-c container] command [args]
+kubectl exec -it tomcat2-deployment-75cc77755c-bgh5j bash
+
+# Label pods para clasificar
+kubectl label <type> key1=val1
+kubectl label pods tomcat2-deployment-75cc77755c-bgh5j healty=false
+
+
+# Run, para correr una imagen en especial en un cluster
+kubectl run hazelcast --image=hazelcast/hazelcast --port=5701
+
+# kubectl get pods
+# kubectl get pods [pod name]
+ 
+# kubectl expose <type name> <identifier/name> [—port=external port] [—target-port=container-port [—type=service-type]
+# kubectl expose deployment tomcat-deployment --type=NodePort
+ 
+# kubectl port-forward <pod name> [LOCAL_PORT:]REMOTE_PORT]
+ 
+# kubectl attach <pod name> -c <container>
+ 
+# kubectl exec  [-it] <pod name> [-c CONTAINER] — COMMAND [args…]
+# kubectl exec -it <pod name> bash
+ 
+# kubectl label [—overwrite] <type> KEY_1=VAL_1 ….
+# kubectl label pods <pod name> healthy=fasle
+ 
+# kubectl run <name> —image=image
+# kubectl run hazelcast --image=hazelcast/hazelcast --port=5701
+# # the hazelcast docker image has been moved to hazelcast/hazelcast (https://hub.docker.com/r/hazelcast/hazelcast
+ 
+# kubectl describe pod
+
+
+kubernetes nodes: vm o on-premisses
+ - kubelete: corre los pods
+ - kube-proxy: maneja la red en el nodo. Es el NodePort, etc
+
+
+# escalado online sin downtime
+kubectl describe deployments tomcat2-deployment
+
+# 1. escalamos 
+kubectl scale --replicas=4 deployment/tomcat-deployment
+# 2 defino un servicio de load balancer
+kubectl expose deployment tomcat-deployment --type=LoadBalancer --port=8080 --target-port=8080 --name=tomcat-load-balancer
+# 3 veo que ip le asigno al servicio
+kubectl describe services tomcat-load-balancer
+
+
+
+kubectl get deployments
+kubectl rollout status
+kubectl rollout history
+kubectl set image
+  - kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
+
+kubectl rollout history deployment tomcat-deployment --revision=2
+
+-- Labels / selectors --
+
+kubectl get nodes
+# Le pongo ssd de nombre al nodo minikube
+kubectl label node minikube storageType=ssd
+
+# storageType=ssd es todo el nombre de lo que entiendo. Clave/valor son los labels
+kubectl describe node minikube
+
+# En el yaml que define el deployment agrego
+# en la seccion de spec: para indicar que este deployment se tiene que 
+# aplicar en nodos con la clave/valor storageType: ssd
+
+  nodeSelector:
+    storageType: ssd
+
+# Healt checks
+#-------------
+
+# readiness probes: chequea si un pod es ready. Ejemplo luego de iniciarlo.
+# liveness probes: para determinar cuando un pod es healthy o unhealthy, luego
+# de haber sido ready
+
+
+# Basicamente tengo que definir en el yaml del deployment las pruebas. Se 
+# ponen en spec:
+
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 3
+
+
+# Volumenes
+
+kind: PersistentVolume
+apiVersion: v1 
+
+# k8s usa Claim para ver PersistentVolume que satisfaga los requerimientos
+
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pv-claim
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce # Significa que solo un contenedor puede usarlo
+
 kubectl get deployments
 
 
