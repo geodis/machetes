@@ -275,6 +275,8 @@ kubectl get pods --namespace=kube-system
 minikube addons open heapster
 
 # Namespace
+# ---------------------------
+# ---------------------------
 # pueden ser asignados a un objeto ResourceQuota
 # Podemos limitar
 # - compute
@@ -294,3 +296,17 @@ spec:
 
 kubectl create namespace <nombre>
 kubectl get namespace 
+
+# -----------cpu-limits.yaml------------
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+spec:
+   hard:
+     # 40% de cpu
+     limits.cpu: "400m"
+
+# Agrego la quota que esta arriba en el file cpu-limits.yml al namespace cpu-limited-tomcat
+kubectl create -f cpu-limits.yaml --namespace=cpu-limited-tomcat 
+
