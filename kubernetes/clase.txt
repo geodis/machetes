@@ -65,4 +65,11 @@ spec:
           name: mysql-pass
           key: password
 
+# Pasos de como setear los pass por linea de comando y en los yml
+# kubectl create secret generic [nombre] --from-literal=clave=valor
+kubectl create secret generic mysql-pass --from-literal=password=MiPass
+kubectl get secret
+
+# Usage & Monitoring
+
 
