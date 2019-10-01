@@ -4,7 +4,7 @@ kubectl get deployments
 kubectl rollout status
 kubectl rollout history
 kubectl set image
-	- kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
+  - kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
 
 kubectl rollout history deployment tomcat-deployment --revision=2
 
@@ -18,4 +18,51 @@ kubectl label node minikube storageType=ssd
 
 kubectl describe node minikube
 
-Health check
+# Health check
+ livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 3
+
+# Kubernetes web ui
+kubectl proxy
+
+# ejercicio -  mongodb
+
+# ejemplo1
+kubectl run mongo-excercice-1 --image=mongo --port=27017
+kubectl scale --replicas=4 deployment mongo-excercice-1
+
+
+# Volume
+
+kubectl get persistentvolumes
+
+# Secrets
+# Son key/value strings
+
+# de archivo
+kubectl create secret generic db-user-pass --from-file=username.txt --from-file=password.txt
+# de linea de comandos
+kubectl create secret generic mysql-pass --from-literal=password=YOUR_PASSWORD
+
+spec:
+  containers:
+  - image: mysql:5.6
+    name: mysql
+    env: 
+    - name: MYSQL_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: mysql-pass
+          key: password
+
+
