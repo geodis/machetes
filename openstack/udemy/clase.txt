@@ -186,7 +186,108 @@ openstack command list | grep openstack.identity -A40
 ====================================
 Glance CLI  - Virtual Machine Disks
 ====================================
+https://docs.openstack.org/image-guide/obtain-images.html
+
 Cuando queremos levantar una VM con Nova, no 
 instalamos de 0 una imagen del so.
 
 Nova le pide una copia de la imagen a Glance y bootea de ella
+
+Imagenes: raw, ramdisk, vhd, vdi, qcow2, vmdk, ovf
+
+
+REST API: interfaz de usuario
+Glance Domain Controller: Autorizacion, politicas, etc
+database:
+glance store drivers:
+registry layer:
+
+# Buscando los comandos de openstack ... mmmm
+openstack command list | grep openstack.image -A 30
+openstack image list
+
+# Bajo un cirros
+curl -o cirros.img http://download.cirros-cloud.net/0.4.0/cirros-0.4.0-x86_64-disk.img
+
+openstack image create --min-disk 2 --private --disk-format qcow2 --file <image_file> <image_name>
+
+--min-disk 2: Al menos 2G para que la vm arranque
+--private: La imagen no es visible fuera de este proyecto
+--disk-format qcow2. Esto es que la imagen es qcow2. Tambien se puede pasar una URL y que lo baje!!!!
+
+openstack image [add,remove] project: agrega o quita una imagen de un proyecto
+
+image save: guarda la imagen en un archivo local
+
+===============================
+Neutron  - Network Connectivity
+===============================
+
+
+- Rich topologies: multi tier networks
+- Technology agnostic
+
+- REST API(RPC): Acepta requests y routea al plugin correspondiente
+plugins y agentes de neutron son los que plug/unplugn ports, crear
+redes, sub redes, direcciones ip...
+
+Queue: Usa una cola de mensajes para routear la informacion entre neutron
+server y varios agentes
+
+MLT Plugin (??)
+
+	____{ DATABASE }
+	|
+neutron ------ (Queue) ------- [l2 agent]
+				  | ---------- [l3 agent]
+				  | ---------- [dhcp agent]
+				  | ---------- [advanced services]
+
+Base de datos relacional: para mantener el estado
+a traves de redes y componentes
+
+l2 agent: levanta puertos y los conecta a la red compartida
+l3 agent: provee conexion a diferentes redes (externas)
+DHCP server: 
+advanced services: Load balance, firewall, vpn, gateway, etc..
+
+ GRE Network Segmentation
+VX Lan
+
+
+L2 Agent:
+---------------
+- Corre en un nodo de computo
+- se comunica con neutron por RPC 
+- Observa y notifica cuando se agregan o quitan devices
+y configura la red para el device
+
+
+
+OV Switch
+------------
+
+
+CLI
+----
+
+openstack network agent list
+systemctl status neutron-server
+
+# Veo cuantos bridges tengo
+ovs-vsctl show 
+
+ovs-vsctl: Maneja el ovs daemon
+
+# creamos una red
+openstack network create <name>
+# creamos una sub red y la asignamos a la red
+openstack subnet create subnet1 --subnet-range 10.5.5.0/24 --dns-nameserver 8.8.8.8 --network intnet
+
+
+
+
+Neutron
+
+openstack network agent list
+systemctl status neutron-server
