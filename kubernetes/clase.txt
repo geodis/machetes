@@ -72,4 +72,15 @@ kubectl get secret
 
 # Usage & Monitoring
 
+# - heapster  is a performance monitoring and metrics collection system
+#   + InfluxDB
+#   + Grafana
 
+minikube addons enable heapster
+
+kubectl get pods --namespace=kube-system
+
+minikube addons open heapster
+
+# Namespace
+# pueden ser asignados a un objeto ResourceQuota
