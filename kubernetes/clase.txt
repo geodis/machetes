@@ -344,3 +344,20 @@ while true ; do wget -q -O- http://wordpress.default.svc.cluster.local ; done
 # Legacy Auditing
 
 # Advanced Auditing
+
+# -------------------------------------
+# PRODUCTION
+# -------------------------------------
+
+# High Availability
+
+1. Nodos confiables para los masters --> separar cada maquina que va a correr un master
+  - deben correr: kubelet y monit
+
+2. Reliable storaga -> etcd
+
+3. kube-api en los masters y deberia estar detras de un load-balancer
+
+4. De todos los masters uno es el active Master (el master de masters, ja)
+
+
