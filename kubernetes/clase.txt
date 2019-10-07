@@ -327,3 +327,20 @@ kubectl create -f cpu-limits.yaml --namespace=cpu-limited-tomcat
 
 # Uso del <=50% de cpu x pod
 kubectl autoscale deployment <nombre> --cpu-percent=50 --min=1 --max=10
+# Autoscaling
+# ------------
+ 
+kubectl autoscale deployment wordpress --cpu-percent=50 --min=1 --max=5
+ 
+kubectl get hpa
+
+# simulo una carga
+kubectl run -i --tty load-generator --image=busybox --generator=run-pod/v1 /bin/sh
+while true ; do wget -q -O- http://wordpress.default.svc.cluster.local ; done
+
+# Auditing
+# ------------
+
+# Legacy Auditing
+
+# Advanced Auditing
