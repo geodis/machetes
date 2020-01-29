@@ -1,0 +1,31 @@
+# Assignment: Writing a Compose File
+
+version: "2"
+
+services:
+  drupal:
+    image: drupal:latest
+    ports:
+      - 8080:80
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-themes:/var/www/html/themes
+      - drupal-sites:/var/www/html/sites
+
+  postgres:
+    image: postgres
+    environment: 
+      POSTGRES_PASSWORD: example
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  drupal-modules: 
+  drupal-profiles: 
+  drupal-themes: 
+  drupal-sites: 
+    
+  postgres-data:
+
+

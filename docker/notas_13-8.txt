@@ -1,0 +1,246 @@
+docker version
+docker info
+docker container run --publish 80:80 --detach nginx
+docker container ls
+docker container stop d82
+docker container run --publish 80:80 --detach --name webhost nginx
+docker container logs webhost
+docker container top
+docker container run --publish 8080:80 --name webhost -d nginx:1.11 nginx -T  
+
+Ejercicio1
+----------
+docker container run --publish 80:80 --detach --name mi_nginx nginx
+docker container run --publish 8080:80 --detach --name mi_apache httpd
+docker run --publish 3306:3306 --name mi_mysql --env MYSQL_RANDOM_ROOT_PASSWORD=yes --detach mysql
+docker container logs mi_mysql
+---------------------------------
+docker container top mysql
+docker container inspect mysql
+docker container stats -a
+--------------------------------
+docker container run -it --name proxy nginx bash
+docker container start -ai nginx
+docker container exec -it proxy bash
+docker pull alpine
+--------------------------------
+docker container port webhost2
+docker container inspect --format '{{ .NetworkSettings.IPAddress }}' webhost2
+docker network ls
+docker network create my_app_nework
+docker container run -d --name new_nginx --network my_app_net nginx
+docker network connect my_app_net webhost2
+-------------------------------
+
+Ejercicio2
+----------
+docker container run --rm -it --name centos7 centos:7 bash
+
+Ejercicio3
+----------
+docker network create mi_red
+docker container run -d --net mi_red --net-alias search elasticsearch:2
+docker container run --rm --net mi_red alpine nslookup search
+docker container run --rm --net mi_red centos curl -s search:9200
+-------------------------------
+docker image history nginx
+docker image tag nginx mi_repo/nginx
+docker image push mi_repo/nginx
+docker login
+-------------------------------
+
+Dockerfile
+---------
+docker image build -t customnginx .
+
+docker image prune
+docker image prune -a
+docker system prune
+docker system df
+
+Lastly, realize that if you're using Docker Toolbox, 
+the Linux VM won't auto-shrink. You'll need to delete 
+it and re-create (make sure anything in docker 
+containers or volumes are backed up). You can recreate 
+the toolbox default VM with docker-machine rm default 
+and then docker-machine create
+--------------------------------------------------------
+docker container run -d --name mi_mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=True -v mysql-db:/var/lib/mysql mysql 
+
+Ejercicio 5: Named Volumes
+--------------------------
+docker container run -d --name mi_postgres_viejo -v psql-data:/var/lib/postgresql/data  -e POSTGRES_PASSWORD=mysecretpassword postgres:9.6.1-alpine
+---------------------------------
+
+Docker Compose
+---------------
+docker-compose up/down -d (background)
+docker-compose logs 
+docker-compose ps
+docker-compose top
+
+
+Ejercicio 6: compose file
+-----------
+en compose-assigment-2
+-------------------------------
+docker-compose build
+
+-------------------------------------
+		SWARM
+-------------------------------------
+docker info
+docker swarm init
+docker swarm join-token
+docker service en un swarm reemplaza docker container run
+docker node
+docker service
+docker service create alpine ping 8.8.8.8
+docker service ls --> muestra el servicio
+docker service ps service_id --> muestra el contenedor
+------------------------------------
+docker node ls
+[desde el manager]
+docker node update --role manager nodo1
+------------------------------------
+Servicio en distintas redes (creo)
+docker network create --driver overlay mydrupal
+docker service create --name psql --network mydrupal -e POSTGRES_PASSWORD=mypass postgres
+-----------------------------------
+
+Ejercicio Multi Node webapp
+----------------------------
+docker network create --driver overlay backend
+docker network create --driver overlay frontend
+docker service create --name vote -p 80:80 --network frontend --replicas 2 dockersamples/examplevotingapp_vote:before
+docker service create --name redis --network frontend redis:3.2
+docker service create --name worker --network backend --network frontend dockersamples/examplevotingapp_worker
+docker service create --name db --mount type=volume,source=db-data,target=/var/lib/postgresql/data --network backend postgres:9.4
+docker service create --name result -p 5001:80 --network backend dockersamples/examplevotingapp_result:before
+---------------------------
+
+Stacks
+------
+docker stack deploy -c example-voting-app-stack.yml voteapp
+--------------------------
+Secrets
+--------
+docker secrets create psql_user psql_user.txt
+echo "miPassword" | docker secret create psql_pass -
+docker secret ls
+
+docker service create --name psql --secret psql_user --secret psql_pass -e POSTGRES_PASSWORD_FILE=/run/secrets/psql_pass -e POSTGRES_USER_FILE=/run/secrets/psql_user postgres
+
+Si quisiera sacarlo.
+---------
+docker service update --secret-rm
+
+Stacks.
+-------
+
+
+Ciclo Dev, build and deploy:
+
+Un solo file para:
+Local: docker-compose up para ambiente de develop
+Remoto: docker-compose up CI - testing
+Remoto: docker stack deploy para ambiente de prod
+
+
+-rw-rw-r-- 1 chris chris  582 Aug 13 17:36 docker-compose.override.yml
+-rw-rw-r-- 1 chris chris  558 Aug 13 17:36 docker-compose.prod.yml
+-rw-rw-r-- 1 chris chris  638 Aug 13 17:36 docker-compose.test.yml
+-rw-rw-r-- 1 chris chris  106 Aug 13 17:36 docker-compose.yml
+-rw-rw-r-- 1 chris chris  518 Aug 13 17:36 Dockerfile
+-rw-rw-r-- 1 chris chris    9 Aug 13 17:36 psql-fake-password.txt
+drwxrwxr-x 2 chris chris 4096 Aug 13 17:36 themes
+
+docker-compose.override usa este archivo en el docker-compose up por defecto
+
+dev: docker-compose up 
+ci: docker-compose -f docker-compose.yml -f docker-compose.test.yml up -d
+prod: 
+	# Mergea los archivos en un archivo 
+	docker-compose -f docker-compose.yml -f docker-compose.test.yml config > out.yml
+
+Updates de servicios:
+--------------------
+- update de la imagen de un servicio
+docker service update --image myapp:1.2.1 <servicename>
+
+- Agrego una variable y remuevo un puerto
+docker service update --env-add NODE_ENV=production --publish-rm 8080
+
+- Cambio el numero de replicas en dos servicios a la vez
+docker service scale web=8 api=6
+
+- Y desde el file. Editar el yml y luego
+docker stack deploy -c file.yml <stackname>
+
+
+docker service create -p 8088:80 --name web nginx:1.13.7
+
+docker service update --image nginx:1.13.6 web
+
+Esto causa que de a uno los containers sean apagados, cambiados y encendidos con la nueva imagen
+
+- Update de puertos
+  docker service update --publish-rm 8088 --publish-add 9090:80 web
+
+- Para forzar un balanceo de nodos
+  docker service update --force web
+
+Hace redeploy sin cambios de los nodos. Esto causa que se re balanceen entre contenedores
+------------------------------------------------------------
+
+Docker Healthchecks
+===================
+Container states:
+	- starting
+	- healthy
+	- unhealthy
+
+
+
+docker run \
+	# || para que de siempre 0 1 
+	--health-cmd="curl -f localhost:9200/_cluster/health || false" \
+	# cada 5 seg corre el check
+	--health-interval=5s \
+	# cuanto esperar hasta el return code
+	--health-retries=3s \
+	# 
+	--health-timeout=2s \
+	# por defecto el check empieza a los 30 seg. Con esto lo cambio.
+	# por defecto los checks se hacen a los 30 seg de arrancado el container
+	--health-start-period=15s \
+	elasticsearch:2
+	:
+
+docker container run --name p2 -d postgres --health-cmd="pg_isready || exit 1" postgres
+docker service create --name p2 --health-cmd="pg_isready -U postgres || exit 1" postgres
+
+
+===========
+Registry
+===========
+
+
+-- Levanto mi propio Registry
+
+docker container run -d -p 5000:5000 --name registry registry
+
+-- Creo una imagen de ejemplo
+
+docker pull hello-world
+
+# Esto es el equivalente a usuario/imagen pero el usuario es
+# el registry 127.0.0.1, si no es el por defecto --> docker-hub
+docker tag hello-world 127.0.0.1:5000/hello-world
+docker image ls --> se ve el nuevo tag
+# pusheo la imagen al registry
+docker push 127.0.0.1:5000/hello-world
+
+docker pull 127.0.0.1:5000/hello-world
+
+docker container run -d -p 5000:5000 --name registry -v $(pwd)/registry-data:/var/lib/registry registry
