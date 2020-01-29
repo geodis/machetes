@@ -1,0 +1,76 @@
+
+# YAML - k8s
+
+Siempre tiene al menos estos 4 campos (properties)
+
+apiVersion: depende de que queremos crear depende la version
+kind:
+metadata:
+
+
+spec: (Es un diccionario. Especificaciones para el pod. Cambia segun el tipo de pod.)
+
+
+Kind 		 | version
+-------------+--------
+POD	 		 |	v1
+service	 	 |	v1
+ReplicaSet	 |	v1
+Deployment	 |	v1
+
+metadata: es un diccionario
+	name: myapp-pod
+	labels: (sirven para filtrar los pods. Aca se puede poner cualquier clave/valor)
+		app: myapp
+		type: front-end
+
+
+spec:
+	containers: (lista de arrays)
+	- name: nginx-container
+	  image: nginx-container
+
+Ejecucion:
+kubectl create -f pod-definition.yml
+
+
+
+kubectl get pods
+kubectl describe pod myapp-pod
+
+Create a new pod with the NGINX image
+kubectl run nginx --image=nginx --generator=run-pod/v1
+
+What is the image used to create the new pods?
+kubectl describe pod newpod-<id>  
+kubectl get pods -o wide 
+
+How many containers are part of the pod 'webapp'?
+kubectl describe pod webapp
+Why do you think the container 'agentx' in pod 'webapp' is in error?
+# Asi chequeo los logs
+kubectl describe pod webapp
+
+Delete the 'webapp' Pod.
+kubectl delete pod webapp
+
+Create a new pod with the name 'redis' and with the image 'redis123'
+kubectl run redis --image=redis123 --generator=run-pod/v1
+
+# redis123 esta intencionalmente mal
+Now fix the image on the pod to 'redis'.
+Update the pod-definition file and use 'kubectl apply' command or use 'kubectl edit pod redis' command.
+
+kubectl edit pod redis
+
+# Definiendo el archivo pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+spec:
+  containers:
+  - name: redis
+    image: redis
+
+kubectl run -f pod.yaml
