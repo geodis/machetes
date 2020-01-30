@@ -1,0 +1,49 @@
+# Replication Controller
+Monitorea la existencia de la cantidad de pods que quiero
+kubectl create -f rc-definition.yml
+El selector no es obligatorio 
+
+# Lista de los replication controllers creados
+kubectl get replicationcontroller
+
+# ReplicaSet
+# -------------
+Monitorea la existencia de la cantidad de pods que quiero
+En la definicion del file
+se agrega un "selector":
+Ayuda al RS a identificar cuales pods se seleccionan
+
+Se especifican porque las RS pueden manejar pods que fueron
+incluso creados (o no fueron creados por el template) 
+antes que el RS.
+
+selector:
+	matchLabels:
+		type: front-end
+
+# Lista de los replication controllers creados
+kubectl get replicaset
+
+# Labels y selectores
+# --------------------
+
+Escalar:
+1) en el file de rs. replicas = 6
+kubectl replace -f replicaset-definition.yml
+
+2) por linea de comandos
+kubectl scale --replicas=6 -f replicaset-definition.yml
+
+3) por linea de comandos sin file. Pongo el nombre del replicaset
+kubectl scale --replicas=[cant] [type] [name]
+kubectl scale --replicas=6 replicaset myapp-replicaset
+
+# resumen
+kubectl create -f definicion.yml
+kubectl get replicaset
+# Tambien borra los pods asociados
+kubectl delete replicaset myapp-replicaset
+# Escalo usando el file
+kubectl replace -f replicaset-definition.yml
+# Escalo de linea de comandos sin modificar el file
+kubectl scale --replicas=3 -f replicaset-definition.yml
