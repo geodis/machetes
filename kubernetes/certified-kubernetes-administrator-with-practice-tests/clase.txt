@@ -1,4 +1,16 @@
 
+
+
+# Como arrancar minikube
+# ----------------------
+stop libvirtd
+stop docker
+iptables -F de todo
+start libvirtd
+start docker
+minikube start --vm-drive kvm2 --logtostderr
+# ------------------------------------------
+
 # YAML - k8s
 
 Siempre tiene al menos estos 4 campos (properties)
@@ -38,29 +50,35 @@ kubectl create -f pod-definition.yml
 kubectl get pods
 kubectl describe pod myapp-pod
 
-Create a new pod with the NGINX image
+# Create a new pod with the NGINX image
 kubectl run nginx --image=nginx --generator=run-pod/v1
+# Generar solamente el YAML
+kubectl run --generator=run-pod/v1 nginx --image=nginx --dry-run -o yaml
+kubectl create deployment --image=nginx nginx --dry-run -o yaml
 
-What is the image used to create the new pods?
+
+# What is the image used to create the new pods?
 kubectl describe pod newpod-<id>  
 kubectl get pods -o wide 
 
-How many containers are part of the pod 'webapp'?
+# How many containers are part of the pod 'webapp'?
 kubectl describe pod webapp
-Why do you think the container 'agentx' in pod 'webapp' is in error?
+
+# Why do you think the container 'agentx' in pod 'webapp' is in error?
 # Asi chequeo los logs
 kubectl describe pod webapp
 
-Delete the 'webapp' Pod.
+# Delete the 'webapp' Pod.
 kubectl delete pod webapp
 
-Create a new pod with the name 'redis' and with the image 'redis123'
+# Create a new pod with the name 'redis' and with the image 'redis123'
 kubectl run redis --image=redis123 --generator=run-pod/v1
 
 # redis123 esta intencionalmente mal
-Now fix the image on the pod to 'redis'.
+# Now fix the image on the pod to 'redis'.
 Update the pod-definition file and use 'kubectl apply' command or use 'kubectl edit pod redis' command.
 
+# Me abre un vim con el yaml autogenerado en ram del pod, luego de editarlo y guardarlo se hace un apply
 kubectl edit pod redis
 
 # Definiendo el archivo pod.yaml
@@ -73,4 +91,50 @@ spec:
   - name: redis
     image: redis
 
+
+kubectl apply -f pod.yaml
+# o borrarlo y volverlo a crear
 kubectl run -f pod.yaml
+
+
+# REPLICA SETS
+# ----------------------------
+
+Controllers: son los cerebros de k8s, son los ps que monitorean los objetos k8s
+Replication controller (obsoleto:
+	- ayuda a tener varias instancias del mismo pod en el cluster k8s (HA). Se asegura que un numero especifico
+	de pods esten corriendo
+	- Load balancing & scaling: multiple pods en multiples nodos
+
+Replica set: 
+	- Esta reemplazando el Replication controller
+
+Ejercicio: rc-definition.yml
+kubectl
+
+# Obtener el yml de un RS
+# -----------------------
+kubectl get rs mi_replica -o yaml > mi_rs.yml
+
+# Escalar replicas
+# ----------------
+
+kubectl scale rs new-replica-set --replicas=5
+
+
+# Deployments
+# -----------------------------------------------
+# Rolling updates:
+Cuando tengo una nueva version de mi app las voy aplicando de a "una" y no bajo todas las instancias
+y las reemplazo de una y si algo falla tengo que poder hacer un rollback
+
+El deployment incluye aparte de las RS las acciones de cambiar de version, rollback, pausar y aplicar
+cambios y resumir toda app cuando los cambios estan 100% aplicados, etc.
+El deployments crea automaticamente un RS
+Las RS crean automaticamente los PODS
+
+# Definition
+cambia el kind: Deployment
+
+kubectl create -f deployment-definition.yml
+kubectl get deployments
