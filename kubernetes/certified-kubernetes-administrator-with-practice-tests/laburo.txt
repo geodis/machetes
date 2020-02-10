@@ -1,6 +1,8 @@
 # Replication Controller
 Monitorea la existencia de la cantidad de pods que quiero
 kubectl create -f rc-definition.yml
+# Creo en un namespace distinto al default
+kubectl create -f rc-definition.yml --namespace=dev
 El selector no es obligatorio 
 
 # Lista de los replication controllers creados
@@ -47,3 +49,54 @@ kubectl delete replicaset myapp-replicaset
 kubectl replace -f replicaset-definition.yml
 # Escalo de linea de comandos sin modificar el file
 kubectl scale --replicas=3 -f replicaset-definition.yml
+
+# Namespaces
+# -----------------------
+
+db-service.dev.svc.cluster.local
+
+cluster.local --> default domain
+svc --> service
+dev --> namespace
+db-service --> service name
+
+
+En el archivo de definicion.yml
+
+metadata:
+	name: bla
+	namespace: dev # si no es en el default o si no en 
+				   # el create le paso --namespace=dev
+
+Nuevo Namespace:
+
+apiVersion: v1
+kind: Namespace
+metadata:
+	name: dev				   
+
+O por linea
+
+kubectl create namespace dev
+
+# Switcheo de namespace por defecto
+
+kubectl config set-context $(kubectl config current-context) --namespace=dev
+# Ver todos los pods 
+kubectl get pods --all-namespaces
+
+# ResourceQuota
+# --------------------
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: dev
+
+spec:
+  hard:
+    pods: "10"
+    requests.cpu: "4"
+    requests.memory: 5Gi
+    limits.cpu: "10"
+    limits.memory: 10Gi
