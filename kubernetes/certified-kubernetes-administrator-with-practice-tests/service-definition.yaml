@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+
+spec:
+  type: NodePort  # el tipo de servicio [clusterIP, NodePort, LoadBalancer]
+  ports:
+    - targetPort: 80  # el del POD/app: si no lo especificamos se asume igual que port
+      port: 80        # el del servicio
+      nodePort: 30008 # el del nodo: si no lo especificamos en random >30000 ... 32767 <
+  selector:
+    # Estos son los labels tal cual del yml del pod
+    app: myapp
+    type: front-end

@@ -1,0 +1,42 @@
+# conecta aplicaciones con otras apps o usuarios
+Services son objectos (como RS,pods, etc) 
+
+# Casos de Uso:
+# -------------  
+NodePortService: escuchar un servicio en el NODO y forwardear
+la conexion a un POD en un puerto
+
+clusterIP: el servicio crea una IP virtual en el cluster para habilitar
+la comunicacion entre diferentes servicios (front-end con back-end services)
+
+LoadBalancer: load balancer para el servicio soportado en cloud
+
+# NodePort
+
+NODE{30008----[service]--80---80--(10.244.0.2)[POD]}
+
+targetPort es el 80 del POD donde esta corriendo la app
+port: es el 80 del servicio. El seervice tiene su propia ip
+NodePort: es el 30008. Es el que accedo desde afuera. Por defecto >30000
+
+service-definition.yml
+
+No puede tener labels
+selector: me permite vincular el service con el pod
+los labels tal cual del yml del pod
+    app: myapp
+    type: front-end
+
+kubectl create -f service-definition.yml
+
+# Cuando los pods esstan en un mismo nodo
+cuando tengo pods identicos con mismos labels, el service busca por labels, entonces
+todos los que matchean los usa como endpoints para requests del usuario. Automatico: Usa Random para
+distribuir los pods
+
+# Cuando los pods estan en distintos nodos
+el servicio se expande a todos los nodos y abre el mismo puerto en cada nodo
+
+# ClusterIP
+# ----------
+
