@@ -1,0 +1,42 @@
+# Manual Scheduling
+
+pod-definition.yml
+
+spec.nodeName: por defecto no esta seteado. Pertenece a cada POD
+El scheduler mira todos los pods y busca los que no tienen esta
+propiedad seteada. Estos son los candidatos para schedulear.
+
+Lo hace seteandole al nodeName del POD el nombre del Nodo. 
+Crea un objeto que bindea el Pod al Nodo
+
+Si no hay scheduler, entonces los pods quedan en un 
+STATUS: pending
+
+Puedo a mano meterle el nombde del nodo al nodeName en el file
+cuando creo el POD. No se puede modificar a mano cuando ya esta
+creado el POD. La opcion es crear un objeto bind
+
+apiVersion: v1
+kind: Binding
+metadata:
+  name: nginx
+target:
+  apiVersion: v1
+  kind: Node
+  name: # aca va el nombre del target Node
+
+Luego hay que hacer un curl --request POST con el yml del binding
+en formato json a la ip del POD. (Esto es lo que hace el scheduler 
+para bindear)
+
+# Ejemplo de filtro por labels
+kubectl get pods --selector app=App1
+
+Annotations: Simplemente notas 
+
+
+metadata:
+  labels:
+    ...
+  annotations:
+    buildversion: 1.34

@@ -70,3 +70,5 @@ kubectl expose pod redis --port=6379 --name=redis-service --dry-run -o yaml
 # Este no usa pods labels como selectores, asume selectores como app=redis
 kubectl create service clusterip redis --tcp=6379:6379 --dry-run -o yaml
 
+# Agrego un label por linea de comandos
+kubectl run --generator=run-pod/v1 redis --image=redis:alpine -l tier=db
