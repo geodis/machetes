@@ -1,2 +1,54 @@
 Taints and tolerations
+-----------------------
 
+Son usados para setear restricciones sobre que PODS pueden
+ser scheduleados en un NODO.
+
+- taint a los nodos para repeler los pods
+-- taint: se setea en nodos
+- tolerations a los pods para tolerar los nodos
+-- tolerations: se setean en pods
+
+Si un pod tiene tolerancia a un nodo que tiene taint y los otros
+nodos no tienen taint, no esta garantizado que este pod caiga en el 
+nodo con taint. Puede caer en cualquiera porque tolerable a todos (los que tienen y no taint)
+
+kubectl taint nodes node-name key=value:taint-effect
+# ej
+kubectl taint nodes node1 app=blue:NoSchedule
+
+taint-effect: que le pasa a los PODS que no toleran ese taint
+- NoSchedule: no lo schedula en el nodo
+- PreferNoSchedule: trata de no schedulearlo en el nodo, pero no lo garantiza
+- NoExecute: nuevos pods no van a ser scheduleados en el nodo, y los
+existentes seran desalojados si no toleran el taint. Estos pods pudieron
+estar scheduleados antes que se aplicara el taint
+
+
+Tolerations
+-----------
+# ej
+kubectl taint nodes node1 app=blue:NoSchedule
+
+[pod-definition.yml]
+apiVersion: 
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx
+  # Por alguna razon es obligatorio entre ""
+  tolerations:
+    - key: "app"
+      operator: "Equal"
+      value: "blue"
+      effect: "NoSchedule"
+
+
+Master Node: el scheduler no schedulea pods en estos nodos porque se
+le auto setea un taint por defecto que no acepta pods. Se puede
+modificar a mano, pero es una mala practica
+
+kubectl describe node kubemaster | grep Taint
