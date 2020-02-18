@@ -8,3 +8,7 @@ spec:
   ports:
     - targetPort: 80    # puerto del back-end
       port: 80          # puerto del service
+
+    selector:
+      app: myapp
+      type: back-end
