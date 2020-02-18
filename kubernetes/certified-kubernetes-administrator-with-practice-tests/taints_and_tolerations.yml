@@ -52,3 +52,86 @@ le auto setea un taint por defecto que no acepta pods. Se puede
 modificar a mano, pero es una mala practica
 
 kubectl describe node kubemaster | grep Taint
+
+# Remove the taint on master, which currently has the taint effect of NoSchedule
+kubectl taint nodes master node-role.kubernetes.io/master:NoSchedule-'
+
+
+Node selector
+-------------
+
+apiVersion:
+kind: Pod
+metadata:
+  name: myapp-pod
+spec:
+  containers:
+    - name: data-processor
+      image: data-processor
+  
+  nodeSelector:
+    # Son labels que tambien asigno en los nodos
+    # asi el POD sabe en que server meterse.
+    size: Large
+
+EJ: kubectl label nodes node1 size=Large
+# Setear el label al nodo
+kubectl label nodes <node-name> <label-key>=<label-value>
+
+
+Limites: Si tuviera que cumplir estas restricciones
+con selector no alcanza, Para eso estan las afinidades
+No se pueden proveer expresiones avanzadas
+
+- Large OR Medium
+- NOT small
+
+
+Node affinity
+-------------
+
+Limita el posicionamiento de PODs en Nodos especificos
+cuando los pods son creados
+
+Si no machea la expresion en ningun nodo?
+Node Affinity Type:
+
+Define el comportamiento del scheduler respecto al node affinity
+y los estados en el ciclo de vida del pod.
+
+POSIBLES:
+  # 
+  requiredDuringSchedulingIgnoredDuringExecution
+  # 
+  preferredDuringSchedulingIgnoredDuringExecution
+
+Planeados:
+requiredDuringSchedulingRequiredDuringExecution
+
+  
+# Por nodeSelector
+nodeSelector:
+  size: Large
+
+# Por affinity
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+          # El pod va a ser ubicado en un nodo cuyo
+          # label "size" contenga alguno de los valores
+          - key: size
+            operator: In
+            values:
+              - Large
+              - Medium
+
+          # OTROS ejemplos
+          - key: size
+            operator: NotIn
+            values:
+              - Small
+          # ----------------
+          - key: size
+            operator: Exists
