@@ -1,0 +1,73 @@
+El scheduler tiene en cuenta los recursos (cpu, ram, disco) que consume
+el POD y los disponibles en el NODO. SI el nodo no tiene
+suficientes recursos, evita meter el POD ahi.
+
+Si no entra en ningun NODO, entonces queda Pending
+(ej de Pending: Insufficient cpu)
+
+Default (resoruce requests):
+  cpu: 0.5
+  mem: 256Mi
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: simple-webapp-color
+  labels:
+    name: simple-webapp-color
+spec:
+  containers:
+    - name: simple-webapp-color
+      image: simple-webapp-color
+      ports:
+        - containerPort: 8080
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: 1
+
+
+Resource - CPU:
+---------------
+
+0.1cpu == 100m CPU  -- m -> milli. Minimo se puede setear 1m
+
+1 CPU == 1 AWS vCPU
+1 CPU == 1 GCP Core
+1 CPU == 1 Azure Core
+1 CPU == 1 Hyperthread
+
+Resources - Memory
+------------------
+1G(Gigabyte) = 1.000.000.000 bytes
+1Gi(Gibibyte) = 1.073.741.824 bytes
+
+1K = 1000 bytes
+1Ki = 1024 bytes
+
+
+containers - limites
+---------------------
+Los containers pueden crecer en recursos si no los especifico.
+Por defecto asigna hasta 1vCPU si no lo especifico.
+Por defecto asigna 512Mi por container
+
+requests y limits son seteados por cada container
+spec:
+  containers:
+    - name: simple-webapp-color
+      image: simple-webapp-color
+      ports:
+        - containerPort: 8080
+      resources:
+        requests:
+          memory: "1Gi"
+          cpu: 1
+        limits:
+          memory: "2Gi"
+          cpu: 2
+
+El cpu es truncado si el POD trata de pedir mas que su limite (throttle)
+pero la memoria puede ser superada. Si el POD trata de consumir
+mas memoria que su limite CONSTANTEMENTE, entonces es TERMINADO.

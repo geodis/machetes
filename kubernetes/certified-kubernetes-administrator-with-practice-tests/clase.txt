@@ -55,7 +55,7 @@ kubectl run nginx --image=nginx --generator=run-pod/v1
 # Generar solamente el YAML
 kubectl run --generator=run-pod/v1 nginx --image=nginx --dry-run -o yaml
 kubectl create deployment --image=nginx nginx --dry-run -o yaml
-
+kubectl run blue --image=nginx --replicas=6            
 
 # What is the image used to create the new pods?
 kubectl describe pod newpod-<id>  

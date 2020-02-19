@@ -11,7 +11,8 @@ ser scheduleados en un NODO.
 
 Si un pod tiene tolerancia a un nodo que tiene taint y los otros
 nodos no tienen taint, no esta garantizado que este pod caiga en el 
-nodo con taint. Puede caer en cualquiera porque tolerable a todos (los que tienen y no taint)
+nodo con taint. Puede caer en cualquiera porque tolerable a todos 
+(los que tienen y no taint)
 
 kubectl taint nodes node-name key=value:taint-effect
 # ej
@@ -80,11 +81,11 @@ kubectl label nodes <node-name> <label-key>=<label-value>
 
 
 Limites: Si tuviera que cumplir estas restricciones
+- Large OR Medium
+- NOT small
 con selector no alcanza, Para eso estan las afinidades
 No se pueden proveer expresiones avanzadas
 
-- Large OR Medium
-- NOT small
 
 
 Node affinity
@@ -104,6 +105,14 @@ POSIBLES:
   requiredDuringSchedulingIgnoredDuringExecution
   # 
   preferredDuringSchedulingIgnoredDuringExecution
+
+
+DuringScheduling: El pod no existe aun. Si el tipo es
+required y no hay nodo que matchee el tag, el pod no cae en ninguno.
+Este tipo se usa en casos donde la ubicacion del pod es crucial.
+
+preferred: Si no se encuentra nodo, el scheduler ignora la regla de affinity
+y ubica el POD en cualquier NODO disponible
 
 Planeados:
 requiredDuringSchedulingRequiredDuringExecution
@@ -135,3 +144,24 @@ affinity:
           # ----------------
           - key: size
             operator: Exists
+
+
+
+
+Ejemplo:
+  pod-rojo
+  pod-verde
+  pod-azul
+  pod1
+  pod2
+
+  nodo-verde
+  nodo-rojo 
+  nodo-azul
+  nodoA
+  nodoB
+
+Quiero que cada nodo de color caiga en el server de color y nada mas.
+- taint a cada nodo de color (nodo-rojo --> taint rojo, etc)
+- toleration a cada pod a entrar en su respectivo color
+- nodeSelector para escoger el nodo
