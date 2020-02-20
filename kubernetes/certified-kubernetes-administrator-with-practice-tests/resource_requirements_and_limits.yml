@@ -9,6 +9,34 @@ Default (resoruce requests):
   cpu: 0.5
   mem: 256Mi
 
+Para que el POD use estos valores por defecto, primero
+debimos haber seteado estos valores para request y limitarlos
+creando un LimitRange en el namespace
+
+    # apiVersion: v1
+    # kind: LimitRange
+    # metadata:
+    #   name: mem-limit-range
+    # spec:
+    #   limits:
+    #   - default:
+    #       memory: 512Mi
+    #     defaultRequest:
+    #       memory: 256Mi
+    #     type: Container
+
+    # apiVersion: v1
+    # kind: LimitRange
+    # metadata:
+    #   name: cpu-limit-range
+    # spec:
+    #   limits:
+    #   - default:
+    #       cpu: 1
+    #     defaultRequest:
+    #       cpu: 0.5
+    #     type: Container
+
 
 apiVersion: v1
 kind: Pod
@@ -71,3 +99,67 @@ spec:
 El cpu es truncado si el POD trata de pedir mas que su limite (throttle)
 pero la memoria puede ser superada. Si el POD trata de consumir
 mas memoria que su limite CONSTANTEMENTE, entonces es TERMINADO.
+
+
+status 'OOMKilled' indicates that the pod ran out of memory
+
+DaemonSets
+----------
+
+Ayuda al deploy de instancias multiples de pods pero instancia
+1 copia del pod en cada NODO. Si se agrega un nodo al cluster, 
+una replica es automaticamente instanciada y cuando el nodo es 
+removido, el pod es automaticamente eliminado
+
+Casos de Uso:
+-------------
+
+- Monitoring Solution
+- Logs Viewer
+
+En ambos casos necesito 1 pod en c/nodo que quiero monitorear o loggear
+
+[daemon-set-definition.yaml]
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: monitoring-daemon
+spec:
+  selector:
+    matchLabels:
+      app: monitoring-agent
+    template:
+      metadata:
+        labels:
+          app: monitoring-agent
+      spec:
+        containers:
+          - name: monitoring-agent
+            image: monitoring-agent
+
+kubectl create -f daemon-set-definition.yaml
+kubectl get daemonsets
+
+Ubica los pods en cada nodo usando nodeAffinity
+
+
+Static Pods
+-----------
+
+La idea es que kubelet tiene harcodeado en parte de su archivo
+de inicio del servicio un path de directorio donde busca yml
+y crea y mantiene pods. Se llaman Pods estaticos. Tambien
+crea pods a pedido de kube-apiserver, estas son sus 2 habilidades.
+Si el nodo es parte de un cluster, le avisa a la api de sus pods
+estaticos. Puedo ver estos pods static con kubectl get pod, pero 
+no los puedo editar o borrar como un pod clasico. Se borran 
+si borro el yml del path que lee el kubelet
+Los nombres de estos pods se le auto apendea el nombre del nodo.
+Ej: static-web-node01
+
+Caso de uso:
+  Por ejemplo para generar masters. Es decir, para instalar los
+  pods de apiserver, controller-manager, etcd.
+  Asi es como kube-admin genera un cluster
+

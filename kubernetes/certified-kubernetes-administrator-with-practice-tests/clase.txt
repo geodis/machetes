@@ -142,3 +142,45 @@ cambia el kind: Deployment
 kubectl create -f deployment-definition.yml
 kubectl get deployments
 >>>>>>> 34bdd3d8afc54adb2221bc34f0ca3ff71848451b
+
+
+# Notas sobre Edicion de PODs
+# ===========================
+
+No se puede editar specificaciones
+de un POD existente, aparte de las siguientes:
+
+- spec.containers[*].image
+- spec.initContainers[*].image
+- spec.activeDeadlineSeconds
+- spec.tolerations
+
+Por ejemplo, no se puede editar:
+- variables de environment
+- service accounts
+- resource limits
+
+Alternativas:
+
+1. kubectl edit pod <pod-name>
+
+abre el vim y cuando lo guardo se aplica. Salvo que sea un 
+atributo de estos no modificables, al salvarlo dara error
+y sera guardado en un tmp. Entonces solo se puede borrar
+el pod y crearlo con kubectl y el yml temporal.
+
+2. Segunda opcion dumpear el xml del pod que esta corriendo
+
+kubectl get pod pod-name -o yaml > yml
+
+borrar y aplicar
+
+# Notas sobre Edicion de Deployments
+# ==================================
+
+Se puede editar cualquier campo/propiedad del template
+de pod, ya que el pod template es hijo de la especificacion
+del deploy. Con cada cambio el deploy automaticamente borra y
+recrea los pods con los cambios
+
+kubectl edit deployment my-deployment
