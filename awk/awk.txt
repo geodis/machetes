@@ -1,0 +1,43 @@
+sintaxis
+
+awk options program file
+
+# Especificar el separador de archivos
+-F fs 
+
+# file: programa awk
+-f file 
+
+# declarar variable
+-v var=value
+
+Para definir un script awk utilizamos llaves rodeadas por unas comillas simples
+
+awk '{print "hola mundo"}'
+
+Si escribes cualquier cosa, retornara la misma cadena de bienvenida que nosotros proporcionamos.
+fin: ctrl + d
+
+# Procesamiento de archivos
+# =========================
+
+$0 para toda la línea.
+$1 para el primer campo.
+$2 para el segundo campo.
+$n para el campo enésimo campo.
+
+# imprimo 1er campo con delimitador ":"
+$ awk -F: '{print $1}' /etc/passwd
+
+
+
+
+
+
+
+
+
+
+
+
+
