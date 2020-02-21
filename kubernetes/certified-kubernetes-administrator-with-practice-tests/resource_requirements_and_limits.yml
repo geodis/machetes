@@ -163,3 +163,107 @@ Caso de uso:
   pods de apiserver, controller-manager, etcd.
   Asi es como kube-admin genera un cluster
 
+
+# What is the path of the directory holding the static pod definition files?
+Run the command ps -aux | grep kubelet and identify the config file - 
+--config=/var/lib/kubelet/config.yaml. 
+Then checkin the config file for staticPdPath.
+
+staticPodPath: /etc/kubernetes/manifests
+
+# Generar un YML de POD Static que ejecute un programa
+kubectl run --restart=Never --image=busybox static-busybox --dry-run -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: static-busybox
+  name: static-busybox
+spec:
+  containers:
+  - command:
+    - sleep
+    - "1000"
+    image: busybox
+    name: static-busybox
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}
+
+
+# Multiple Scheduler
+# -------------------
+
+Puedo crear mis propios schedulers segun mis criterios de en 
+nodos cargar que pods. En los pods asigno que scheduler le toca.
+
+--scheduler-name=default-scheduler (es el nombre del default)
+
+my-custom-scheduler.service
+ExecStart=/usr/local/bin/kube-scheduler \\
+  --config=/etc/kubernetes/config/kube-scheduler.yaml \\
+  --scheduler-name=my-custom-scheduler  
+
+
+/etc/kubernetes/manifests/kube-scheduler.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-scheduler
+  namespace: kube-system
+spec:
+  containers:
+    - command:
+      - kube-scheduler
+      - --address=127.0.0.1
+      - --kubeconfig=/etc/kubernetes/scheduler.conf
+      - --leader-elect=true 
+      # si agrego esta linea, lo clono con mi propio nombre
+      - --scheduler-name=my-custom-scheduler 
+      image: k8s.gcr.io/kube-scheduler-amd64:v1.11.3
+      name: kube-scheduler
+
+
+--leader-elect=true 
+Se usa cuando tengo multiples copias del scheduler corriendo
+en diferentes master nodes. Si multiples copias del mismo
+scheduler estan corriendo en diferentes nodos. Solo una
+puede estar activa a la vez. 
+Esta opcion ayuda a elegir cual va a ser el leader scheduler. 
+
+Si quiero tener multiples schedulers a la vez, entonces
+--leader-elect=false.
+Si quiero tener otros schedulers, diferenciados del default
+entonces uso:
+--lock-object-name=my-custom-scheduler
+
+
+Con kubectl get pods --namespace=kube-system puedo ver los schedulers
+
+Configuro el pod para que use un scheduler en particular
+--------------------------------------------------------
+
+pod-definition.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+
+  schedulerName: my-custom-scheduler
+
+
+Como veo que scheduler lo tomo??
+
+#  Lista todos los eventos en el current namespace
+kubectl get events
+# Para ver los logs del scheduler
+kubectl logs my-custom-scheduler --namespace=kube-system
