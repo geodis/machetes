@@ -58,7 +58,7 @@ docker image prune -a
 docker system prune
 docker system df
 
-Lastly, realize that if you're using Docker Toolbox, 
+Lastly, realize that if you re using Docker Toolbox, 
 the Linux VM won't auto-shrink. You'll need to delete 
 it and re-create (make sure anything in docker 
 containers or volumes are backed up). You can recreate 
