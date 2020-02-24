@@ -171,6 +171,19 @@ Then checkin the config file for staticPdPath.
 
 staticPodPath: /etc/kubernetes/manifests
 
+Para entender donde estan estos archivos,debo ir a /etc/systemd/system/ y ahi tienen que estar los archivos de como arranca el 
+servicio kubelet y kubeadm. Ahi estan los parametros de configuracion que me llevan a los paths de donde encuentro los yml
+de pods estaticos
+
+Otra Forma
+----------
+$ ps -ef | grep kubelet | grep config
+--> --config=/var/lib/kubelet/config.yaml 
+$ grep staticPodPath /var/lib/kubelet/config.yaml
+# (aca estan todos los control-plane components)
+--> staticPodPath: /etc/kubernetes/manifests 
+
+
 # Generar un YML de POD Static que ejecute un programa
 kubectl run --restart=Never --image=busybox static-busybox --dry-run -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
 

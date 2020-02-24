@@ -1,0 +1,52 @@
+## Metricas
+# -----------
+
+Node Level Metrics:
+  - Numero de nodos en  un cluster
+  -- cuantos estan healty
+  - Performance metrics
+  -- Uso de CPU
+  -- Uso de Memoria
+  -- Uso de Disco
+
+Pod Level Metrics:
+  - Cantidad de PODS
+  - Performance metrics de c/POD
+  -- Uso de CPU
+  -- Uso de Memoria
+  -- Uso de Disco
+
+Metrics Server: 
+Se puede tener un server de metricas por cluster
+Es solo en memoria que guarda las metricas, no a disco.
+
+
+  - Prometheus
+  - Elastic Stack
+  - DataDog
+  - Dynatrace
+
+Kubelet: Contiene un sub-componente cAdvisor (Container Advisor) 
+responsable de traer metricas de performance de los PODS y exponerlas
+a traves de kubelet API hacia el metrics server
+
+$ minikube addons enable metrics-server
+
+O si no:
+git clone https://github.com/kubernetes-incubator/metrics-server.git
+kubectl create -f deploy/1.8+/
+
+Como ver las metricas
+--------------------
+kubectl top node
+kubectl top pod
+
+
+## Logs
+# -------
+
+kubectl create -f event-simulator.yaml
+# -f como en tail. 
+# kubectl logs -f pod container
+kubectl logs -f event-simulator-pod
+ 
