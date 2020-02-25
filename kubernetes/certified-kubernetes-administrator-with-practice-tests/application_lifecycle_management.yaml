@@ -1,0 +1,113 @@
+## Rollouts and Versioning
+# ------------------------
+
+Los rollout son triggereados: y una version de Deployment es creada
+Cuando la app es upgradeada, significando que una nueva version de 
+contenedor es updateada a una nueva, un rollout es triggereado 
+y una nueva version de deployment es creada.
+
+
+kubectl rollout status deployment/myapp-deployment
+kubectl rollout history deployment/myapp-deployment
+
+# Deploy Strategy
+# ----------------
+
+Hay 2 formas:
+
+Recreate strategy
+-----------------
+1. primero destruir todas las instancias de apps de una version y luego 
+crear todas las instancias de app de la nueva version.
+Problema: es que hay un momento en que no hay servicio
+
+RollingUpdate (default)
+-----------------------
+2. Bajamos y subimos de a una app.
+
+Si hago kubectl describe deployment my-deploy
+En la parte "StrategyType" esta como fue aplicado el cambio y puedo ver
+en el log/historial del final como se bajaron y subieron los pods
+
+
+# Apply
+# -----
+
+# Si especifico cambios en el yml asi los aplico y puedo versionar el file
+kubectl apply -f deployment-definition.yml
+
+# Lo puedo hacer a mano en consola y no versiono nada
+kubectl set image deployment/myapp-deployment nginx=nginx:1.9.1
+
+
+## Rolling Updates & Rollbacks
+# --------------------
+
+Cuando tengo un replica set con cierta cantidad de pods y hago un
+upgrade o rollback, se crea otro replica set Y en este se va creando 
+un pod y bajando un pod en el RS preexistente hasta que el RS preexistente
+no tiene mas PODs y quedaron todos updateados en la nueva RS.
+
+# Para deshacer un cambio
+# -----------------------
+Destruye todos los pods en la nueva RS y reestablece los viejos pods en la
+anterior RS
+
+kubectl rollout undo deployment/my-deploy
+
+# kubectl run
+# -----------
+
+kubectl run nginx --image=nginx
+
+Crea un deployment, no solo un pod, sin usar un file. El RS y POD requeridos
+son automaticamente creados
+
+
+## Resumen de comandos
+# ---------------------
+
+create:   kubectl create -f deployment-definition.yml
+
+get:      kubectl get deployments
+
+update:   kubectl apply -f deployment-definition.yml
+          kubectl set image deployment my-deploy nginx=nginx:1.9.1
+
+status:   kubectl rollout status deployment my-deploy
+          kubectl rollout history deployment my-deploy
+
+rollback: kubectl rollout undo deployment my-deploy
+
+
+## Comandos y argumentos en un POD definition file
+# ------------------------------------------------
+
+
+docker run ubuntu
+docker ps
+docker ps -a
+docker build -t ubuntu-sleeper .
+
+CMD "sleep 5"
+
+# Si llamo al contenedor con paramentros, entonces TODO el comando CMD
+# Es reemplazaco completamente
+# docker run ubuntu-sleeper echo hello
+CMD ["sleep","5"]
+--> echo hello
+
+# Si llamo al contenedor con paramentros, entonces los parametros son
+# appendeados al ENTRYPOINT
+# docker run ubuntu-sleeper 10
+ENTRYPOINT ["sleep"]
+--> sleep 10
+# Si lo llamo sin parametros y el parametro es OBLIGATORIO, entonces
+# va a dar error. Entonces especifico un default
+
+ENTRYPOINT ["sleep"]
+CMD["5"]
+
+# Si quiero overridear el entrypoint
+docker run --entrypoint sleep2.0 ubuntu-sleeper 10
+comando resultado: sleep2.0 10
