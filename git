@@ -1,0 +1,47 @@
+git config --global user.name "pepe"
+git config --global user.email "pepe@pipi.com"
+git config --list
+
+git init .
+git status
+# agrego todos
+git add -A
+#  quito file del add
+git rm --cached <file>
+git commit -m "mensaje"
+# historial de commits
+git log
+# clono un repo
+git clone
+git diff
+# del repo
+git pull origin master
+git push origin master
+
+# workflow
+# ----------
+
+# branches
+
+git branch mi_nueva_feature
+git checkout mi_nueva_feature
+# listar branches
+git branch
+git branch -a
+
+git push -u origin mi_nueva_feature
+
+# uno branch con master
+git checkout master
+git pull
+git branch --merged
+git merfe mi_nueva_feature
+git push origin master
+
+# Borro branch que ya no uso
+git push origin --delete mi_nueva_feature
+# borro en el local
+git branch -d mi_nueva_feature
+
+
+

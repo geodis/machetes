@@ -106,8 +106,130 @@ ENTRYPOINT ["sleep"]
 # va a dar error. Entonces especifico un default
 
 ENTRYPOINT ["sleep"]
-CMD["5"]
-
+CMD["5"
+]
 # Si quiero overridear el entrypoint
 docker run --entrypoint sleep2.0 ubuntu-sleeper 10
 comando resultado: sleep2.0 10
+
+## Como le paso argumentos a un POD?
+# ----------------------------------
+
+docker run --name ubuntu-sleeper ubuntu-sleeper 10
+
+pod-definition.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-sleeper-pod
+
+spec:
+  containers:
+    - name: ubuntu-sleeper
+      image: ubuntu-sleeper
+      # Si uso el command: hace override del ENTRYPOINT del Dockerfile
+      command: ["sleep2.0"]
+      # cualquier cosa que sea apendeada en el docker run va en args
+      # el args hace override al CMD: ["5"] de la imagen del dockerfile
+      args: ["10"]
+
+
+Dockerfile           -----> k8s pod yml
+ENTRYPOINT ["sleep"] -----> command: ["sleep2.0"]
+CMD ["5"]            -----> args: ["10"]
+
+## Environment Variable
+# ----------------------
+
+...
+spec:
+  containers:
+    - name: simple-webapp-color
+      image: simple-webapp-color
+      ports:
+        - containerPort: 8080
+      # env[]: esta propiedad pasa variables de env
+      env:
+        - name: APP_COLOR
+          value: "pink"
+        - name: APP_MODE
+          value: prod
+
+# equivale a 
+docker run -e APP_COLOR=pink simple-webapp-color
+
+# ENV Value Types
+# ---------------
+
+# Plain Key-Value
+env:
+  - name: APP_COLOR
+    value: pink
+
+# ConfigMap 
+# ----------
+
+## Imperativas
+#-------------
+# Forma 1
+# -------
+kubectl create configmap \
+  app-config --from-literal=APP_COLOR=blue \
+             --from-literal=APP_MODE=prod
+
+# Forma 2
+# -------
+kubectl create configmap \
+  app-config --from-file=app_config.properties
+
+## Declarativa
+# ------------
+
+config-map.yaml
+---------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_COLOR: blue
+  APP_MODE: prod
+
+--> kubectl create -f config-map.yaml
+--> kubectl get configmaps
+--> kubectl describe configmaps app-config
+
+En el POD:
+----------
+ENV
+----
+envFrom:
+  - configMapRef:
+    name: app-config
+
+Otra forma:
+-----------
+SINGLE ENV
+----------  
+env:
+  - name: APP_COLOR
+    valueFrom:
+      configMapKeyRef:
+        name: app-config
+        key: APP_COLOR
+
+Otra forma:
+-----------
+VOLUME
+----------  
+volumes:
+  - name: app-config-volume
+    configMap:
+      name: app-config
+
+# Secrets
+env:
+  - name: APP_COLOR
+    valueFrom:
+      secretKeyRef:
