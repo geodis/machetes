@@ -29,9 +29,69 @@ $n para el campo enésimo campo.
 # imprimo 1er campo con delimitador ":"
 $ awk -F: '{print $1}' /etc/passwd
 
+# Múltiples Comandos
+# ==================
+
+múltiples comandos, sepáralos con un símbolo de punto y coma
+$ echo "hola chris" | awk '{$2="mai"; print $0}'
 
 
+# Script Desde un Archivo
+# =======================
 
+mi_pgma --> {print $1 " home at "$6}
+
+$ awk -F: -f mi_pgma /etc/passwd
+
+# Pre procesamiento
+# =================
+
+Si necesitas crear un título o cabecera para tu resultado Puedes utilizar la palabra clave BEGIN 
+
+awk 'BEGIN {print "Cabecera"}
+{print $0}' myfile
+
+# Post Procesamiento Awk
+# ======================
+Para ejecutar un script después de procesar los datos, utiliza la palabra clave END:
+
+$ awk 'BEGIN {print "The File Contents:"}
+ 
+ {print $0}
+  
+  END {print "File footer"}' myfile
+
+# Variables Integradas
+# ====================
+
+
+FIELDWIDTHS Especifica el ancho del campo.
+RS          Especifica el separador de registros.
+FS          Especifica un separador de campos.
+OFS         Especifica un separador de Salidas. (default: " ")
+ORS         Especifica el separador de Salidas.
+ARGC        Retorna el número de parámetros pasados.
+ARGV        Retorna los parámetros de la línea de comandos.
+ENVIRON     Es un arreglo de las variables de ambiente del shell y sus respectivos valores.
+FILENAME    El nombre del archive que está siendo procesado por awk.
+NF          Cuenta los campos de la línea que está siendo procesada.
+NR          Retorna el total de registros procesados.
+FNR         Con esta variable puedes acceder al registro que está siendo procesado.
+IGNORECASE  Le dice al programa que ignore las diferencias entre mayúsculas y minúsculas.
+
+
+awk 'BEGIN{FS=":"; OFS="-"} {print $1,$6,$7}' /etc/passwd
+
+Supongamos que tenemos este contenido:
+
+1235.96521
+927-8.3652
+
+awk 'BEGIN{FIELDWIDTHS="3 4 4"}{print $1,$2,$3}' testfile
+
+-->
+123 5.96 521
+927 -8.3 652
 
 
 
