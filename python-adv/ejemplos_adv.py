@@ -148,3 +148,23 @@ dumpear librerias
 # Metaclases
 # ----------
 
+# Ver mas tarde porque no se usa casi
+
+# Decorators
+# ----------
+
+def func(f):
+	def wrapper():
+		print("start")
+		f()
+		print("end")
+
+	return wrapper
+
+def func2():
+	print("soy func2")
+
+
+x = func(func2)
+print(x)
+x()
