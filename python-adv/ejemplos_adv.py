@@ -90,7 +90,7 @@ class Person:
 
     def __mul__(self,x):
         if type(x) is not int:
-            raise Exception("Invalid argument, must be int")
+            raise Exception("Invalid nument, must be int")
 
         self.name = self.name * x
 
@@ -147,18 +147,18 @@ print(qu)
 """
 # =================================
 
-# *args, **kwargs
+# *ns, **kwns
 # ===============
 """# correct_function_definition.py
-def my_function(a, b, *args, **kwargs):
+def my_function(a, b, *ns, **kwns):
 	print(a)
 	print(b)
 
-	for i in args:
+	for i in ns:
 		print(i)
 
 
-	for k,v in kwargs.items():
+	for k,v in kwns.items():
 		print("key: " + k + " value: " + v)
 
 # # llamada
@@ -190,7 +190,7 @@ print(x)
 x()
 """
 
-# # Sobrecarga de nombre
+# # Sobrecna de nombre
 """
 func2 = func(func2)
 # Aca no estoy llamando a def func2, sino a func(func2) :-|
@@ -200,11 +200,11 @@ func2()
 
 """
 def func(f):
-	# Para aceptar O NO parametros de las funciones que paso por argumento
-	def wrapper(*args, **kwargs):
+	# Para aceptar O NO parametros de las funciones que paso por numento
+	def wrapper(*ns, **kwns):
 		print("start")
-		# Para aceptar O NO parametros de las funciones que paso por argumento
-		rv = f(*args, **kwargs)
+		# Para aceptar O NO parametros de las funciones que paso por numento
+		rv = f(*ns, **kwns)
 		print("end")
 		# Hago un return por si alguna f pasada por parametro devuelve algo
 		return rv
@@ -237,7 +237,7 @@ print(x)
 import time
 
 def timer(func):
-	def wrapper(*args, **kwargs):
+	def wrapper(*ns, **kwns):
 		start = time.time()
 		rv = func()
 		total = time.time() - start
@@ -261,3 +261,134 @@ test2()
 # Generators
 # ---------------
 
+# x = [i**2 for i in range(10000000000)]
+	
+# for el in x:
+# 	print("-")
+# 	print(el)
+
+"""
+class Gen:
+	def __init__(self, n):
+		super(Gen, self).__init__()
+		self.n = n
+		self.last = 0
+
+	def __next__(self):
+		print("__next__ %s %s" % (self.n, self.last))
+		return self.next()
+
+	def next(self):
+		print("next")
+		if self.last == self.n:
+			raise StopIteration()
+
+		rv = self.last ** 2
+		self.last += 1
+		return rv
+	
+g = Gen(100)
+
+while True:
+	try:
+		print(next(g))
+	except StopIteration:
+		break
+"""
+
+# # Ejemplo1
+# ----------
+"""
+def gen(n):
+	for i in range(n):
+		yield i**2
+
+g = gen(10)
+
+for a in g:
+	print('a %s ' % a)
+"""
+
+
+# # Ejemplo2
+# ----------
+"""
+def contador(max):
+    print("=Dentro de contador - empezando")
+    n=0
+    while n < max:
+        print(f"=Dentro de contador - viene yield con n={n}")
+        yield n +2
+        print("=Dentro de contador - retomando después de yield")
+        n=n+1
+    print("=Dentro de contador - terminando")
+
+print("Instanciando contador") 
+mycont = contador(3)
+print("Contador instanciado") 
+
+for i in mycont:
+    print(f"valor leido del iterador={i}") 
+print("Listo") 
+"""
+
+# Context Managers
+# ----------------
+"""
+file = open("file.txt","w")
+try:
+	file.write("hello")
+finally:
+	file.close()
+
+# Equivale a (con context manager)
+
+# Se encarga automaticamente de hacer finally: close
+with open("file.txt","w") as file:
+	file.write("hello")
+"""
+
+# Mi propio context manager
+# -------------------------
+"""
+class File:
+	def __init__(self, filename, method):
+		self.file = open(filename, method)
+
+	def __enter__(self):
+		print("Enter")
+		return self.file
+
+	def __exit__(self, type, value, traceback):
+		print(f"{type}, {value}, {traceback}")
+		print("Exit")
+		self.file.close()
+
+		if type == Exception:
+			return True
+
+with File("file.txt", "w") as f:
+	print("Middle")
+	f.write("hello")
+	raise Exception()
+	# raise FileExistsError()
+
+"""
+# Mi propio context manager - usando generators y un decorador
+# supuestamente es mejor el ejemplo de arriba porque es mas versatil
+# ------------------------------------------------------------
+
+from contextlib import contextmanager
+
+@contextmanager
+def file(filename, method):
+
+	print("enter")
+	file = open(filename, method)
+	yield file
+	file.close()
+	print("exit")
+
+with file("file.txt", "w") as f:
+	print("middle")
+	f.write("hello")
