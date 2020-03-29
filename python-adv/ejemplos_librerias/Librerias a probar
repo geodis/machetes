@@ -1,0 +1,44 @@
+Librerias a probar
+------------------
+Web
+----
+ + request
+ + twisted (game development)
+ - beatifulsoup (web scraping)
+ - selenium (automation website)
+
+DataSience
+----------
++ numpy
++ pandas (csv)
++ matplotlib
++ opencv
+
+MachineLearning AI
+------------------
++ Tensorflow
++ keras - api para tensorflow para novatos
++ pytorch
++ scikit-lern
+
+
+GUI
+------
++ kivy (multiplatafroma)
++ pyqt5 (el mejor) + spyder ide
++ tkinter
+
+
++ pygame
+
+
+Kafka data pipelining 
+SQLAlchemy
+
+Proyectos
+---------
+* algoritmos
+- pathfinder
+- stable matching
+- 
+unity

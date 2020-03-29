@@ -1,0 +1,7 @@
+tiapiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  APP_COLOR: darkblue
+  APP_MODE: prod

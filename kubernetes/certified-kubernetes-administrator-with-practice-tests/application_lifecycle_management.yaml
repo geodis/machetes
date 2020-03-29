@@ -179,8 +179,8 @@ kubectl create configmap \
              --from-literal=APP_MODE=prod
 
 # Forma 2
-# -------
-kubectl create configmap \
+# ------
+-kubectl create configmap \
   app-config --from-file=app_config.properties
 
 ## Declarativa
@@ -204,9 +204,13 @@ En el POD:
 ----------
 ENV
 ----
-envFrom:
-  - configMapRef:
-    name: app-config
+spec:
+  ....
+  containers:
+  ....
+    envFrom:
+      - configMapRef:
+        name: app-config
 
 Otra forma:
 -----------
@@ -229,7 +233,120 @@ volumes:
       name: app-config
 
 # Secrets
+# ----------
+
+# Modo imperativo
+# ---------------
+kubectl create secret generic \
+  <secret-name> --from-literal=<key>=<value>
+
+kubectl create secret generic \
+  <secret-name> --from-file=file
+
+kubectl create secret generic \
+  app-secret --from-literal=DB_Host=mysql
+             --from-literal=DB_User=mysql
+             --from-literal=DB_Password=mysql
+
+# Modo declarativo
+# ----------------
+kubectl create -f 
+
 env:
   - name: APP_COLOR
     valueFrom:
       secretKeyRef:
+
+Las claves se hashean con echo -n "mysql" | base64
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secret
+
+data:
+  DB_Host: mysql
+  DB_User: root
+  DB_Password: paswrd
+
+
+spec:
+  containers:
+    envFrom:
+      - secretRef:
+        name: app-config
+
+    # single env
+    env:
+      - name: DB_Password
+        valueFrom:
+          secretKeyRef:
+            name: app-secret
+            key: DB_Password
+    # volume
+    volumes:
+    - name: app-secret-volume
+      secret:
+        secretName: app-secret
+
+# --------------------------------------------------------------
+# Multi Containers PODs
+# --------------------------------------------------------------
+
+# Init Containers
+# https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+# --------------------------------------------------------------
+
+# An initContainer is configured in a pod like all other containers, except that it is specified 
+# inside a initContainers section,  like this:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox
+    command: ['sh', '-c', 'git clone <some-repository-that-will-be-used-by-application> ; done;']
+
+# When a POD is first created the initContainer is run, and the process in the initContainer must 
+# run to a completion before the real container hosting the application starts. 
+# You can configure multiple such initContainers as well
+# In that case each init container is run one at a time in sequential order.
+# If any of the initContainers fail to complete, Kubernetes restarts the Pod repeatedly until 
+# the Init Container succeeds.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox:1.28
+    command: ['sh', '-c', 'until nslookup myservice; do echo waiting for myservice; sleep 2; done;']
+  - name: init-mydb
+    image: busybox:1.28
+    command: ['sh', '-c', 'until nslookup mydb; do echo waiting for mydb; sleep 2; done;']
+
+
+
+# --------------------------------------------------------------
+# Self Healing
+# --------------------------------------------------------------
+# TODO: LEER ESTO EN OTRO LADO
+# Kubernetes provides additional support to check the health of applications running within PODs 
+# and take necessary actions through Liveness and Readiness Probes
