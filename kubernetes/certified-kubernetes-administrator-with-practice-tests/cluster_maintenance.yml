@@ -1,0 +1,186 @@
+# Drain
+# ----------
+# Los pods son terminados "gracefully" en node-1 y recreados en otro.
+# Momentaneamente node-1 es marcado como un-schedulable hasta que saque la restriccion
+# drain.
+
+kubectl drain node-1 --ignore-daemonsets
+
+# Cuando el nodo-1 vuelve online, le quito el drain con uncordon
+kubect uncordon node-1
+
+# Marca el nodo como no-schedule, pero no termina ni mueve los pods
+kubectl cordon node-2
+
+# Cluster Upgrade
+# ---------------
+
+1. Upgrade Master
+# mientras este se upgradea queda offline. Los workers siguen laburando
+
+2. Upgrade Workers
+# Strategy 1. Upgradear todos a la vez pero tengo downtime
+# Strategy 2. Upgradear un nodo a la vez. Los PODS se mueven al resto de los nodos
+# Strategy 3. Agregar nuevos nodos con la version correcta directamente al cluster
+
+kubeadm upgrade plan
+# de 1.11 a 1.12
+# ---------------
+apt-get upgrade -y kubeadm=1.12.0-00
+kubeadm upgrade apply v1.12.0
+
+kubectl get nodes
+
+NAME      STATUS   ROLES    AGE   VERSION
+master    Ready    master   11d   v1.11.3
+node-01   Ready    <none>   11d   v1.11.3
+
+VERSION: se refiere al kubelet y no a la version de la api
+# 
+apt-get upgrade -y kubelet=1.12.0-00
+systemctl restart kubelet
+
+kubectl get nodes
+
+NAME   STATUS   ROLES    AGE   VERSION
+master    Ready    master   11d   v1.12.0
+node-01   Ready    <none>   11d   v1.11.3
+
+# UPGRADE - Worker NODES:
+# -----------------------
+
+# En el master
+1. kubectl drain node-01
+# En el NODO-01 (ssh)
+2. apt-get upgrade -y kubeadm=1.12.0-00
+3. apt-get upgrade -y kubelet=1.12.0-00
+4. kubeadm upgrade node config --kubelet-version v1.12.0
+5. systemctl restart kubelet
+# En el master
+6. kubectl uncordon node-01
+
+
+Run the commands: 
+  apt install kubeadm=1.17.0-00 
+  and then 
+  apt install kubelet=1.17.0-00 
+  and then 
+  kubeadm upgrade node config --kubelet-version $(kubelet --version | cut -d ' ' -f 2)
+
+
+# Backup and Restore Methods
+# --------------------------
+
+Que backupear:
+
+la idea es versionar todos los archivos, pero en el caso que se hubiera 
+hecho algun servicio en ram de manera declarativa/linea de comandos, 
+hay una manera de consultar kube-apiserver para dumpear todas las config
+de todos los objetos creados.
+
+kubect get all --all-namespaces -o yaml > all-deploy-services.yml
+
+# VELERO: app para backup
+
+# ETCD
+
+# backupear el etcd server.
+# En el archivo del servicio (sysctl): etcd.all-deploy-service
+# la entrada: --data-dir=/var/lib/etcd 
+# Este es el directorio que habria que backupear del ETCD
+
+# primero debo setear la version:
+export ETCDCTL_API=3
+etcdctl version
+
+# ETCD: Viene tambien con un sistema de snapshots
+etcdctl snapshot save snapshot.db
+
+# Tambien se deben dumpear los certificados
+etcdctl snapshot save snapshot.db \
+--endpoints=https://127.0.0.1:2379 \
+--cacert=/etc/etcd/ca.crt \
+--cert=/etc/etcd/etcd-server.crt \
+--key=/etc/etcd/etcd-server.key
+
+# Primero puedo chequear si losc certificados corresponden al server
+# El  resultado es info y nombre del cluster y miembros
+etcdctl member list \
+--endpoints=https://127.0.0.1:2379 \
+--cacert=/etc/etcd/ca.crt \
+--cert=/etc/etcd/etcd-server.crt \
+--key=/etc/etcd/etcd-server.key
+# 
+# etcdctl member list --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key
+
+# status del backup
+etcdctl snapshot status snapshot.db
+
+# Restaurar el cluster ETCD
+# 1. parar el servicio
+service kube-apiserver stop
+# 2. restore
+etcdctl snapshot restore snapshot.db \
+  --data-dir /var/lib/etcd-from-backup \
+  --initial-cluster master-1=https://ip:1234,master-2=https://ip:1234 \
+  --initial-cluster-token etcd-cluster-1 \
+  --initial-advertise-peer-urls https://${INTERNAL_IP}:12345
+# 3. Por seguridad etcd crea un nuevo token para que los nodos
+# no se asocien solos al "restore" del cluster, por si quisiera
+# hacer un cluster de testing clonado del original. Entonces
+# al etcd.service le tengo que setear el nuevo token (resultado del
+# comando anterior) y el path de datos: /var/lib/etcd-from-backup
+
+# etcd.service
+--initial-cluster-token etcd-cluster-1
+--data-dir /var/lib/etcd-from-backup
+# 4. Iniciar el servicio
+# cambio el etcd.service por eso se recarca el sysctl
+systemctl daemon-reload
+service etcd restart
+service kube-apiserver start
+
+# Since our ETCD database is TLS-Enabled, 
+# the following options are mandatory:
+#
+# verify certificates of TLS-enabled secure servers using this CA bundle
+# --cacert  
+#
+# identify secure client using this TLS certificate file
+# --cert    
+#
+# This is the default as ETCD is running on master node and exposed on localhost 2379.
+# --endpoints=[127.0.0.1:2379]  
+#
+# identify secure client using this TLS key file
+# --key   
+
+Restore:
+etcdctl 
+
+etcdctl snapshot restore /tmp/snapshot-pre-boot.db --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key --endpoints=127.0.0.1:2379 --data-dir=/var/lib/etcd-from-backup --initial-cluster="master=https://127.0.0.1:2380" --name=master --initial-advertise-peer-urls="https://127.0.0.1:2380" --initial-cluster-token="etcd-cluster-1"
+# nombre del miembro, sacado del comando etcdctl member list
+# se usa cuando estamos recuperando un cluster desde un backup
+# Crea un id cluster unico. Evita clusters duplicados. Le pongo un nuevo
+# nombre unico
+
+
+# Luego
+ls /var/lib/etcd-from-backup/
+--> member
+
+# Necesito modificar el yml del pod del etcd
+cd /etc/kubernetes/manifests/
+vim etcd.yaml
+# 1. Aca tengo que cambiar los paths de --data-dir a /var/lib/etcd-from-backup/
+# 2. Agrego completo --initial-cluster-token=etcd-cluster-1
+# 3. en el mountPath tengo que cambiar por /var/lib/etcd-from-backup/
+# 4. en el hostPath tengo que cambiar por /var/lib/etcd-from-backup/
+
+# En cuanto termino de editar, el POD deberia ser recreado
+docker ps -a | grep etcd
+
+# Para chequear que todo quedo OK, corro de nuevo el member list
+etcdctl member list --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key
+# Chequeo si volvieron online los permisos
+kubectl get pods,svc,deployments
