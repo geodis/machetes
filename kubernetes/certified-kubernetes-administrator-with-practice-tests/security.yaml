@@ -376,3 +376,97 @@ Encargado de los certificados
 Modulos:
   CSR-APPROVING
   CSR-SIGNING
+
+# ------------------------
+# KubeConfig
+# ------------------------
+
+# kubectl get pods
+# ----------------
+curl https://my-kube:6443/api/v1/pods \
+--key admin.key
+--cert admin.crt
+--cacert ca.crt
+
+# Ejemplo de mi minikube
+# ----------------------
+curl https://192.168.99.100:8443/api/v1/pods \
+--key /home/$USER/.minikube/client.key \
+--cert /home/$USER/.minikube/client.crt \
+--cacert .minikube/ca.crt
+# ===
+kubectl get pods
+--server https://192.168.99.100:8443
+--client-key /home/$USER/.minikube/client.key
+--client-certificate /home/$USER/.minikube/client.crt
+--certificate-authority .minikube/ca.crt
+
+# Esto es incomodo, entonces creo un archivo:
+# config
+--server https://192.168.99.100:8443
+--client-key /home/$USER/.minikube/client.key
+--client-certificate /home/$USER/.minikube/client.crt
+--certificate-authority .minikube/ca.crt
+
+# Pod defecto se busca el archivo 'config' dentro 
+# de la carpeta .kube en el home del user que ejecuta
+kubectl get pods --kubeconfig config
+# es lo mismo que
+kubectl get pods
+
+# KubeConfig File
+$HOME/.kube/config
+
+# Formato:
+3 secciones: 
+  - Clusters: los clustes de k8s a los que tiene acceso el usr. (development, production, google, etc)
+    -> --server
+  - Users: Cuentas de usuario (usernames) con las que tengo acceso a estos clusters (admin, dev_user, prod_user)
+    -->
+    --client-key /home/$USER/.minikube/client.key
+    --client-certificate /home/$USER/.minikube/client.crt
+    --certificate-authority .minikube/ca.crt
+
+  - Contexts: Entrelaza clusters con users (admin@production)
+
+# --------------------------------------------------
+# config file
+# --------------------------------------------------
+apiVersion: v1
+kind: Config
+# Si tengo varios contextos esta linea especifica el DEFAULT
+current-context: my-kube-admin@my-kube-playground
+
+clusters:
+- name: my-kube-playground
+  cluster:
+    server: https://my-kube-playground:6443
+    certificate-authority: ca.crt
+    # Otra forma es usar:
+    # cat ca.crt|base64
+    # y en vez de usar certificate-authority
+    certificate-authority-data:
+      <hash>
+
+
+contexts:
+- name: my-kube-admin@my-kube-playground
+  context:
+    cluster: my-kube-playground  #el nombre en clusters
+    user: my-kube-admin          #el nombre en users
+    # Se puede especificar el namespace que uso por defecto
+    namespace: finance
+users:
+- name: my-kube-admin
+  user:
+    # Usar full path en certificados
+    client-certificate: admin.crt
+    client-key: admin.key
+
+# Linea de comandos
+# -----------------
+kubecto config view
+kubecto config view --kubeconfig=mi_archivo_config
+# para usar un context especifico
+kubectl config use-context prod-user@production
+
