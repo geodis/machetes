@@ -1,0 +1,180 @@
+# ----------------
+# Image Security
+# ----------------
+
+como securizar imagenes y configurar PODs para que usen
+imagenes seguras
+
+spec:
+  image: nginx
+  # equivale a
+  image: docker.io/nginx/nginx
+  # image: registry/[user account]/[image repository]
+
+# Kubernetes
+gcr.io/kubernetes-e2e-test-images/dnsutils
+
+# Private Registry
+# ----------------
+docker login private-registry.io
+docker run private-registry.io/apps/internal-app
+
+# Como le paso las credenciales a los Nodos para que creen
+# los PODs con las imagenes privadas
+
+# docker-registry es un tipo built-in que se usa para 
+# guardar credenciales Docker
+kubectl create secret docker-registry regcred \
+  --docker-server= private-registry.io \
+  --docker-username= registry-user \
+  --docker-password= registry-password \
+  --docker-email= registry-user@org.com
+
+nginx-pod.yml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+spec:
+  containers:
+  - name: nginx
+    image: private-registry.io/apps/internal-app
+  # Con esto accedo a las credenciales creadas [secret]
+  imagePullSecrets:
+  - name: regcred
+
+Name: private-reg-cred
+Username: dock_user
+Password: dock_password
+Server: myprivateregistry.com:5000
+Email: dock_user@myprivateregistry.com
+
+# ------------------
+# Security Contexts
+# ------------------
+
+# 
+docker run --user=1001 ubuntu sleep 1000
+# capabilities
+docker run --cap-add MAC_ADMIN ubuntu
+
+# En k8s podemos configurar la seguridad a nivel de 
+# container o a nivel de Pod
+
+- Pod: configurar a este nivel, estos settings se aplican a todo
+contenedor dentro del POD
+- Container: configurar a nivel de POD y de Container causa que 
+los settings del container sobrecargan los del Pod (valen los del container)
+
+Ejemplo:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-prod
+  # A NIVEL DEL POD
+  securityContext:
+    runAsUser: 1000
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu
+      command: ["sleep", "1000"]
+      # A NIVEL DE CONTAINER
+      securityContext:
+        runAsUser: 1000
+        # capabilites: solo soportadas a nivel de CONTAINER
+        capabilities:
+          add: ["MAC_ADMIN"]
+
+# kubectl exec -it ubuntu-sleeper -- date -s '19 APR 2012 11:14:00'
+
+# ---------------
+# Network Policy
+# ---------------
+
+
+Default: All Allow (rule): Permite el trafico de cualquier POD a 
+cualquier otro POD o servicio en el Cluster
+
+80:WebPod <----> 5000:API Pod <----> 3306: DB Pod
+
+Quiero prohibir el trafico WebPod <----> DB Pod
+
+NetworkPolicy:
+-------------
+
+Es un objeto, que linkeo a uno o mas PODS. Y aca defino las reglas
+
+Le pongo labels a los pods:
+
+# Permito trafico entrante al puerto 3306 tcp de los PODS
+# marcados como "api-pod"
+policyTypes:
+- Ingress
+ingress:
+- from:
+  - podSelector:
+      matchLabels:
+        name: api-pod
+  ports:
+  - protocol: TCP
+    port: 3306
+
+
+# Ejemplo completo 
+# ----------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: db-policy
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          name: api-pod
+    ports:
+    - protocol: TCP
+      port: 3306
+
+Las Network Solutions que soportan NetworkPolicy:
+  - kube-router
+  - Calico
+  - Romana
+  - Weave-net
+  # No soportadas en 
+  - Flannel
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: internal-policy
+spec:
+  podSelector:
+    matchLabels:
+      name: internal
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          name: mysql
+    ports:
+    - protocol: TCP
+      port: 3306
+  - to:
+    - podSelector:
+        matchLabels:
+          name: payroll
+    ports:
+    - protocol: TCP
+      port: 8080
+  

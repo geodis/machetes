@@ -2,3 +2,135 @@
 # --------------------------------------------------
 # API Groups
 # --------------------------------------------------
+
+# TIP: levanta un proxy con las credenciales para
+# hacer curl a localhost sin tener que autenticar 
+kubectl proxy   
+
+
+# --------------------------------------------------
+# Role Base Access Control
+# --------------------------------------------------
+
+# Role Object:
+# ------------
+
+# developer-role.yaml
+# 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer
+  # namespace:
+rules:
+  # Para core groups dejo apiGroups vacio
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list", "get", "create", "update", "delete"]
+  # Si quiero especificamente que tenga acceso a ciertos Pods
+  resourceNames: ["blue", "orange"]
+
+- apiGroups: [""]
+  resources: ["ConfigMap"]
+  verbs: ["create"]
+
+
+kubectl create -f developer-role.yaml
+
+Y ahora debo likear el user al rol
+
+# 
+# devuser-developer-binding.yaml
+# 
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: devuser-developer-binding
+  # namespace:
+subjects:
+- kind: User
+  name: dev-user
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: developer
+  apiGroup: rbac.authorization.k8s.io
+
+kubectl create -f devuser-developer-binding.yaml
+
+# Comandos
+kubectl get roles
+kubectl get rolebindings
+kubectl describe role developer
+kubectl describe rolebindings devuser-developer-binding
+# Que puedo hacer como usuario
+kubectl auth can-i create deployments
+kubectl auth can-i delete nodes
+# 
+# Ejemplo de "sudo" para probar permisos de otro usuario como Admin
+kubectl auth can-i create deployments --as dev-user
+kubectl auth can-i create pods --as dev-user --namespace test
+
+
+# --------------------------------
+# Cluster Roles and Role Bindings
+# --------------------------------
+
+Cluster Scoped:
+---------------  
+  - nodes
+  - pv (persisten volume)
+  - clusterroles
+  - clusterrolebindings
+  - certificatesigningrequests
+  - namespaces
+  ...
+
+# Lista de todos los recursos limitados por namespace
+kubectl api-resources --namespaced=true
+# Lista de todos los recursos limitados por cluster
+kubectl api-resources --namespaced=false
+
+
+ClusterRoles: Roles pero Cluster Scoped
+EJ:
+  ClusterAdmin (rol)
+  - can view nodes
+  - can create nodes
+  - can delete nodes
+
+El Yml es idem al anterior salvo:
+--
+kind: ClusterRole
+rules.resources: ["nodes"]
+
+ClusterRoleBinding: Linkea el usuario al rol
+
+kind: ClusterRoleBinding
+
+# ---
+# kind: ClusterRole
+# apiVersion: rbac.authorization.k8s.io/v1
+# metadata:
+#   name: storage-admin
+# rules:
+# - apiGroups: [""]
+#   resources: ["persistentvolumes"]
+#   verbs: ["get", "watch", "list", "create", "delete"]
+# - apiGroups: ["storage.k8s.io"]
+#   resources: ["storageclasses"]
+#   verbs: ["get", "watch", "list", "create", "delete"]
+
+# ---
+# kind: ClusterRoleBinding
+# apiVersion: rbac.authorization.k8s.io/v1
+# metadata:
+#   name: michelle-storage-admin
+# subjects:
+# - kind: User
+#   name: michelle
+#   apiGroup: rbac.authorization.k8s.io
+# roleRef:
+#   kind: ClusterRole
+#   name: storage-admin
+#   apiGroup: rbac.authorization.k8s.io
