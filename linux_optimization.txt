@@ -1,0 +1,24 @@
+Bash Prompt time:
+
+PS1="\T$ "
+
+/proc/sys --> representa variables del kernel
+
+/proc/<pid>
+--> limits: limites - ulimit
+--> numa_maps: None Uniform Memory Access
+--> sched: estadisticas para el scheduling
+--> stat: process status info
+--> statm: process memory status info
+--> status: similar to ps info
+
+sysctl puede manejar y controlar los archivos dentro de /proc/sys
+
+# listar todos
+sysctl -a
+/etc/sysctl.conf, /etc/sysctl.d
+
+
+sysstat
+pmap, slabtop, snice, vmstat
+perf

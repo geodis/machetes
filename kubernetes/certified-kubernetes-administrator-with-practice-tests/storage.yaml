@@ -1,0 +1,134 @@
+# Repaso de Docker
+# ----------------
+
+# Sintaxis vieja
+# Volume Mount
+docker run -v data_volume:/var/lib/mysql mysql
+# Bind Mount
+docker run -v /data/mysql:/var/lib/mysql mysql
+
+# NUEVA SINTAXIS
+docker run \
+--mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
+
+# Storage Drivers:
+# ----------------
+# Encarcados del mount, de los layers de la imagen docker,
+# del copy-on-write
+- AUFS
+- ZFS
+- BTRFS
+- Device Mapper
+- Overlay
+- Overlay2
+
+# Volumenes estan manejados por Volume Drivers:
+- Local
+- Azyre Fuke Storage
+- Convoy
+- GlusterFS
+etc...
+
+docker run -it \
+--name mysql
+# driver de aws
+--volume-driver rexray/ebs
+--mount src=ebs-vol,target=/var/lib/mysql
+mysql
+
+# [CRI] Container Storage Interface (standards)
+# ---------------------------------------
+Es un standard que define como las soluciones de orquestacion, 
+como k8s, se comunican con los runtime de containers (como docker, rky, cri-o)
+
+# [CNI] Container Network Interface
+# ---------------------------------
+- weaveworks
+- flannel
+- cilium
+
+# [CSI] Container Storage Interface
+# ---------------------------------
+- portworx
+- Amazon EBS
+- Dell EMC
+- GlusterFS
+
+k8s:
+  - debe: llamar a provisionar un nuevo volumen
+  - debe: llamar a borrar un volumen
+  - debe: llamar a usar un volumen
+
+csi:
+  - debe: provisionar un nuevo volumen en el storage
+  - debe: decomisionar un volumen en el storage
+  - debe: habilitar el volumen en el nodo
+
+
+# Persistent Volumenes
+# --------------------
+# No recomendado para multi node, porque cada
+# POD usaria su /data en localhost
+apiVersion: v1
+kind: Pod
+metadata:
+  name: random-number-generator
+spec:
+  containers:
+  - image: alpine
+    name: alpine
+    command: ["/bin/sh", "-c"]
+    args: ["shuf -i 0-100 -n 1 >> /opt/number.out;"]
+    # punto de montaje en el POD
+    volumeMounts:
+    - mounthPath: /opt
+      name: data-volume
+  # Directorio en localhost
+  volumes:
+  - name: data-volume
+    hostPath:
+      path: /data
+      type: Directory
+
+  # En caso de usar el storage de AWS
+  volumes:
+  - name: data-volume
+    awsElasticBlockStore:
+      volumeID: <volume-id>
+      fsType: ext4
+
+
+# Persistent Volume Claim (PVC)
+# ----------------------------
+Es un cluster pool de volumenes de storage para ser 
+usado por usuarios que configuran las apps de los pods.
+El usuarios seleccionan storage de este pool
+
+
+Access Mode: (como montado en el host)
+
+- ReadOnlyMany
+- ReadWriteOnce
+- ReadWriteMany
+
+pv-definition.yaml
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-vol1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  # no esta pensado para produccion
+  # porque usa el /tmp del NODO
+  hostPath:
+    path: /tmp/data
+  # Para Amazon
+  awsElasticBlockStore:
+    volumeID: <volume-id>
+    fsType: ext4
+
+kubectl get persistentvolume
