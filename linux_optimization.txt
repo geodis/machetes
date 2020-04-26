@@ -22,3 +22,6 @@ sysctl -a
 sysstat
 pmap, slabtop, snice, vmstat
 perf
+
+sudo perf record find / -xdev -name core > /dev/null 2>&1
+sudo perf report

@@ -320,7 +320,7 @@ def contador(max):
         print(f"=Dentro de contador - viene yield con n={n}")
         yield n +2
         print("=Dentro de contador - retomando después de yield")
-        n=n+1
+		n=n+1
     print("=Dentro de contador - terminando")
 
 print("Instanciando contador") 
@@ -378,17 +378,34 @@ with File("file.txt", "w") as f:
 # supuestamente es mejor el ejemplo de arriba porque es mas versatil
 # ------------------------------------------------------------
 
-from contextlib import contextmanager
+# from contextlib import contextmanager
 
-@contextmanager
-def file(filename, method):
+# @contextmanager
+# def file(filename, method):
 
-	print("enter")
-	file = open(filename, method)
-	yield file
-	file.close()
-	print("exit")
+# 	print("enter")
+# 	file = open(filename, method)
+# 	yield file
+# 	file.close()
+# 	print("exit")
 
-with file("file.txt", "w") as f:
-	print("middle")
-	f.write("hello")
+# with file("file.txt", "w") as f:
+# 	print("middle")
+# 	f.write("hello")
+
+"""
+----------------------------------------------------------
+Lambda function - Funciones anonimas
+----------------------------------------------------------
+"""
+
+func = lambda x,y=4: x+y
+print(func(4))
+print(func(4,3))
+
+
+# map
+a = [1,2,3,4,5,6,7,8,9,10]
+print(list(map(lambda x:x+5  ,a)))
+
+print(list(filter(lambda x: x%2==0,a)))

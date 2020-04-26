@@ -132,3 +132,67 @@ spec:
     fsType: ext4
 
 kubectl get persistentvolume
+
+# Persistent Volume Claim (PVC)
+# -----------------------------
+
+
+Admin: Crea Persistent Volume
+User: Crea Persistent Volume Claim, para usar el storage
+k8s: bindea pvc con pv. Cada PVC es bindeado a un solo PV y viceversa
+Para bindear busca los PV que cumplan con:
+  - Suficiente capacidad
+  - accessModes
+  - volume modes
+  - storage class
+  - labels/selectors
+
+Si no consigue ninguno queda "Pending"
+
+pvc-definition.yaml
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      storage: 500Mi
+
+kubectl create -f pvc-definition.yaml
+kubectl get persistentvolumeclaim
+# Delete
+kubectl delete persistentvolumeclaim myclaim
+# Por defecto el PV queda "Retain" hasta que sea
+# eliminado manualmente por el Admin. Nadie lo 
+# puede reutilizar. O pude ser eliminado "Delete"
+# automaticamete. O puede ser reciclado "Recycle"
+# Creo que se marca como corruptos (scrubbed) los datos y se puede reusar
+
+
+----------------------------------------------
+Uso del PVC en el POD, ReplicaSet o Deployment
+----------------------------------------------
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+
+
+# Continuacion del tema
+Storage Classes and StatefulSets

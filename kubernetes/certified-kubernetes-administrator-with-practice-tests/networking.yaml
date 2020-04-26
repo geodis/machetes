@@ -1,0 +1,162 @@
+ip link
+ip addr add 1.1.1.1/24 dev eth0
+
+# Network Namespaces
+# ------------------
+
+ip netns add red
+ip netns add blue
+ip netns
+
+ip link
+
+ip netns exec red ip link
+o
+ip -n red link
+
+# host
+arp
+# namespace
+ip netns exec red arp
+ip netns exec red route
+
+# Para linkear dos namespaces (link)
+ip link add veth-red type veth peer name veth-blue
+# ahora vinculo cada extremo el pipe (veth-*) al
+# namespace. Que seria como sus interfaces de red
+ip link set veth-red netns red
+ip link set veth-blue netns blue
+# Puedo asociar IPs a cada namespace
+ip -n red addr add 192.168.15.1/24 dev veth-red
+ip -n blue addr add 192.168.15.2/24 dev veth-blue
+# Levanto las interfaces
+ip -n red link set veth-red up
+ip -n blue link set veth-blue up
+# ping
+ip netns exec red ping 192.168.15.2
+
+# Linux bridge
+# Creo un switch
+ip link add v-net-0 type bridge
+ip link set dev v-net-0 up
+
+# Cuando borro un extremo el link se borra completo
+ip -n red link del veth-red
+# creo 2 links
+ip link add veth-red type veth peer name veth-red-br
+ip link add veth-blue type veth peer name veth-blue-br
+
+# Attacheo cada punta a su namespace y al bridge
+# RED
+ip link set veth-red netns red
+# la otra punta al bridge
+ip link set veth-red-br master v-net-0
+
+# BLUE
+ip link set veth-blue netns blue
+# la otra punta al bridge
+ip link set veth-blue-br master v-net-0
+
+# Seteo las IPS
+# REE IMPORTANTE EL /24 porque sino no anda!!
+ip -n red addr add 192.168.15.1/24 dev veth-red
+ip -n blue addr add 192.168.15.2/24 dev veth-blue
+# Las levanto
+ip -n red link set veth-red up
+ip -n blue link set veth-blue up
+
+# CON VSWITCH
+
+# Enchufo mi host al vswitch (v-net-0)
+ip addr add 192.168.15.5/24 dev v-net-0
+# Vinculo el vswitch con la red externa
+ip netns exec blue ip route add 192.168.1.0/24 via 192168.15.5
+# o como default gw
+ip netns exec blue ip route add default via 192168.15.5
+# en el host
+iptables -t nat -A POSTROUTING -s 192.168.15.0/24 -j MASQUERADE
+# si quiero llegar desde afuera a una app en una interfaz virtual
+iptables -t nat -A PREROUTING --dport 80 --to-destination 192.168.15.2:80 -j DNAT
+
+
+# Docker Networking
+# -----------------
+
+# Sin red 
+docker run --network none nginx
+# misma red que el host (bind), no hace falta hacer port mapping
+docker run --network host nginx
+# bridge (default) 172.17.0.1
+
+
+# Container Networking Interface (CNI)
+# ------------------------------------
+
+Interface CNI: Es un set de estandares que define como los programas
+deben ser desarrollados para resolver los desafios de redes en un 
+environment de contenedores. Los programas son plugins. 
+bridge es un plugin
+
+- Responsabilidades del plugin CNI
+----------------------------------
+- create veth pair
+- attach veth pair
+- assign ip address
+- bring up interfaces (set ip)
+
+Container RUntimes que implementan CNI:
+  rkt, mesos, k8s, weaveworks, flannel, cilium, nsx, kalico
+
+Docker implementa (CNM) Container Network Model. Es otro standard, similar a CNI
+
+# --------------------------------
+# Kubernetes como maneja las redes
+# --------------------------------
+
+# 1. crea el docker sin red
+docker run --network=none nginx
+--> id: 2e34dcf34
+# 2. crea un bridge con el plugin (que implementa CNI) Bridge
+bridge add 2e34dcf34 /var/run/netns/2e34dcf34
+
+
+Master debe aceptar conexiones:
+  - kube-api --> 6443
+  - kubelet --> 10250
+  - kube-scheduler --> 10251
+  - kube-controller-manager --> 10252
+  - ETCD --> 2379
+  - en multi master para comunicacion entre ETCD's --> 2380
+
+Worker debe aceptar conexiones:
+  - kubelet --> 10250
+  - puertos 30000-32767
+
+Kubelet crea los containers entonces es el responsable de
+ejecutar el script que crea las reglas necesarias para la red
+--cni-conf-dir=/etc/cni/net.d
+y el script
+--cni-bin-dir=/etc/cni/bind
+y lo ejecuta
+./net-script.sh add <container> <namespace>
+
+# CNI Weave
+# ----------
+
+se instala un agente (peer) en cada nodo. Se comunican entre ellos
+y cada uno conoce la topologia de la red completa. 
+Conocen los pods y ips de otros nodos
+
+Deploy:
+-------
+- Como pods
+- Se deployea como DaemonSet
+
+# Install weave-net pod
+# ---------------------
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+Troubleshooting
+---------------
+kubectl logs weave-net-kjsgd weave -n kube-system
+
