@@ -150,7 +150,7 @@ Conocen los pods y ips de otros nodos
 Deploy:
 -------
 - Como pods
-- Se deployea como DaemonSet
+- Se implementa como DaemonSet
 
 # Install weave-net pod
 # ---------------------
@@ -159,4 +159,90 @@ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl versio
 Troubleshooting
 ---------------
 kubectl logs weave-net-kjsgd weave -n kube-system
+
+# -------------------
+# Service Networking
+# -------------------
+kube-proxy:  actua cada vez que se crea un servicio nuevo
+Crea forwarding rules en el cluster, para que los pods
+sean accesibles en el cluster
+
+Como se crean:
+- userspace
+- iptables (default)
+- ipvs
+kube-proxy --proxy-mode [userspace | iptables | ipvs] ...
+# configuracion de las ips que da k8s cuando creamos un servicio
+kube-api-server --service-cluster-ip-range inNet (default 10.0.0.)
+
+# -------------------
+# DNS - Kube DNS
+# -------------------
+Cada vez que se crea un servicio, una entrada de 
+DNS es creada
+curl http://servicio
+# En diferentes namespace. Por cada namespace el DNS
+# crea un subdominio
+curl http://servicio.namespace
+
+Todos los servicios estan agrupados juntos en otro
+subdominio: svc
+curl http://servicio.namespace.svc
+
+Todos los servicios y POds estan agrupados juntos
+en un root domain para el cluster: cluster.local
+# FQDN
+curl http://servicio.namespace.svc.cluster.local
+
+hostname: servicio
+namespace: namespace
+type: svc
+root: cluster.local
+ip: 10.107.37.188
+
+# Las entradas para PODs no son creadas por defecto
+# pero se pueden habilitar explicitamente
+# El nombre es la IP pero reemplaza . por -
+hostname: 10-107-37-188
+namespace: default # no pone el nombre del namespace, sino default
+type: pod
+root: cluster.local
+ip: 10.107.37.188
+
+curl http://10-107-37-188.default.pod.cluster.local
+
+# -------------------
+# DNS - CoreDNS - K8S
+# -------------------
+
+Es un Deployment, tiene redundancia.
+
+Arch de configuracion:
+
+Corefile
+
+kubectl describe configmap -n kube-system CoreDNS
+
+Corefile:
+----
+.:53 {
+    errors
+    health {
+       lameduck 5s
+    }
+    ready
+    # plugin de k8s. root del DNS
+    kubernetes cluster.local in-addr.arpa ip6.arpa {
+       pods insecure
+       fallthrough in-addr.arpa ip6.arpa
+       ttl 30
+    }
+    prometheus :9153
+    # forwards del DNS. Nameserver del Nodo 
+    forward . /etc/resolv.conf
+    cache 30
+    loop
+    reload
+    loadbalance
+}
 
