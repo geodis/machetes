@@ -1,4 +1,5 @@
-tiapiVersion: v1
+# kubectl create configmap nginx-configuration --namespace ingress-space
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config

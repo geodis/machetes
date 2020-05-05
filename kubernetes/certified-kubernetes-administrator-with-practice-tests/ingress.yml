@@ -150,3 +150,60 @@ spec:
       - backend:
           serviceName: watch-service
           servicePort: 80
+
+
+
+# --------------------
+# Ingress Rewrite
+# --------------------
+
+http://<ingress-service>:<ingress-port>/watch --> http://<watch-service>:<port>/
+Without the rewrite-target option, this is what would happen:
+http://<ingress-service>:<ingress-port>/watch --> http://<watch-service>:<port>/watch
+
+Notice watch and wear at the end of the target URLs. 
+The target applications are not configured with /watch or /wear paths. 
+They are different applications built specifically for their purpose, 
+so they don't expect /watch or /wear in the URLs.
+
+To fix that we want to "ReWrite" the URL when the request 
+is passed on to the watch or wear applications
+
+For example: replace(path, rewrite-target)
+In our case: replace("/path","/")
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: critical-space
+  annotations:
+    # Target URI where the traffic must be redirected
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /pay
+        backend:
+          serviceName: pay-service
+          servicePort: 8282
+
+replace("/something(/|$)(.*)", "/$2")
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+  name: rewrite
+  namespace: default
+spec:
+  rules:
+  - host: rewrite.bar.com
+    http:
+      paths:
+      - backend:
+          serviceName: http-svc
+          servicePort: 80
+        path: /something(/|$)(.*)
