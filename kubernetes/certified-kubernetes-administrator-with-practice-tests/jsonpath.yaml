@@ -1,0 +1,109 @@
+# Json path
+
+kubectl get pods -o=jsonpath='{.items[0].spec.containers[0].image}'
+kubectl get pods -o=jsonpath='{path1}{'\n'}{path2}..'
+{'\n'}
+{'\t'}
+# loops - range
+
+'{range .items[*]}'
+    '{.metadata.name}{"\t"}{.status.capicty.cpu}{"\n"}'
+'{end}'
+
+
+ '{range .items[*]} {.metadata.name} {"\t"} {.status.capicty.cpu} {"\n"} {end}'
+
+ kubectl get nodes -o=custom-columns=<COLUMN NAME>:<JSON PATH>
+ # ejemplo
+ kubectl get nodes -o=custom-columns=NODE:.metada.name, CPU:.status.capicty.cpu
+
+
+
+kubectl get nodes --sort-by=.metadata.name
+kubectl get nodes --sort-by=.status.capacity.cpu
+# Ordenar por capacidad los storage
+kubectl get pv --sort-by='{.spec.capacity.storage}'
+kubectl get pv -o=custom-columns=NAME:.metadata.name,CAPACITY:.spec.capacity.storage
+kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.contexts[?(@.context.user=='aws-user')].name}"
+
+{
+  "car": {
+    "color": "blue",
+    "price": "$20.000"
+  },
+  "bus": {
+    "color": "white",
+    "price": "$120.000"
+  }
+}
+
+$.car.color --> ["blue"]
+$.bus.color --> ["white"]
+
+All Colors
+
+$.*.color --> ["blue","white"]
+
+[  
+  {
+    "color": "blue",
+    "price": "$20.000"
+  },
+  {
+    "color": "white",
+    "price": "$120.000"
+  }
+]
+
+$[*].color ---> ["blue","white"]
+
+{
+  "car": {
+    "color": "blue",
+    "price": "$20.000",
+    "wheels": [
+      {
+        "model": "abc",
+      },
+      {
+        "model": "qwe",
+      }
+    ]
+  },
+  "bus": {
+    "color": "white",
+    "price": "$120.000",
+    "wheels": [
+      {
+        "model": "232abc",
+      },
+      {
+        "model": "qwewe",
+      }
+    ]
+  }
+}
+
+# todos los modelos de ruedas
+$.*.wheels[*].model
+
+["apple, "google, "microsoft", "facebook", "cocoa", "disney"]
+# elemento 0 y 4
+$[0,3]
+$[START,END]
+
+# elemento 0 al 4 (no incluido)
+$[0:3] --> ["apple, "google, "microsoft"]
+
+# Step
+$[0:8:2] ["apple, "microsoft", "cocoa",...]
+$[START:END:STEP]
+
+# Ultimo index
+$[-1]
+En otras implementaciones:
+$[-1:0]
+$[-1:]
+
+# Ultimos 3
+$[-3:]
