@@ -1,0 +1,66 @@
+HA Availability
+
+Cuando tengo multiple masters, se pone un load balancer:kube-controller-manager-endpoint
+
+Cada master esta configurado con --leader-elect true en el kube-controller-manager
+config file (si mal no recuerdo)
+
+
+Esto significa que el primero que llega a postularse como leader ante el 
+kube-controller-manager-endpoint gana. Y ambos tienen las siguientes ocpiones
+
+# Cada cuanto vence el lock del master
+# mantiene el liderazgo por este tiempo
+--leader-elect-lease-duration 15s
+# cada cuanto reafirma su liderazgo
+--leader-elect-renew-deadline 10s
+# cada cuanto intenta ser el lider
+--leader-elect-retry-period 2s
+
+Entonces si el actual lider muere y no puede renovar, el que esta en standby
+pasa a ser lider
+
+IDEM Para SCHEDULER
+
+
+ETCD in HA mode:
+----------------
+
+
+Leader Election - RAFT protocol
+Ej en 3 nodos: El protocolo dice que c/nodo lanza un random timer
+el primer nodo que termina su tiempo envia a los otros nodos su
+request de querer ser lider (los otros nodos estan esperando que termine su timer)
+y responden OK. Y ahi asume el liderazgo.
+
+Cada x periodo sigue notificando su liderazgo a los otros nodos. Si 
+en algun momento deja de hacerlo, es decir a los otros nodos en un tiempo 
+random (mismo del protocolo) no le llego que aun siga siendo lider (porque se cayo)
+este nodo propone ser lider.
+
+Write: es considerado completo si es escrito en la MAYORIA de los nodos del cluster.
+Cuando el write se distribuye los nodos que replicaron el dato le dan el OK de haber 
+escrito.
+Mayoria:  Quorum = |N/2+1|
+(3 nodos minimo recomendado, 5 es el mejor, mas es al pepe)
+
+Q: Quorum
+FT: Fault Tolerance (hasta cuantos pueden morir)
+
+1 nodo: Q=1 FT=0
+2 nodo: Q=2 FT=0
+3 nodo: Q=2 FT=1
+4 nodo: Q=3 FT=1
+5 nodo: Q=3 FT=2
+6 nodo: Q=4 FT=2
+7 nodo: Q=4 FT=3
+
+de 3 a 7 cual consideramos?
+---------------------------
+- 3 y 4 tienen mismo FT
+- 5 y 6 tienen mismo FT
+
+Es recomendado elegir un numero IMPAR de nodos (3 o 5 o 7)
+La explicacion es que se si de una segmentacion de red
+no importa como se de hay mas probabilidades de que me 
+quede quorum que de que no. Explicacion en el video.

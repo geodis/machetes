@@ -1,0 +1,94 @@
+# Test Basico
+# ------------
+
+# Me fijo el estado de los nodos si estan ready
+kubectl get nodes
+
+#  Me fijo si existen pods activos
+kubectl get pods
+
+# Me fijo si el cluster existe como pods
+kubectl get pods -n kube-system
+
+# Me fijo si los componentes del control-plane
+# estan implementados como servicios:
+systemctl status kube-apiserver
+journalctl -u kube-apiserver
+# 
+service kube-apiserver status
+kubectl logs kube-apiserver -n kube-system
+# kube-controller
+systemctl status kube-controller-manager
+# kube-scheduler
+systemctl status kube-scheduler
+# kubelete (en los workers)
+systemctl status kubelet
+# kube-proxy (en los workers)
+systemctl status kube-proxy
+
+
+# Ver si puedo deployar apps:
+kubectl run nginx
+kubectl get pods
+# Ver si puedo escalar apps:
+kubectl scale --replicas=3 deploy/nginx
+# Exponer la aplicacion
+kubectl expose deployment nginx --port=80 --type=NodePort
+# Me fijo si la puedo acceder
+kubect get svc
+curl "http://worker-1:31850"
+
+# ---------------
+# Test End to End
+# ---------------
+
+# son como 1000 tests que testean la validez de un cluster k8s
+
+e2e: ~1000 tests (12hs)
+conformance: ~160 (2hs). El minimo de tests que un cluster
+debe soportar para que me validen mi cluster certificado
+
+- SONOBUOY: otro testeador
+
+Como se hace el test:
+
+go get -u k8s.io/test-infra/kubetest
+kubetest --extract=v1.11.3
+cd kubernetes
+export KUBE_MASTER_IP="192.168.26.10:6443"
+export KUBE_MASTER=kube-master
+
+kubetest --test --provider=skeleton > testout.txt
+
+kubetest --test --provider=skeleton --test_args="--ginkgo.focus=Secrets" > testout.txt
+# 164 tests, 2hs
+kubetest --test --provider=skeleton --test_args="--ginkgo.focus=\[Conformance\]" > testout.txt
+
+
+
+# Testing de Workers
+# ------------------
+
+kubectl get nodes
+
+kubectl describe node worker-1
+
+Conditions:
+  - OutOfDisk
+  - MemoryPressure --> Out of memory (True)
+  - DiskPressure --> Disk capacity LOW (True)
+  - PIDPressure --> Too many process (True)
+  - Ready 
+
+Cuando el nodo se deja de comunicar con el master estas condiciones
+pasan a estado: Unknown
+
+# En el Worker
+
+# Revisar: cuestiones de linux normales
+service kubelet status
+journalctl -u kubelet
+# chequear certificados
+openssl x509 -in /var/lib/kubelet/worker-1.crt -text
+
+kubectl cluster-info

@@ -49,4 +49,8 @@ kubectl create -f event-simulator.yaml
 # -f como en tail. 
 # kubectl logs -f pod container
 kubectl logs -f event-simulator-pod
+# --previous. Porque si el pod se esta restarteando
+# a cada rato, puedo acceder a los logs del anterior
+# que se destruyo
+kubectl logs web -f --previous
  
