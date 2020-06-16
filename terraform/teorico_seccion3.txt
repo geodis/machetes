@@ -1,0 +1,77 @@
+# Ejecutar donde esta creado el instance.tf
+# esto inicializa los plugins de providers (aws) en este caso
+terraform init
+# para ver que se va hacer
+terraform plan
+# para aplicar
+terraform apply
+# al finalizar o para destruir todas las instancias
+terraform destroy
+
+# Si hago
+# terraform plan -out out.terraform
+# Si hay cambios nuevos, o alguna diferencia del plan original
+# guarda las diferencias en out.terraform. Luego
+terraform apply out.terraform # modifica la instancia
+
+terraform apply es:
+terraform plan -out file; terraform apply file; rm file
+# Es Recomendado en produccion
+terraform plan -out file
+terraform apply file
+
+# TERRAFORM VARIABLES
+# 
+
+# No hace falta declarar el tipo de variable, pero se recomienda
+
+Tipos: string, number (integer), bool
+
+variable "a-string" {
+	type = string
+}
+
+variable "this-is-a-number" {
+	type = number
+}
+
+variable "true-or-false" {
+	type = bool
+}
+
+# Complex Types:
+# 
+
+List: [0,1,5,2]
+# siempre ordenada
+
+Map: {"key" = "value"}
+
+Set: [1,2,3]
+# no tiene orden
+# contiene solo unique values
+
+Object: Es como Map, pero cada elemento puede tener
+un tipo diferente
+{
+	firstname = "John"
+	housenumber = 10
+}
+
+Tuple: Es como una lista, pero cada elemento puede
+tener un tipo diferente
+
+# Tupla
+[0, "string", false]
+
+
+# Puedo dejar que Terraform decida el tipo
+
+variable "a-string" {
+	default "this is a string"
+}
+
+variable "this-is-a-list" {
+	default = ["list of", "strings"]
+}
+

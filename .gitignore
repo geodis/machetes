@@ -5,3 +5,4 @@ comandos
 *.retry
 python-adv/.env/*
 .terraform/
+.idea
