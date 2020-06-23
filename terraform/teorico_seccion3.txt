@@ -47,6 +47,7 @@ List: [0,1,5,2]
 
 Map: {"key" = "value"}
 
+
 Set: [1,2,3]
 # no tiene orden
 # contiene solo unique values
@@ -74,4 +75,50 @@ variable "a-string" {
 variable "this-is-a-list" {
 	default = ["list of", "strings"]
 }
+
+# Use variables to hide secrets
+AMIs en variables
+*.tfvars va en el .gitignore
+
+# lookup
+#----------
+# If you are using Terraform v0.12.0 or later, the idiomatic way to
+# access one of the lists from your map of lists is to use the index syntax:
+cidr = var.cidr[terraform.workspace]
+
+# You can also use the index syntax in Terraform v0.11 or earlier, but
+# it must be wrapped in a template string because that is how we indicate
+# to Terraform that we intend to use an expression in those older versions:
+cidr = "${var.cidr[terraform.workspace]}"
+
+${ lookup( en_que_map_buscar, key) }
+key que quiero buscar
+
+The lookup function is for situations where you don't know if the given
+key is present and want to provide a default value to use instead if it is
+not. Although lookup with only two arguments is still supported for
+backward-compatibillity, it should generally be used only in its three-argument
+form in modern Terraform:
+
+# (this particular default is likely not a good idea, but this
+#  is just to illustrate the syntax.)
+cidr = lookup(var.cidr, terraform.workspace, ["0.0.0.0/0"])
+
+Until Terraform 0.12.7, the lookup function is indeed restricted to only work
+with maps of primitive types. In Terraform 0.12.7 it was generalized to behave
+the same way as the index operator, but with the extra rule of returning the
+default value if the requested key isn't present.
+
+recommend always using exact type constraints in Terraform 0.12.0 or later.
+
+# Archivos:
+# ----------
+* provider.tf: Tiene los datos del provider, accede a los valores a travez de ${var.VARIABLE}
+
+* vars.tf: Aca declaramos las variables que usa provider.tf por ejemplo. Si dejamos {} en las
+variables, no estamos definiendo un valor. O podemos poner un default.
+
+* terraform.tfvars: Aca directamente van los VALORES de las variables. Si dejo "" no sobrecargo
+el valor en vars.tf o dejo el default de vars.tf.
+
 

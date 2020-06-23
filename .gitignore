@@ -6,3 +6,5 @@ comandos
 python-adv/.env/*
 .terraform/
 .idea
+mykey*
+*.tfvars

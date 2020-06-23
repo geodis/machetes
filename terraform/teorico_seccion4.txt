@@ -1,0 +1,304 @@
+# Provision software to instances
+# -------------------------------
+
+Forma 1:
+
+Se puede construir una AMI custom ya con el soft en la imagen.
+Para esto se usa --> packer
+
+Forma 2:
+
+Usando AMIs estandarizadas y luego instalando el soft
+
+- File Uploads
+- Remote exec scripts
+- Automation tools: chef, puppet, ansible
+
+# File Upload
+-------------
+
+provisioner "file" {
+
+    source = "app.conf"                     # en el mismo lugar que el archivo .tf
+    destination = "/etc/myapp.conf"
+    # Para usar SSH
+    connection {
+        user = var.instance_username        # ec2-user es el default en Amazon Linux y Ubuntu
+        password = var.instance_password
+    }
+}
+
+*  en AWS se usan SSH keypairs
+
+resource "aws_key_pair" "chris-key" {
+    key_name = "mykey"
+    public_key = "ssh-rsa my-public-key"
+}
+
+resource "aws_instance" "example" {
+    ami = var.amis[var.aws_region]
+    instance_type = "t2.micro"
+    key_name = aws_key_pair.key_name
+
+    provisioner "file" {
+        source = "script.sh"                     # en el mismo lugar que el archivo .tf
+        destination = "/opt/script.sh"
+        # Para usar SSH Keypair
+        connection {
+            user = var.instance_username        # ec2-user es el default en Amazon Linux y Ubuntu
+            private_key = file(var.path_to_private_key)
+        }
+    }
+    #
+    # Ejecutar el script: remote-exec
+    # --------------------------------
+    provisioner "remote-exec" {
+        inline = [
+            "chmod +x /opt/script.sh",
+            "/opt/script.sh arguments"
+        ]
+    }
+}
+
+
+# Output Attributes
+-------------------
+
+output "ip" {
+    value = aws_instance.example.public_ip    # tipo.resource_name.attribute_name
+}
+
+# Usar atributos en un script
+- Util para arrancar scripts de automatizacio cuando se termino el provisionado de la infra
+- Para poner la ip en el ansible host file
+
+resource "aws_instance" "example" {
+    ami = var.amis[var.aws_region]
+    instance_type = "t2.micro"
+    provisioner "local-exec" {
+        # el archivo private.txt queda en la maquina que ejecuta el terraform
+        command = "echo ${aws_instance.example.private_ip} >> private.txt"
+    }
+}
+
+# Terraform State
+-----------------
+
+- mantiene el estado remoto de la infra en el archivo terraform.state y el estado previo
+en: terraform.tfstate.backup. Se crean en el apply
+
+- si el estado remoto cambia y hacemos apply de nuevo, terraform hace los cambios
+para generar los cambios y corregir el estado remoto
+
+- El estado de terraform puede ser salvado remoto, usando el backend de terraform
+
+- Siempre me asegura estar en la ultima version del estado
+
+- Evita tener que commitear y pushiear terraform.tfstate a un git
+
+Default: local backend (el archivo de terraform)
+
+otros backends:
+ - s3 (con locking usuando dynamoDB)
+ - consul (con locking)
+ - terraform enterprise
+
+# Configurar Remote State:
+--------------------------
+
+2 pasos:
+
+1. Agregar el codigo de backed a un .tf file
+2. Run init
+
+Ejemplo: Configurar consul remote store
+
+1. Agrego backend.tf
+# No se pueden usar variables en los backends porque el backend aplica
+en el init.
+
+# backend.tf
+
+terraform {
+    backend "consul" {
+        address = "demo.consul.io"      # hostname of consul cluster
+        path = "terraform/myproject"    # donde guardar el state
+    }
+}
+
+# En S3 (es mas comun)
+
+terraform {
+    backend "s3" {
+        bucket = "mybucket"
+        key = "terraform/myproject"
+        region = "eu-west-1"
+    }
+}
+Para S3 configurar AWS credentials usando la utility de linea de comandos:
+$ aws configure ....
+
+Luego terraform init. Y se inicializa el backend
+
+Extra: si quiero que el remote store sea solo read-only
+
+data "terraform_remote_state" "aws-state" {
+    backend = "s3"
+    config {
+        buscket = "terraform-state"
+        key = "terraform.tfstate"
+        access_key = var.aws_access_key
+        secret_key = var.aws_secret_key
+        region = var.aws_region
+    }
+}
+
+# Datasources
+-------------
+
+Proveen de informacion dinamica
+
+- lista de AMIs
+- lista de zonas
+- todas la ips usadas por aws. Util para filtrar trafico por region.
+Se hace con security groups (simil iptables)
+
+Ejemplo:
+
+data "aws_ip_ranges" "european_ec2" {
+    regions = ["eu-west-1", "eu-central-1"]         # Input: ver las ips para estas regiones
+    services = ["ec2"]                              # Solo para ec2 services
+}
+
+# Esos ips los podemos usar en este security group
+resource "aws_security_group" "from_europe" {
+  name = "from_europe"
+
+  # con esta regla de ingress permito el trafico 443 -> 443 de las ips european_ec2
+  ingress {
+    from_port = 443
+    protocol = "tcp"
+    to_port = 443
+    # esta regla aplican al bloque de datos european_ec2
+    cidr_blocks = [data.aws_ip_ranges.european_ec2.cidr_blocks]     # cidr_blocks es un rango de ips
+  }
+  tags = {
+    CreateDate = data.aws_ip_ranges.european_ec2.create_date
+    SyncToken = data.aws_ip_ranges.european_ec2.sync_token          # si los datos cambian, cambia el token
+  }
+}
+
+# Templates
+------------
+
+- para crear archivos de config customizados
+
+Ej: "templates/init.pl"
+
+#!/bin/bash
+echo "database-ip = ${myip}" >> /etc/myapp.config
+
+# Luego se crea un resource template_file que lee el archivo anterior y
+reemplaza las variables
+
+resource "template_file" "my-template" {
+  template = file("templates/init.pl")
+
+  vars = {
+    myip = aws_instance.database1.private_ip
+  }
+}
+
+# luego se usa el my-template cuando creo una instancia
+
+# create a web server
+resource "aws_instance" "web" {
+....
+    user_data = data.template_file.my-template.rendered
+}
+
+La instancia del web server va a tener el template inyectado en user_data
+y cuando se lance, user_data crea el archivo myapp.config
+
+
+Modules
+--------
+- para organizar terraform
+- para usar modulos third party
+- reusar codigo
+
+Ej: Uso de modulo de git
+
+module "module-example" {
+    source = "github.com/wardviaene/terraform-module-example"
+}
+
+# Local folder y pasando parametros al modulo
+---
+module "module-example" {
+    source = "./module"
+    region = "us-west-1"
+    ip-range = "10.0.0.0/8"
+    cluster-size = "3"
+}
+
+Dentro de la carpeta del modulo estan los archivos de terraform:
+- vars.tf (variables)
+- cluster.tf (definicion de las instancias resources que componen el cluster)
+- output.tf ( modulo output donde devuelvo salida al modulo Main)
+    output "aws-cluster" {
+        value = aws_instance.instance-1.public_ip,aws_instance.instance-2.public_ip
+    }
+
+Y el modulo principal asi tomo la salida del module-example
+
+output "some-output" {
+    value = module.module-example.aws_cluster
+          # module.module-name.infra-name
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
