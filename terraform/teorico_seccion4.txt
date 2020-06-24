@@ -232,11 +232,17 @@ Ej: Uso de modulo de git
 module "module-example" {
     source = "github.com/wardviaene/terraform-module-example"
 }
+# Si quiero correr un modulo que tiene que hacer clone:
+------------
+terraform get
+Se crea una carpeta .terraform/modules con los modulos
+
 
 # Local folder y pasando parametros al modulo
 ---
 module "module-example" {
     source = "./module"
+    # parametros
     region = "us-west-1"
     ip-range = "10.0.0.0/8"
     cluster-size = "3"
@@ -257,8 +263,32 @@ output "some-output" {
           # module.module-name.infra-name
 }
 
+Terraform Command Overiew
+-------------------------
 
+terraform apply     applies state
+terraform destroy   destroys all terraform managed state
+terraform fmt       format configuration according to Terraform language style conventions
+                    Se usa antes de commitear los cambios para chequear que el formato es ok?
 
+terraform get       Download and update modules
+terraform graph     crea una representacion visual de la configuracion o plan de ejecucion
+
+# import will try and find the infrastructure resource identified with ID and import the state into
+# terraform.tfstate with resourde id ADDRESS
+Importa una infra que esta corriendo en un tfstate
+terraform import [options] address id
+
+terraform output [options] [NAME]   Output any of your resources. Using NAME will only output a specific resource
+terraform plan
+terraform push      Atlas: comercial
+terraform refresh       Compara entre el tfstate file y a infra remota. Refresca la infra remota si hay diferencias
+terraform remote        configure remote state storaga
+terraform show          show human readable output from a state or a plan
+terraform state         para advanced state management: eg rename a resource: state mv aws_instance.example aws_instance.prod
+terraform taint         manually mark a resource as tainted, meaning it will be destructed and recreated at the next apply
+terraform untaint         
+terraform validate      validate syntax
 
 
 
