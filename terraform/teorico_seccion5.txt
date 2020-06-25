@@ -1,0 +1,87 @@
+VPC - Virtual Private Network
+-----------------------------
+- aisla las instancias a nivel de red
+- Buena practica: siempre lanzar instancias en una VPC:
+    - default
+    - o una creada y manejada por terraform
+- para setups medianos o chicos un VPC x region esta Ok
+- Una instancia de un VPC no se puede comunicar con otra VPC usando
+IP privada (si con ip publica, pero no recomendado)
+- Se pueden linkear 2 VPCs (peering)
+
+Private SubNets
+----------------
+10.0.0.0/8  10.0.0.0-10.255.255.255 mask: 255.0.0.0
+172.16.0.0/12   172.16.0.0-172.31.255.255 mask:(default de aws)
+192.168.0.0/16  192.168.0.0-192.168.255.255
+
+- Cada Zona (ej: us-west-1) tiene su propia Subnet publica y privada
+
+- Cada Subnet Publica esta conectada a un Internet Gateway. Estas instancias
+tambien tienen una IP publica para ser alcanzadas desde internet
+
+- services y applications van en la public subnet
+- backend, db, caching server van en la private subnet
+- Load Balancer tipicamente en la public subnet y las instancias sirviendo
+una aplicacion en la private subnet
+
+
+Ejemplo vpc.tf:
+--------------
+cidr_block: Classess Inter-Domain Routing. El tamaño completo de la red. Dentro van
+            las subnets
+instance_tenancy: Multiple instances en un mismo hardware. Se puede cambiar si
+                  se necesita una unica instancia por maquina fisica (sale mas $)
+
+enable_classiclink = false (por si se quiere linkear a EC2 classic. Otro tipo de red de aws)
+
+map_public_ip_on_launch: pedir o no una IP publica (para subnet public). Cuando
+                         lance una instancia en una subnet public va a obtener una ip
+                         en el rango cidr_block (privado) de esa subnet y una ip publica
+
+
+# Internet GW
+resource "aws_internet_gateway" "main-gw" {
+  vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "main"
+  }
+}
+
+Route tables son aplicadas a las Instancias (solo si las asocio con las regals de asociacion)
+# Route tables
+resource "aws_route_table" "main-public" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block = "0.0.0.0/0"                # Todo el trafico que no sea interno de la VPC va por default gw
+    gateway_id = aws_internet_gateway.main-gw.id    # Este es el default gw
+  }
+  tags = {
+    Name = "main-public-1"
+  }
+}
+# route associations public -- esta es la asignacion del default gw de c/subnet
+resource "aws_route_table_association" "main-public-1-a" {
+  subnet_id = aws_subnet.main-public-1.id
+  route_table_id = aws_route_table.main-public.id
+}
+
+# NAT GW -- para proveer acceso a internet a las instancias de la  red privada, pero no vicecersa
+-------------------------------------------------------------------------------------------------
+
+resoruce "aws_eip" "nat" { --> es una ip estatica (elasticIP)
+    vpc = true
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
