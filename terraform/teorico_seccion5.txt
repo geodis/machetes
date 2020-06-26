@@ -74,6 +74,12 @@ resoruce "aws_eip" "nat" { --> es una ip estatica (elasticIP)
 }
 
 
+Correr EC2 en VPC
+-----------------
+
+- con security groups (simil iptables)
+
+
 
 
 
