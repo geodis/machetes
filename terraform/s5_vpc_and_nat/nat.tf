@@ -1,3 +1,5 @@
+/* comento para no usar NAT con la instancia
+
 # NAT GW -- para proveer acceso a internet a las instancias de la
 # red privada, pero no vicecersa
 
@@ -39,6 +41,7 @@ resource "aws_route_table_association" "main-private-1-b" {
 //  route_table_id = aws_route_table.main-private.id
 //}
 
+*/
 
 
 
