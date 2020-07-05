@@ -79,6 +79,71 @@ Correr EC2 en VPC
 
 - con security groups (simil iptables)
 
+--------------
+# EBS Volumes - Block Storage
+----------------------------
+- t2.micro por defecto tiene 8G de EBS. Automaticamente eliminado cuando la instancia se termina
+- Algunas instancias tienen lo que se llama Ephemeral Storage (storage local) que se elimina cuando la
+instancia se elimina.
+
+Agregar Extra Volumne (persistente post destruccion de la instancia)
+
+# La instancia
+resource "aws_instance" "example" {
+}
+
+# el Storage
+resource "aws_ebs_volume" "ebs-volume-1" {
+  availability_zone = "us-west-1"
+  size = 20     # Gib
+  type = "gp2"  # general prupose storage. Opciones [standard, io1, st1]
+  tags = {
+    Name = "extra volume data"
+  }
+}
+
+# La asignacion del device
+resource "aws_volume_attachment" "ebs-volume-1-attachment" {
+  device_name = "/dev/xvdh"
+  instance_id = aws_instance.example.id
+  volume_id = aws_ebs_volume.ebs-volume-1.id
+}
+
+Si quiero agrandar (los 8G) el storage del root volume en la definicion de instancia:
+
+root_block_device {
+    volume_size = 16
+    volume_type = "gp2"
+    delete_on_termination = "true" # cuando se elimina la instancia
+}
+
+
+# Userdata:
+-------------
+- Customization at launch. Se ejecuta en la creacion de la instancia, no en el reboot
+- install extra soft
+- prepare instance to join a cluster
+- exec command/scripts
+- mount volumes
+-
+Ejemplo userdata en una linea de string
+----------------------------------------
+resource "aws_instance" "example" {
+....
+    # userdata
+    user_data = "#!/bin/bash\nwget http://instalador_openvpn/paquete.deb\ndpkg -i paquete.deb"
+}
+
+Ejemplo userdata (mejor) con Templates
+--------------------------------------
+
+resource "aws_instance" "example" {
+....
+    user_data = data.template_cloudinit_config.cloudinit-example.rendered
+}
+
+
+
 
 
 
