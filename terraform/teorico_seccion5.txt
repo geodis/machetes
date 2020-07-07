@@ -143,6 +143,151 @@ resource "aws_instance" "example" {
 }
 
 
+# Static IPs, EIPs, Route53
+----------------------------
+
+- ips privadas son auto asignadas a EC2
+- cada subnet de VPC tiene su propio rango (ej: 10.0.1.0-255
+- Puedo harcodear una IP fija
+
+resource "aws_instance" "ej" {
+    ....
+    subnet_id = aws_subnet.main-public-1.id
+    private_ip = 10.0.1.4   # tiene que estar en el range de la subnet
+}
+
+# EIP (Elastic IP addresses) - Publicas
+---------------------------------------
+
+resource "aws_instance" "ej" {
+    ....
+    subnet_id = aws_subnet.main-public-1.id
+    # Le asigno una ip privada
+    private_ip = 10.0.1.4   # tiene que estar en el range de la subnet
+}
+# Con este resource agrego la IP PUBLICA estatica
+resource "aws_eip" "ex-eip" {
+    instance = aws_instance.example.id
+    vpc = true
+}
+aws_eip.ex-ip.public_ip attribute en out
+
+* Si se reserva un EIP y no se usa en una instancia, hay que pagarla, de otra manera es gratis
+
+
+# Route 53
+----------
+resource "aws_route53_zone" "example-com" {
+    name = "example.com"
+}
+resource "aws_route53_record" "server1-record" {
+    zone_id = aws_route53_zone.example-com.zone_id
+    name = "server1.example.com"
+    type = "A"
+    ttl = "300"
+    records = [aws_eip.example-eip.public_ip]
+}
+
+Como saber los nameserver de tu dominio para tu NIC.
+property: aws_route53_zone.example-com.name_servers
+
+
+# RDS - Relational Database Services
+------------------------------------
+
+- replication. High availability (una master y otra standby, si se cae pasa a master)
+- automated snapshots (for backups)
+- automated security updates
+- easy instance replacement (vertical scaling)
+Se le puede indicar modificar cpu, ram, etc y hay un downtime de minutos.
+
+BD: Mysql, MariaDB, PostgreSQL, Microsoft SQL, Oracle.
+
+Pasos:
+-----
+1. Crear un subnet group que permita especificar en que subnets va a estar la BD (ejemplo eu-west-1a y eu-west-1b)
+
+# Este grupo especifica que el RDS sera puesto en estas private subnets(1 o 2)
+EN HA, habra una instancia en cada una
+
+resource "aws_db_subnet_group" "mariadb-subnet" {
+    name = "mariadb-subnet"
+    description = "RDS subnet group"
+    # las subnets donde el RDS deberia correr
+    subnet_ids = [aws_subnet.main-private-1.id, aws_subnet.main-private-2.id]
+}
+
+2. Crear un Parameter Group:
+    Permite especificar parametros para cambiar los settings en la BD
+
+resource "aws_db_parameter_group" "mariadb-parameters" {
+  name = "mariadb-parameters"
+  family = "mariadb10.1"
+  description = "MariaDB parameter group"
+
+  parameter {   # Estos params se pasan al config file
+    name = "max_allowed_packet"
+    value = "16777216"
+  }
+}
+
+3. Crear un Security Group para permitir el trafico a la RDS
+
+resource "aws_security_group" "allow-mariadb" {
+  vpc_id = aws_vpc.main.id
+  name = "allow-mariadb"
+  description = "allow-mariadb"
+
+  ingress {
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
+    # permito aaceso de nuestra instancia "example"
+    security_groups = [aws_security_group.example.id]   # En vez de poner un cidr pongo otro security group
+  }
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    self = true
+  }
+  tags = {
+    Name = "allow-mariadb"
+  }
+}
+
+
+4. Crear la RDS
+
+resource "aws_db_instance" "mariadb" {
+  allocated_storage = 100 # 100 GB gives us more IOPS
+  engine = "mariadb"
+  engine_version = "10.1.14"
+  instance_class = "db.t2.micro"
+  identifier = "mariadb"
+  name = "mariadb"
+  username = "root" # el que quiera
+  password = "qwerty"
+  db_subnet_group_name = aws_db_subnet_group.mariadb-subnet.name
+  parameter_group_name = "mariadb-parameters"
+  multi_az = false # set tru to have HA. 2 instances synchronized with each other
+  vpc_security_group_ids = [aws_security_group.allow-mariadb.id]
+  storage_type = "gp2"
+  backup_retention_period = 30 # dias de backup
+  availability_zone = aws_subnet.main-private-1.availability_zone   # Prefered AZ
+  tags = {
+    Name = "mariadb-instance"
+  }
+}
+
+
+
+
+
+
+
+
 
 
 
