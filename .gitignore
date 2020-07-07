@@ -8,3 +8,6 @@ python-adv/.env/*
 .idea
 mykey*
 *.tfvars
+*.tfstate
+*tfstate.backup
+*.info

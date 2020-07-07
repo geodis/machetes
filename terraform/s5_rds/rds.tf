@@ -1,11 +1,11 @@
 resource "aws_db_instance" "mariadb" {
   allocated_storage = 100
-  storage_type = "gp2"
   engine = "mariadb"
+  storage_type = "gp2"
   instance_class = "db.t2.micro"
-  name = "mariadb-db"
+  name = "mariadb"
   username = "root"
-  password = "qwerty"
+  password = "qwerasawwety"
   db_subnet_group_name = aws_db_subnet_group.mariadb-subnet.name
   parameter_group_name = aws_db_parameter_group.mariadb-parameters.name
   multi_az = false
@@ -20,12 +20,12 @@ resource "aws_db_instance" "mariadb" {
 
 resource "aws_db_subnet_group" "mariadb-subnet" {
   name = "mariadb-subnet"
-  subnet_ids = [aws_subnet.main-public-1.id, aws_subnet.main-public-2.id]
+  subnet_ids = [aws_subnet.main-private-1.id, aws_subnet.main-private-2.id]
 }
 
 resource "aws_db_parameter_group" "mariadb-parameters" {
-  family = "mariadb10.1"
   name = "mariadb-parameters"
+  family = "mariadb10.2"
   parameter {
     name = "max_allowed_packet"
     value = "16777216"
