@@ -282,20 +282,434 @@ resource "aws_db_instance" "mariadb" {
 }
 
 
+# IAM - Identity and Access management
+--------------------------------------
+- users, groups, roles
+
+roles:
+    - solo funcionan en EC2
+    - pueden dar a usuarios y servicios acceso temporal que normalmente no tienen
+    - se pueden attachear a una instancia. EC2 por ej.
+        - de esa instancia un usuario o servicio puede obtener credenciales de acceso
+        - usando esas credenciales el usuario/servicio puede asumir el rol que le da
+        permiso para hacer "algo"
+    - las credenciales vencen en X tiempo
+    - cuando un servicio necesita acceder a un S3 realiza una llamada a la API de aws
+
+resource "aws_iam_group" "administrators" {
+  name = "administrators"
+}
+resource "aws_iam_policy_attachment" "administrators-attach" {
+  name = "administrators-attach"
+  groups = [aws_iam_group.administrators.name]
+  # esta policy es lo que hace que administrators tenga "accesos"
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
 
 
+# Custom Policy
+----------------
+
+resource "aws_iam_group" "administrators" {
+  name = "administrators"
+}
+resource "aws_iam_group_policy" "my_developer_policy" {
+  name = "my_administrators_policy"
+  group = aws_iam_group.administrators.id
+  policy = << EOF
+  {
+    "Version:" "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": "*",
+        "Resource": "*"
+      }
+    ]
+  }
+EOF
+}
+
+Crear usuarios y agregarlos a un grupo:
+--------------------------------------
+
+resource "aws_iam_user" "admin1" {
+  name = "admin1"
+}
+
+resource "aws_iam_user" "admin2" {
+  name = "admin2"
+}
+
+resource "aws_iam_group_membership" "administrators-users" {
+  name = "administrators-users"
+  users = [
+    aws_iam_user.admin1.name,
+    aws_iam_user.admin2.name,
+  ]
+  group = aws_iam_group.administrators.name
 
 
+# Roles
+--------
+
+Ejemplo de ROL que vamos a attachear a un EC2
+
+resource "aws_iam_role" "s3-mybucket-role" {
+  name = "s3-mybucket-role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+# Es un tecnicismo, pero en este profile attacheamos el ROL y en la
+# instancia nos vamos a referir a este PROFILE
+resource "aws_iam_instance_profile" "s3-mybucket-role-instanceprofile" {
+  name = "s3-mybucket-role"     # se pone el mismo nombre del iam_role
+  roles = [aws_iam_role.s3-mybucket-role.name]
+}
+
+# Attach del ROL al EC2
+resource "aws_instance" "example" {
+  ami = ""
+  instance_type = ""
+  subnet_id = ""
+  vpc_security_group_ids = []
+  key_name = ""
+  # ------ Role ------
+  iam_instance_profile = aws_iam_instance_profile.s3-mybucket-role-instanceprofile.name
+}
+
+# BUCKET
+
+resource "aws_s3_bucket" "mi-bucket" {
+  bucket = "mybucket-c29df1"
+  acl = "private"
+
+  tags = {
+    Name "mybucket-c29df1"
+  }
+}
+
+# agrego los permisos al rol definiendo un documento de policy
+
+resource "aws_iam_role_policy" "s3-mybucket-role-policy" {
+  name = "s3-mybucket-role-policy"
+  # refiero al rol
+  role = aws_iam_role.s3-mybucket-role.id
+  # la policy que aplica al rol
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"  # Permito todas las acciones S3
+      ],
+      "Resource": [
+        # se aplica s3* a todos los resources que matcheen
+        "arn:aws:s3:::mybucket-c29df1",
+        "arn:aws:s3:::mybucket-c29df1/*"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+# Autoscaling
+--------------
+
+- autoscaling groups: Para automaticamente agregar/remover instancias cuando se alcanzan
+ciertos umbrales (cpu, memoria, ancho de banda)
+- Autoscaling en AWS se necesita al menos 2 recursos:
+    - Un aws launch configuration: propiedades de la instancia a ser lanzada (ami id,
+    security group, etc)
+    - Un grupo de autoscaling: propiedades de la escalabilidad: min instancias, max, health checks
+
+- Autoscaling Policies: Son triggereadas basadas en un threshold
+    - Es un cloudWatch alarm que voy a setear, y cuando se alcanza el umbral se dispara la politica
+    - Entonces un ajuste se ejecuta:
+    ej: si uso promedio de CPU > 20% entonces scale up +1 instancia
+    ej: si uso promedio de CPU < 5% entonces scale down -1 instancia
 
 
+# Primero se debe crear una "Launch configuration" y "Autoscaling group"
+-------------------------------------------------------------------------
+-------------------------------------------------------------------------
+
+resource "aws_launch_configuration" "example-launchconfig" {
+  name_prefix = "example-launchconfig"
+  image_id = var.amis[var.aws_region]
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.mykey.key_name
+  security_groups = [aws_security_group.allow-ssh.id]
+}
+
+resource "aws_autoscaling_group" "example-autoscaling" {
+  name = "example-autoscaling"
+
+  # En que subnets se van a lanzar las instancias. Se pueden poner multiples
+  # subnets. SI necesito 2 instancias c/u va a ir a una subnet. Para HA si una subnet completa
+  # se cae, aun queda la otra funcionando. 2 es lo mas usado, pero tambien se puede poner 3.
+  vpc_zone_identifier = [aws_subnet.main-public-1.id, aws_subnet.main-public-2.id]
+
+  # el launch configuration creado arriba
+  launch_configuration = aws_launch_configuration.example-launchconfig.name
+
+  # min y maximo de instancias
+  min_size = 1
+  max_size = 2
+
+  # health checks
+  health_check_grace_period = 300   #segundos
+  health_check_type = "EC2"   # Si tengo un LB, este puede hacer los health checks. En este caso EC2, la instancia
+                              # en si misma va a hacer los checks
+  force_delete = true         # Las instancias que son quitadas del autoscaling group: son automaticamente borradas
+
+  tag {
+    key = "Name"
+    value = "ec2 instance"
+    propagate_at_launch = true
+  }
+}
+
+# Autoscaling Policy
+--------------------
+
+Para crear una policy necesitamos un aws_autoscaling_policy
+
+resource "aws_autoscaling_policy" "example-cpu-policy" {
+  name = "example-cpu-policy"
+  # La relaciono con el autoscaling group
+  autoscaling_group_name = aws_autoscaling_group.example-autoscaling.name
+  adjustment_type = "ChangeInCapacity"  # si esta policy se dispara --> entonces vamos a hacer un ajuste
+  scaling_adjustment = 1  # ChangeInCapacity: Absolute number. Vamos a escalar +1. SI queremos reducir pongo -1
+  cooldown = "300"    # Periodo donde no se escuchan eventos de scaling.
+  policy_type = "SimpleScaling"   #Default para AWS.
+}
+
+- Luego podemos crear un CloudWatch alarm que dispare el autoscaling policy
+
+resource "aws_cloudwatch_metric_alarm" "example-cpu-alarm" {
+  alarm_name = "example-cpu-alarm"
+  alarm_description = "example-cpu-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods = 2  # comparamos 2 periodos de evaluacion
+  metric_name = "CPUUtilization"  # Comparamos la utilizacion de CPU >= threshold
+  namespace = "AWS/EC2"
+  period = "120"
+  statistic = "Average"
+  threshold = "30"  # 30%. Si el average de la utilizacion de CPU > 30% por un periodo de 120, durante 2 perdiodos
+                    # de evaluacion --> alarma
+  dimensions = {
+    "AutoScalingGroupName" = aws_autoscaling_policy.example-cpu-policy.name
+  }
+  actions_enabled = true
+  alarm_actions = [aws_autoscaling_policy.example-cpu-policy.arn] # refiero a las politicas a tomar
+}
+
+Si quiero recibir una alerta, por ejemplo por Mail cuando se invoca el autoscaling,
+se necesita crear un SNS topic (Simple Notification Service)
+-------------------------------------------------------------------
+resource "aws_sns_topic" "example-cpu-sns" {
+  name = "example-cpu-sns"
+  display_name = "example ASG SNS topic"
+} # Para susbcribirse al topic hay que hacerlo desde la consola de aws, porque solo obtenes el id (arn)
+  # cuando se subscribe el mail que va a recibir la alerta (??)
 
 
+El SNS Topic necesita ser attacheado al autoscaling group
+-------------------------------------------------------------------
+
+resource "aws_autoscaling_notification" "example-notify" {
+  group_names = [aws_autoscaling_group.example-autoscaling.name]
+  topic_arn = aws_sns_topic.example-cpu-sns.arn
+  notifications = [
+  "autoscaling:EC2_INSTANCE_LAUNCH",
+  "autoscaling:EC2_INSTANCE_TERMINATE",
+  "autoscaling:EC2_INSTANCE_LAUNCH_ERROR"
+  ]
+}
+
+# ELB - Elastic Load Balancers - (comparable con un nginx/haproxy)
+-------------------------------------------------------------------
+
+Ahora que tenemos Instancias Autoescalables necesitamos poner un LB
+enfrente para distribuir el trafico entre las multiples EC2
+
+- ELB Se auto escalara cuando reciba mas trafico
+- ELB hara el health check de las instancias.
+    - Si una instancia falla el check, no se le pasa trafico
+- Si una nueva instancia es agregada por el autoscaling group, el
+ELB va a agregar automaticamente las nuevas instancias y las chequea
+- ELB se puede propagar entre multiples Availability Zones
+Para mas fault tolerance
+
+- Tambien puede usarse como un "SSL TERMINATOR". La encriptacion
+se puede hacer hasta el LB y luego desencriptado hacia las EC2 total es
+red interna
+- AWS puede manejar los SSL por nosotros. Ya los genera para los ELB (gratis)
 
 
+# 2 TIPOS DE ELB
+-----------------
+
+1. Classic ELB
+    - Routes traffic based on network info (ej: forward traffic from 80 to 8080)
+
+2. Application Load Balancer (ALB) (como ingress)
+    - Routes traffic based on application level information
+       ej: can route /api and /website to different EC2 instances
 
 
+resource "aws_elb" "my-elb" {
+  name = "my-elb"
+  # Si uso VPC puedo definir las subnets donde tiene que estar el ELB
+  subnets = [aws_subnet.main-public-1.id, aws_subnet.main-public-2.id] # ELB va a tener 2 IP, una en c/subnet
+  # (Required for an EC2-classic ELB) The AZ's to serve traffic in.
+  # availability_zones = []
+
+  # Tipicamente va a permitir 80 y 443
+  security_groups = [aws_security_group.elb-securitygroup.id]
+
+  listener {
+    instance_port = 80
+    instance_protocol = "tcp"
+    lb_port = 80
+    lb_protocol = "tcp"
+//    ssl_certificate_id = ""
+  }
+  health_check {
+    # Si una nueva instancia es agregada, necesita al menos 2 healthy checks antes que se le envie trafico
+    healthy_threshold = 2
+    # Si una instancia activa falla 2 checks, se le deja de enviar trafico
+    unhealthy_threshold = 2
+    timeout = 3   # segundos
+    target = "HTTP:80/"   # El test es una GET al :80/, Otros ej: "HTTP:80/health"
+    interval = 30   # Chequeo c/30 segundos
+  }
+
+  # Esto es OPCIONAL, porque puedo attachear el ELB a un autoscaling group
+  # O lista fija, o attach al AutoScalingGroup
+  instances = [aws_instance.example-instance.id]
+  # Significa que podemos tener una instancia en una subnet pero el load balancer que va a manejar el trafico
+  # en otra subnet
+  cross_zone_load_balancing = true
+  # si vamos a remover una instancia, entonces espera 400 segundos antes de quitarla porque puede haber connecciones
+  # activas. Asi nos aseguramos de no seguir reciviendo contenido de esta instancia
+  connection_draining = true
+  connection_draining_timeout = 400
+
+  tags = {
+    Name = "my-elb"
+  }
+}
 
 
+# EL ELB puede ser attacheado a un AUTOSCALING GROUP
+---------------------------------------------------
+
+
+resource "aws_autoscaling_group" "example-autoscaling" {
+....
+    health_check_type = "ELB"
+    load_balancers = ["aws_elb.my-elb.name"]
+}
+
+# Application Load Balancer - Rule based LB
+--------------------------------------------
+
+- Primero definimos los settings generales
+
+resource "aws_elb" "my-alb" {
+    name = "my-alb"
+    subnets = [aws_subnet.main-public-1.id, aws_subnet.main-public-2.id]
+    security_groups = [aws_security_group.elb-securitygroup.id]
+    ...
+}
+- Luego se especifica un Target Group:
+
+
+resource "aws_alb_target_group" "frontend-target-group" {
+  name = "frontend-target-group"
+  port = 80     # El puerto que usa eltarget groyp
+  protocol = "HTTP"
+  vpc_id = aws_vpc.main.id
+}
+
+- Se pueden attachear instances a los target groups
+
+resource "aws_alb_target_group_attachment" "frontend-target-group-1" {
+  target_group_arn = aws_alb_target_group.frontend-target-group.arn #ID del target group
+  target_id = aws_instance.example-instance.id  # la instancia
+  port = 80
+}
+
+- Tambien necesitamos especificar los Listeners de manera separada
+
+resource "aws_alb_listener" "frontend-listeners" {
+  load_balancer_arn = aws_alb.my-alb.arn
+  port = 80
+
+  default_action {
+    # Va a forwardear lo que escuche en el puerto 80 del LB a el target_group
+    target_group_arn = aws_alb_target_group.frontend-target-group.arn
+    type = "forward"
+  }
+}
+
+- Las acciones default matchean siempre si no se especificaron otras reglas.
+
+- ALB se pueden especificar multiples reglas para enviar trafico a otro target (es lo que lo difiere de ELB)
+
+
+resource "aws_alb_listener_rule" "alb-rule" {
+  listener_arn = aws_alb_listener.front_end.arn
+  priority = 100
+  action {
+    type = "forward"
+    target_group_arn = aws_alb_target_group.new-target-group.arn
+  }
+  condition {
+    path_pattern {
+      values = [
+        "/static/*"]
+    }
+  }
+}
+resource "aws_alb_target_group" "new-target-group" {}
+resource "aws_alb_target_group_attachment" "new-target-group-attachment" {
+  ...
+  target_id = aws_instance.other-instances-than-the-first-one.id
+  ...
+}
+
+
+# Elastic Beanstalk - PaaS de AWS
+----------------------------------
+
+- Seguimos siendo responsables delas instsancias EC2, pero AWS provee los updates
+(manuales o automaticos)
+
+- Maneja application scaling. Usa un LB y un autoscaling group
+- Se puede setear el autoscaling basado en metricas
+- Al hacer un deploy obtenemos un CNAME (hostname) que usamos en route53
+- Una vez que EB esta corriendo, podemos deployar la app usando EB command line utility
+(se baja)
 
 
 
