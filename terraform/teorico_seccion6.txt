@@ -1,0 +1,215 @@
+
+# Interpolation
+---------------
+
+Interpolar valores: ${}
+
+variables: ${var.variable}
+resources: ${aws_instance.id} -> type.resource-name.attr
+data source: ${data.template_file.name.rendered} -> data.type.resource-name.attr
+
+Ejemplos
+
+Pasar variables por linea de comandos para sobrecargar el default
+- terraform apply -var env=dev
+
+string: ${var.nombre}
+map : ${var.amis["us-west-1"]}, ${lookup(var.amis,var.aws_region)}
+list: ${var.subnets[i]},  ${join(",",var.subnets)}
+
+
+outputs of a module:    module.NAME.output  ${module.aws_vpc.vpcid}
+count information:      count.FIELD         whe using the attribute count = number in a resource, you can use ${count.idex}
+path info   path.TYPE   path.cwd (current directory), path.module (module path), path.root (root module path)
+meta info   terraform.FIELD terraform.env shows active workspace
+
+float: +,-,*,/
+integer: +,-,*,%
+
+${2+3-4*10}
+
+# Condicionales
+----------------
+
+CONDITION ? TRUEVAL : FALSEVAL
+
+count = ${ var.env == "prod" ? 2 : 1 }
+==, !=, >, <, &&, ||, >=, <=
+
+# Funciones
+------------
+
+name(arg1,arg2) o  ${file("mykey.pub")}
+
+Ejemplos:
+#
+basename(path): devuelve el filename de un path (ultimo elemento) -> basename("/home/chris/file.txt") -> returns file.txt
+#
+coalesce(string1,string2,..) devuelve el 1er non-empty value -> coalesce("","","hello") -> returns: hello
+#
+coalescelist(list1,list2,..) defuelve la primer lista No- vacia
+#
+element(list,index) devuelve un unico elemento de una lista dado por el index
+-> element(module.vpc.public_subnets, count.index)
+#
+format(format,args,..) formatea un string/list con un formato -> format("server-%03d", count.index +1)
+-> server-001, server-002
+
+# Real world example:
+format("%s/%s",var.string,"string2")
+locals {
+ documents_path = "${var.documents_path == "" ? format("%s/%s",path.module,"documents") : var.documents_path}"
+}
+#
+index(list, elem) Busca el index de un elem en una lista -> index(aws_instance.foo.*.tags.env, "prod")
+#
+join(delim, list) idem otros lenguajes -> join(",", var.lista) -> "ami-123,ami-543,ami-563"
+#
+list(item1,item2) -> join(":", list("a","b","c")) -> a:b:c
+#
+lookup(map, key, [default]) hace un lookup en un map usando "key". Devuelve el valor representando key en el map
+-> lookup(map("k","v"), "l=k", "not found") --> returns v
+#
+lower(string) -> lower("HELLO") -> hello
+upper(string)
+#
+map(key,value) -> map("k","v","k2","v2") ->  {"k"="v","k2"="v2"}
+#
+merge(map1,map2) -> union -> merge( map("k","v"), map("k2","v2") ) -> {"k" = "v",  "k2" = "v2" }
+#
+replace(string,search,repleace) -> replace("aaab","a","b") -> bbbb
+#
+split(delim,string) -> split(",","a,b,c,d") -> ["a","b","c","d"]
+#
+substr(string,offset,length) -> substr("abcde",-3,3) -> cde
+#
+timestamp() -> RCF 3339 timestamp
+#
+uuid() -> genera un uuid unico
+#
+values(map) -> devuelve un array de values
+#
+slice(list(1,2,3),0,2) -> [1,2]
+
+# For y for_each
+-------------------
+[for s in ["this is a","list"]: upper(s)]
+
+# for_each
+resource "aws_security_group" "example" {
+  name = "example"
+  dynamic "ingress" {
+#     for_each = [22,443]
+    for_each = var.puertos
+    content {
+      from_port = ingress.value
+      to_port = ingress.value
+      protocol = "tcp"
+    }
+  }
+}
+
+# dar vuelta un map
+{ for k,v in var.map1: v => k }
+
+# Ej
+variable "project_tags" {
+  type = map(string)
+  default = {
+    Component = "Frontend"
+    Environment = "Production"
+  }
+}
+resource "aws_ebs_volume" "example" {
+  availability_zone = "es-west-1"
+  size = 8
+  tags = {for k,v in merge({Name = "MyVolume"}, var.project_tags: k => lower(v)}
+}
+
+
+# ej
+
+variable "ports" {
+  type = map(list(string))
+  default = {
+    "22" = ["127.0.0.1/320, "192.168.0.0/24""]
+    "443" = ["0.0.0.0/0"]
+  }
+}
+resource "aws_security_group" "example" {
+  name = "example"
+  dynamic "ingress" {
+    for_each = var.ports
+    content {
+      from_port = ingress.key
+      to_port = ingress.key
+      protocol = "tcp"
+      cidr_blocks = ingress.value
+    }
+  }
+}
+
+
+# Project Structure
+--------------------
+
+- Separar development de production
+- Para completo aislamiento es buena practica crear multiples cuentas aws:
+    - una para development
+    - una para production
+    - una para billing
+- Dividir en multiples proyectos. El apply se puede hacer por recursos.
+
+En los archivos de modulos se inicializan las variables que usa el modulo, que luego
+son cargadas por el main module (creo)
+
+demo_structure
+├── dev
+│   ├── dev.tf
+│   ├── provider.tf
+│   ├── vars.tf
+│   └── versions.tf
+├── modules
+│   ├── instances
+│   │   ├── instance.tf # las variables deben estar declaradas
+│   │   └── versions.tf
+│   └── vpc
+│       ├── versions.tf
+│       └── vpc.tf
+└── prod
+    ├── prod.tf
+    ├── provider.tf
+    ├── vars.tf
+    └── versions.tf
+
+- En dev y en prod debo crear las ssh-key
+- La forma de ejecutar es haciendo terraform {init, apply} respectivamente en l carpeta dev y prod y se levantan
+ambos entornos independientemente. Si tengo 2 cuentas, en el provider.tf puedo configurar un profile para dev y prod.
+- Esto me da state files para prod y dev indepedientes
+- Conviene hacer el init/apply en dev con una cuenta AWS y en prod con otra
+
+Otro ejemplo
+https://www.2ndwatch.com/blog/how-we-organize-terraform-code-at-2nd-watch/
+
+# en dev/dev.tf importo los modulos y hago override de las variables
+module "main-vpc" {
+  source     = "../modules/vpc"
+  ENV        = "dev"
+  AWS_REGION = var.AWS_REGION
+}
+
+module "instances" {
+  source         = "../modules/instances"
+  ENV            = "dev"
+  VPC_ID         = module.main-vpc.vpc_id
+  PUBLIC_SUBNETS = module.main-vpc.public_subnets
+}
+
+
+
+
+
+
+
+
+

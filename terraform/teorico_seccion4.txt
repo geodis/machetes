@@ -276,8 +276,8 @@ Ej: Uso de modulo de git
 module "module-example" {
     source = "github.com/wardviaene/terraform-module-example"
 }
-# Si quiero correr un modulo que tiene que hacer clone:
-------------
+# Si quiero correr un modulo, lo tengo que descargar:
+-------------------------------------------------------
 terraform get
 Se crea una carpeta .terraform/modules con los modulos
 
@@ -295,6 +295,8 @@ module "module-example" {
 Dentro de la carpeta del modulo estan los archivos de terraform:
 - vars.tf (variables)
 - cluster.tf (definicion de las instancias resources que componen el cluster)
+# Necesito output de los datos del modulo si necesito esa informacion para ser usada
+# por el main module
 - output.tf ( modulo output donde devuelvo salida al modulo Main)
     output "aws-cluster" {
         value = aws_instance.instance-1.public_ip,aws_instance.instance-2.public_ip

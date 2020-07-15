@@ -1,0 +1,46 @@
+# Packer
+----------
+- Es una herramienta para crear AMIs basado en templates
+- En vez de instalar el software luego de bootear una instancia, se puede crear
+un AMI con todo el soft necesario
+- Es un approach comun cuando se corre una app de escalabilidad horizontal o
+un cluster de algo
+
+# DEvops using Terraform - Integrando terraform y packer en el workflow
+------------------------------------------------------------------------
+
+Developer -> Build -> Test -> | Release -> [provision, deploy] | -> Customer
+
+| Release -> [provision, deploy] | -> terraform + packer
+
+Release, Provision and Deploy se pueden hacer usando:
+
+Git + Jenkins (CI) + Terramform + Packer
+- Durante la etapa de Jenkins se integra Terraform y Packer
+    - Vamos a contruir las imagenes aws con packer
+    - luego a lanzarlas con terraform
+
+---------- ALTERNATIVA -----------
+Git + Jenkins + Terraform + Docker
+
+Ej Pasos
+1. Jenkins hace git clone de la app
+2. Jenkinks invoca packer build --> genera la AMI conteniendo -> nodejs + app
+3. Jenkins hace git clone de terraform repo y se trae los terraform files
+4. Jenkins invoca terraform apply --> Lanza la ami creada por packer en aws
+- en S3 se guarda el terraform state remoto. El apply se puede, luego
+hacer desde el workstation o jenkins
+
+
+
+
+
+
+
+
+
+
+
+
+
+

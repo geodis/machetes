@@ -1,7 +1,6 @@
 *.swp
 *.pdf
 comandos
-*.sh
 *.retry
 python-adv/.env/*
 .terraform/
