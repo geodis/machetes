@@ -88,13 +88,13 @@ resource "aws_instance" "example" {
 en: terraform.tfstate.backup. Se crean en el apply
 
 - si el estado remoto cambia y hacemos apply de nuevo, terraform hace los cambios
-para generar los cambios y corregir el estado remoto
+para alcanzar el state del archivo y corregir el estado remoto
 
 - El estado de terraform puede ser salvado remoto, usando el backend de terraform
 
 - Siempre me asegura estar en la ultima version del estado
 
-- Evita tener que commitear y pushiear terraform.tfstate a un git
+- Evita tener que commitear y pushear terraform.tfstate a un git
 
 Default: local backend (el archivo de terraform)
 
@@ -108,14 +108,14 @@ otros backends:
 
 2 pasos:
 
-1. Agregar el codigo de backed a un .tf file
+1. Agregar el codigo de backend a un .tf file
 2. Run init
 
 Ejemplo: Configurar consul remote store
 
 1. Agrego backend.tf
 # No se pueden usar variables en los backends porque el backend aplica
-en el init.
+# en el init.
 
 # backend.tf
 
