@@ -1,0 +1,192 @@
+# AWS DOCKER
+------------
+
+ECR -> Amazon EC2 Container Registry
+ECS -> Amazon EC2 Container Service (pull de ECR)
+        - Es un orchestratod de docker
+
+Dockerfile --> build ------> push --> run --> App
+production:     Jenkins     ECR       ECS
+development:     Local build  docker-compose
+
+1. Despues que hago un build  de un Dockerfile lo pusheo a Amazon ECR
+2. Se setea un docker cluster (ECS)
+
+La creacion del ECR se puede hacer con terraform:
+---------------
+ecr.tf
+resource "aws_ecr_repository" "myapp" {
+        name = "myapp"
+}
+
+output.tf : Donde voy a obtener la url del Registry
+
+output "myapp-repository-url" {
+  value = aws_ecr_repository.myapp.repository_url
+}
+
+Build:
+terraform output
+--> myapp-repository-url
+
+docker build -t myapp-repository-url/myapp .
+# # login en ecr de aws antes del push
+# aws ecr get-login   ${normal_params_here}   --no-include-email
+# aws ecr get-login   --region us-east-1      --no-include-email  # for example
+# pip install --upgrade awscli
+
+# `aws ecr get-login --no-include-email`
+$(aws ecr get-login --no-include-email)
+--> Login Succeeded
+docker push myapp-repository-url/myapp
+
+
+- Ahora que tenemos la app dockerizada y subida al ECR podemos arrancar el ECS cluster
+- ECS - EC2 Container Services van a manejar los docker containers
+- Necesitamos arrancar un autoscaling group con un AMI custom
+    - este custom AMI contiene el agente ECS
+- Una vez que el ECS cluster esta online las tareas y servicios se pueden arrancar
+El agente de ECS se encarga de eso
+
+Primero: Definir el cluster ECS
+--------------------------------
+resource "aws_ecs_cluster" "example-cluster" {
+  name = "example-cluster"
+}
+
+Luego un grupo autoscaling lanza instancias EC2 que se van a joinear al cluster
+
+resource "aws_launch_configuration" "ecs-example-launchconfig" {
+  name_prefix = "ecs-launchconfig"
+  # ECS Amis son otras diferentes
+  image_id = var.ecs_amis[var.aws_region]
+  instance_type = var.ecs_instance_type # t2.micro
+  key_name = aws_key_pair.mykeypair.key_name
+  iam_instance_profile = aws_iam_instance_profile.ecs-ec2-role.id # necesita permisos extra
+  security_groups = [aws_security_group.ecs-securitygroup.id]
+  # significa que se va a joinear al cluster llamado example-cluster
+  user_data = "#!/bin/bash\necho 'ECS_CLUSTER=example-cluster' > /etc/ecs/ecs.config\nstart ecs"
+  # Significa que si hago cambios en la config terraform primero va a crear uno nuevo
+  # antes de destruir el viejo. Por si cometemos un error en la config y no arranca el modificado
+  # que siga corriendo el anterior
+  lifecycle {create_before_destroy = true}
+}
+
+resource "aws_autoscaling_group" "ecs-example-autoscaling" {
+  name = "ecs-example-autoscaling"
+  vpc_zone_identifier = [aws_subnet.main.public-1.id, aws_subnet.main.public-2.id]
+  launch_configuration = aws_launch_configuration.ecs-example-launchconfig.name
+  min_size = 1
+  max_size = 1
+  tag {
+    key = "Name"
+    value = "ecs-ec2-container"
+    propagate_at_launch = true
+  }
+}
+# ##
+# AMIS ECS:
+#  --> http://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-optimized_AMI.html
+##
+
+ECS - Task Definition
+---------------------
+- Antes de que la app docker pueda ser lanzada, se debe proveer un "Task Definition"
+
+Task Definition: describe cual docker container correr en el clustr
+  - especifica la imagen Docker (que esta subida en el ECR)
+  - especifica: MAX: CPU, Memory
+  - especifica: si los containers deben ser linkeados (ej: linkear app  container con DB container)
+  - especifica: environment variables (eg: credentials)
+
+myapp.tf
+--------
+
+data "template_file" "myapp-task-definition-template" {
+  template = file("templates/app.json.tpl")
+}
+
+resource "aws_ecs_task_definition" "myapp-task-definition" {
+  family = "myapp"  # a que familia pertenece el container
+  container_definitions = data.template_file.myapp-task-definition-template.rendered
+}
+
+app.json.tpl
+------------
+[{
+    "essential": true, # el container tiene que estar corriendo o el service va a fallar
+    "memory": 256,
+    "cpu": 256,
+    "name": "myapp",
+    "image": "${repository_url}:1",
+    "workingDirectory": "/app",
+    "command": ["npm","start"],
+    "portMappings": [{
+    		"containerPort": 3000,
+    		"hostPort": 300
+    }]
+}]
+
+
+ECS - Service Definition
+------------------------
+
+- Va a correr una cantidad especifica de containers basado en la Task Definition
+- El service esta siempre corriendo, si el container se para, es restarteado
+- El servicio puede ser escalado
+- Se puede poner un ELB (Elastic Load Balancer) delante del service
+
+Tipicamente se corren multiples instancias de un container, desparramadas sobre
+una Availability Zone
+  - Si un container falla, el LB deja de mandarle trafico
+
+myapp.tf
+--------
+
+resource "aws_ecs_service" "myapp-service" {
+  name = "myapp"
+  cluster = aws_ecs_cluster.example-cluster.id
+  task_definition = aws_ecs_task_definition.myapp-task-definition.arn
+  desired_count = 1 # cuantas instancias correr en este container
+  iam_role = aws_iam_role.ecs-service-role.arn  # ecs service role
+  # primero el role debe ser creado
+  depends_on = [aws_iam_policy_attachment.ecs-service-attach1]
+
+  load_balancer {
+    elb_name = aws_elb.myapp-elb.name
+    container_name = "myapp"
+    container_port = 3000
+  }
+  # si queremos hacer cambios en el task definition fuera de terraform, podemos
+  # hacer que se ignoren estos cambios. EJ: si tenemos un jenkins que actualiza el task_definition
+  # porque c/vez que pusheamos una nueva imagen a ECR necesitamos actualizar el task definition.
+  # Si no queremos que terraform revierta los cambios, usamos este ignore.
+  lifecycle {ignore_changes = ["task_definition"]}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
