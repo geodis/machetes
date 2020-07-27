@@ -71,3 +71,86 @@ def spam():
 def bacon():
     ham = 101
     eggs = 0
+
+Global
+-------
+def spam():
+  global eggs
+  eggs = 'spam'
+
+eggs = 'global'
+spam()
+print(eggs)
+
+Exception
+---------
+
+try:
+    pass
+except <excepcion>:
+    manejo_de_excepcion
+
+Listas
+-------
+
+[1, 2, 3] + ['A', 'B', 'C']
+['X', 'Y', 'Z'] * 3
+catNames = catNames + [name]  # list concatenation
+supplies = ['pens', 'staplers', 'flamethrowers', 'binders']
+>>> for i in range(len(supplies)):
+
+Multiple Assignment Trick
+-------------------------
+cat = ['fat', 'gray', 'loud']
+size, color, disposition = cat # la long de cat tiene que ser igual a la cant de vars o da error
+# ValueError: not enough values to unpack (expected 4, got 3)
+
+enumerate()
+Instead of using the range(len(someList)) technique with a for loop to obtain the integer
+index of the items in the list, you can call the enumerate() function instead
+
+supplies = ['pens', 'staplers', 'flamethrowers', 'binders']
+for index, item in enumerate(supplies):
+    print('Index ' + str(index) + ' in supplies is: ' + item)
+
+random.choice(lista) -> devuelve un item random
+random.shuffle(lista) -> devuelve la lista ordenada random
+
+Augmented assignment
+spam += 1  --> spam = spam + 1
+spam -= 1 --> spam = spam - 1
+spam *= 1 --> spam = spam * 1
+spam /= 1 --> spam = spam / 1
+spam %= 1 --> spam = spam % 1
+
+Finding a Value in a List with the index() Method
+---------------------------------------------
+spam = ['hello', 'hi', 'howdy', 'heyas']
+spam.index('hello')
+-> 0
+spam.append('moose')
+spam.insert(1, 'chicken')
+spam.remove('bat') # If the value appears multiple times in the list,
+                   # only the first instance of the value will be removed.
+the sort() method sorts the list in place
+you cannot sort lists that have both number values and string values in them
+sort() uses “ASCIIbetical order”
+spam.sort()
+spam.sort(reverse=True)
+
+
+
+*****************************
+https://automatetheboringstuff.com/2e/chapter4/
+Mutable and Immutable Data Types
+*****************************
+
+
+
+
+
+
+
+
+
+
