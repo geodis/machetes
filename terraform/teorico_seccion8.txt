@@ -3,7 +3,7 @@
 
 ECR -> Amazon EC2 Container Registry
 ECS -> Amazon EC2 Container Service (pull de ECR)
-        - Es un orchestratod de docker
+        - Es un orchestrator de docker
 
 Dockerfile --> build ------> push --> run --> App
 production:     Jenkins     ECR       ECS
@@ -45,7 +45,7 @@ docker push myapp-repository-url/myapp
 - ECS - EC2 Container Services van a manejar los docker containers
 - Necesitamos arrancar un autoscaling group con un AMI custom
     - este custom AMI contiene el agente ECS
-- Una vez que el ECS cluster esta online las tareas y servicios se pueden arrancar
+- Una vez que el ECS cluster esta online, las tareas y servicios se pueden arrancar
 El agente de ECS se encarga de eso
 
 Primero: Definir el cluster ECS
@@ -56,6 +56,8 @@ resource "aws_ecs_cluster" "example-cluster" {
 
 Luego un grupo autoscaling lanza instancias EC2 que se van a joinear al cluster
 
+#  aws_launch_configuration
+#  Provides a resource to create a new launch configuration, used for autoscaling groups.
 resource "aws_launch_configuration" "ecs-example-launchconfig" {
   name_prefix = "ecs-launchconfig"
   # ECS Amis son otras diferentes
