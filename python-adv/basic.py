@@ -271,7 +271,39 @@ Pretty Printing
 pprint() and pformat() “pretty print” a dictionary’s values
 
 
+The pprint.pprint() function is especially helpful when the 
+dictionary itself contains nested lists or dictionaries.
 
-********************
-pprint.pprint(count)
-********************
+If you want to obtain the prettified text as a string value 
+instead of displaying it on the screen, call pprint.pformat() 
+instead. 
+
+
+
+Working with Strings
+---------------------
+
+Raw Strings: A raw string completely ignores all escape characters 
+print(r'That is Carol\'s cat.')
+
+print('''Dear Alice,
+
+Eve's cat has been arrested for catnapping, cat burglary, and extortion.
+
+Sincerely,
+Bob''')
+
+f-strings, 
+is similar to string interpolation except 
+that braces are used instead of %s, with the expressions placed directly inside the braces
+>>> name = 'Al'
+>>> age = 4000
+>>> f'My name is {name}. Next year I will be {age + 1}.'
+
+The upper(), lower(), isupper(), and islower() Methods
+isalpha() Returns True if the string consists only of letters and isn’t blank
+isalnum() Returns True if the string consists only of letters and numbers and is not blank
+isdecimal() Returns True if the string consists only of numeric characters and is not blank
+isspace() Returns True if the string consists only of spaces, tabs, and newlines and is not blank
+istitle() Returns True if the string consists only of words that begin with an uppercase 
+letter followed by only lowercase letters
