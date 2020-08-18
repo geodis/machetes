@@ -1,0 +1,61 @@
+
+# yum install -y centos-release-gluster
+# yum install -y glusterfs-server
+# systemctl start glusterd
+# gluster peer status
+# gluster peer probe gluster2
+# gluster peer status
+# Number of Peers: 1
+
+# cliente
+#  yum install -y centos-release-gluster
+# yum install -y glusterfs-client
+
+# Crear volumenes - directorios de bricks
+# en ambos servers: mkdir /gluster (este directorio tiene que estar en una particion individual no la de /)
+# g1: gluster volume list
+# la cantidad de replicas maximas es la cantidad de nodos (debe ser impar >=3 split-brain)
+# tantos bricks como replicas. Puede ejecutarse en cualquier server
+# g1o2: gluster volume create volume1 replica 2 gluster1:/gluster/brick1 gluster2:/gluster/brick1
+
+# la 
+# gluster volume create volume1 replica 2 gluster1:/gluster/brick1 gluster2:/gluster/brick1 force
+
+# para accederlo necesito startearlo
+# gluster volume start volume1
+
+# -------------------------------------
+# acceso desde el cliente
+# mount -t glusterfs gluster1:volume1 /mnt/volume1/
+
+# Borrar el volumen
+# desmontar del cliente
+# gluster volume stop volume1
+# gluster volume delete volume1
+# manualmente borrar los archivos en c/server
+
+# Distribuido - si no le pongo reclicas es distribuido por defecto
+# gluster volume create volume2 gluster1:/gluster/brick2 gluster2:/gluster/brick2 force
+# 192.168.122.121 gluster3
+
+
+gluster volume create test-volume replica 3 transport tcp 
+server1:/exp1 
+server2:/exp2 
+server3:/exp3 
+server4:/exp4 
+server5:/exp5 
+server6:/exp6
+
+
+Listing Servers
+To list all nodes in the TSP:
+
+
+server1# gluster pool list
+
+Removing Servers
+To remove a server from the TSP, run the following command from another server in the pool:
+
+
+# gluster peer detach <server>

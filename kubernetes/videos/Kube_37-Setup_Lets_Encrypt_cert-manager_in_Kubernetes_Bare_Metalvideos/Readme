@@ -1,0 +1,138 @@
+1. git clone https://github.com/nginxinc/kubernetes-ingress.git
+2. kubernetes-ingress/deployments/common
+3. kubectl create -f ns-and-sa.yaml 
+4. kubectl create -f default-server-secret.yaml 
+5. kubectl create -f nginx-config.yaml
+6. kubectl create -f rbac.yaml
+7. kubectl create -f nginx-ingress.yaml
+8. Crear haproxy.cfg
+frontend http_front
+        bind *:443
+        mode tcp
+        option tcplog
+        default_backend http_back
+
+backend http_back
+        mode tcp
+        balance roundrobin
+        server kworker1 192.168.122.241:443
+        server kworker2 192.168.122.194:443
+
+docker run -d --restart=always --name my-running-haproxy \
+    -v /etc/haproxy/:/usr/local/etc/haproxy:ro \
+    -p 192.168.122.30:443:443 haproxy:1.7
+
+9. EN https://hub.helm.sh/charts/jetstack/cert-manager
+kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.0-alpha.1/cert-manager.crds.yaml
+helm repo add jetstack https://charts.jetstack.io
+helm install my-release --namespace cert-manager jetstack/cert-manager
+10. HELM 3:
+# tarda un rato
+helm install cert-manager  --create-namespace --namespace cert-manager jetstack/cert-manager
+
+╰ kubectl -n cert-manager get all        
+NAME                                           READY   STATUS    RESTARTS   AGE
+pod/cert-manager-578cd6d964-lnlpq              1/1     Running   0          24m
+pod/cert-manager-cainjector-5ffff9dd7c-4pjzf   1/1     Running   1          24m
+pod/cert-manager-webhook-556b9d7dfd-sl5cx      1/1     Running   0          24m
+
+NAME                           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/cert-manager           ClusterIP   10.233.30.221   <none>        9402/TCP   25m
+service/cert-manager-webhook   ClusterIP   10.233.4.77     <none>        443/TCP    25m
+
+NAME                                      READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/cert-manager              1/1     1            1           25m
+deployment.apps/cert-manager-cainjector   1/1     1            1           25m
+deployment.apps/cert-manager-webhook      1/1     1            1           25m
+
+NAME                                                 DESIRED   CURRENT   READY   AGE
+replicaset.apps/cert-manager-578cd6d964              1         1         1       25m
+replicaset.apps/cert-manager-cainjector-5ffff9dd7c   1         1         1       25m
+replicaset.apps/cert-manager-webhook-556b9d7dfd      1         1         1       25m
+
+11. Creamos ClusterIssuer.yml con un email valido.
+La url del server es para fake certificates. Hay una url para produccion
+
+12. kubectl create -f ClusterIssuer.yml
+El yml que funciona es este:
+https://cert-manager.io/docs/configuration/acme/
+
+Ejemplo nginx-example.yml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+
+13. kubectl create -f nginx-example.yml
+# Creo el ClusterIP para exponer el 80. Luego instalo un ingress
+14. kubectl expose deploy nginx --port 80
+
+NAME                 TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/kubernetes   ClusterIP   10.233.0.1     <none>        443/TCP   6h24m
+service/nginx        ClusterIP   10.233.19.76   <none>        80/TCP    3s
+
+Ingress Resource
+---------------
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-resource
+  annotations:
+    certmanager.k8s.io/cluster-issuer: letsencrypt-staging
+spec:
+  tls:
+  - hosts:
+    - nginx.example.com
+    secretName: letsencrypt-staging
+  rules:
+  - host: nginx.example.com
+    http:
+      paths:
+      - backend:
+          serviceName: nginx
+          servicePort: 80
+
+15.kubectl create -f ingress-resource.yml
+
+16. kubectl get ing                       
+NAME               CLASS    HOSTS               ADDRESS   PORTS     AGE
+ingress-resource   <none>   nginx.example.com             80, 443   32s
+
+17. kubectl describe ing ingress-resource                                                              
+
+Name:             ingress-resource
+Namespace:        default
+Address:          
+Default backend:  default-http-backend:80 (<error: endpoints "default-http-backend" not found>)
+TLS:
+  letsencrypt-staging terminates nginx.example.com
+Rules:
+  Host               Path  Backends
+  ----               ----  --------
+  nginx.example.com  
+                        nginx:80 (10.233.105.11:80)
+Annotations:         certmanager.k8s.io/cluster-issuer: letsencrypt-staging
+Events:
+  Type    Reason          Age   From                      Message
+  ----    ------          ----  ----                      -------
+  Normal  AddedOrUpdated  73s   nginx-ingress-controller  Configuration for default/ingress-resource was added or updated
+  Normal  AddedOrUpdated  72s   nginx-ingress-controller  Configuration for default/ingress-resource was added or updated
+  Normal  AddedOrUpdated  71s   nginx-ingress-controller  Configuration for default/ingress-resource was added or updated
+  Normal  AddedOrUpdated  70s   nginx-ingress-controller  Configuration for default/ingress-resource was added or updated

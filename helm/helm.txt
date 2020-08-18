@@ -1,0 +1,11 @@
+helm help
+helm install [--values] [--value]
+helm fetch
+helm list
+helm status
+helm search
+helm repo update
+helm upgrade
+helm rollback
+helm delete [--purge]
+helm reset [--force]

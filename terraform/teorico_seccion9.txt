@@ -1,0 +1,16 @@
+Module Development
+------------------
+https://github.com/terraform-aws-modules/
+
+- Reuse code
+- External Modules (por la comunidad) o propios
+Ayudan a setear la infra
+
+
+Modulos populares:
+
+- terraform-aws-vpc     # Create VPC resources
+- terraform-aws-alb     # Application LoadBalancer
+- terraform-aws-eks     # Create Kubernetes Cluster
+
+
