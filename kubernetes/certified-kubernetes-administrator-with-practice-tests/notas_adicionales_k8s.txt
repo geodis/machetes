@@ -1,0 +1,39 @@
+# Como arrancar minikube
+# ----------------------
+stop libvirtd
+stop docker
+iptables -F de todo
+start libvirtd
+start docker
+minikube start --vm-drive kvm2 --logtostderr
+# ------------------------------------------
+
+
+# Notas sobre Edicion de PODs
+# ===========================
+
+# No se puede editar specificaciones
+# de un POD existente, aparte de las siguientes:
+
+- spec.containers[*].image
+- spec.initContainers[*].image
+- spec.activeDeadlineSeconds
+- spec.tolerations
+
+# Por ejemplo, no se puede editar:
+- variables de environment
+- service accounts
+- resource limits
+
+# Alternativas:
+
+1. kubectl edit pod <pod-name>
+
+# abre el vim y cuando lo guardo se aplica. Salvo que sea un 
+# atributo de estos no modificables, al salvarlo dara error
+# y sera guardado en un tmp. Entonces solo se puede borrar
+# el pod y crearlo con kubectl y el yml temporal.
+
+2. Segunda opcion dumpear el xml del pod que esta corriendo
+
+kubectl get pod pod-name -o yaml > yml

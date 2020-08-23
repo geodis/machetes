@@ -76,8 +76,7 @@ kubectl run redis --image=redis123 --generator=run-pod/v1
 
 # redis123 esta intencionalmente mal
 # Now fix the image on the pod to 'redis'.
-Update the pod-definition file and use 'kubectl apply' command or use 'kubectl edit pod redis' command.
-
+# Update the pod-definition file and use 'kubectl apply' command or use 'kubectl edit pod redis' command.
 # Me abre un vim con el yaml autogenerado en ram del pod, luego de editarlo y guardarlo se hace un apply
 kubectl edit pod redis
 
