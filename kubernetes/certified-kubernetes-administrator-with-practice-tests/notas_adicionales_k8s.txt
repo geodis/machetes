@@ -27,6 +27,9 @@ kubectl expose deployment hello-minikube --type=NodePort
 curl  $(minikube service hello-minikube --url)
 kubectl delete deployment hello-minikube
 minikube stop
+# - heapster  is a performance monitoring and metrics collection system
+minikube addons enable heapster
+minikube addons open heapster
 # ------------------------------------------
 
 

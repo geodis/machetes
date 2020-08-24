@@ -89,6 +89,10 @@ kubectl get rs mi_replica -o yaml > mi_rs.yml
 # Escalar replicas
 kubectl scale rs new-replica-set --replicas=5
 
+# Namespace
+kubectl create namespace <nombre>
+kubectl get namespace 
+
 # Deployments
 kubectl create -f deployment-definition.yml
 kubectl get deployments
@@ -139,7 +143,11 @@ kubectl describe services tomcat-load-balancer
 kubectl get persistentvolumes
 # Secrets
 # Son key/value strings
-
+kubectl create secret generic [nombre] --from-literal=clave=valor
+# Desde un archivo:
+kubectl create secret generic db-user-pass --from-file=username.txt --from-file=password.txt
+# de linea de comandos
+kubectl create secret generic mysql-pass --from-literal=password=YOUR_PASSWORD
 
 # Rollout
 # ------------
@@ -149,6 +157,16 @@ kubectl set image
   - kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
 kubectl rollout history deployment tomcat-deployment --revision=2
 
+# Autoscaling
+# -----------
+# Uso del <=50% de cpu x pod
+kubectl autoscale deployment <nombre> --cpu-percent=50 --min=1 --max=10
+kubectl get hpa
+# simulo una carga
+kubectl run -i --tty load-generator --image=busybox --generator=run-pod/v1 /bin/sh
+while true ; do wget -q -O- http://wordpress.default.svc.cluster.local ; done
+
+# ===================================================================================
 # Healt checks
 # ------------
 # - readiness probes: chequea si un pod es ready. Ejemplo luego de iniciarlo.
@@ -243,4 +261,84 @@ kubectl edit deployment my-deployment
 
 # El Deployment crea automaticamente un RS
 # Las RS crean automaticamente los PODS
+
+# ----------------
+# Secrets: 
+# ----------------
+spec:
+  containers:
+  - image: mysql:5.6
+    name: mysql
+    env: 
+    - name: MYSQL_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: mysql-pass
+          key: password
+
+# Pasos de como setear los pass por linea de comando y en los yml
+# kubectl create secret generic [nombre] --from-literal=clave=valor
+kubectl create secret generic mysql-pass --from-literal=password=MiPass
+kubectl get secret
+
+# -------------------
+# Usage & Monitoring
+# -------------------
+
+# - Heapster:  is a performance monitoring and metrics collection system
+#   + InfluxDB
+#   + Grafana
+
+# Podemos limitar
+# - compute
+# - storage
+# - memory
+# - cuantos objetos pueden existir
+spec:
+  hard:
+    pods: 4 # max
+    requests.cpu: 1
+    requests.memory: 1Gi
+    limits.cpu: 2       # en todo el namespace no puede exceder
+    limits.memory: 2Gi  # en todo el namespace no puede exceder
+
+# cpu-limits.yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+spec:
+   hard:
+     # 40% de cpu
+     limits.cpu: "400m"
+
+# Agrego la quota que esta arriba en el file cpu-limits.yml al 
+# namespace cpu-limited-tomcat
+kubectl create -f cpu-limits.yaml --namespace=cpu-limited-tomcat 
+
+# ------------------------------
+# HPA: Horizontal Pod Autoscaler
+# ------------------------------
+# Ajusta el numero de replicas de un Pod para machear el uso promedio de CPU
+# pedida por el usuario
+# K8s va a escalar los pods a necesidad para alcanzar los parametros especificados
+
+# Uso del <=50% de cpu x pod
+kubectl autoscale deployment <nombre> --cpu-percent=50 --min=1 --max=10
+kubectl get hpa
+# simulo una carga
+kubectl run -i --tty load-generator --image=busybox --generator=run-pod/v1 /bin/sh
+while true ; do wget -q -O- http://wordpress.default.svc.cluster.local ; done
+
+# High Availability
+
+# 1. Nodos confiables para los masters --> separar cada maquina que va a correr un master
+#   - deben correr: kubelet y monit
+
+# 2. Reliable storaga -> etcd
+
+# 3. kube-api en los masters y deberia estar detras de un load-balancer
+
+# 4. De todos los masters uno es el active Master (el master de masters, ja)
+
 
