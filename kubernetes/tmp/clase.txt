@@ -1,185 +1,363 @@
 
+# En VM con 
+# cpu: host-passtrougth
+# kvm instalado. No hace falta, bridge
+# docker-machine-driver-kvm2 instalado
+# curl -LO https://storage.googleapis.com/minikube/releases/latest/docker-machine-driver-kvm2
+# chmod +x docker-machine-driver-kvm2
+# sudo mv docker-machine-driver-kvm2 /usr/local/bin/
+# kubectl instalado
+# minikube
+# yum install bash-completion bash-completion-extras
+# echo 'source <(kubectl completion bash)' >>~/.bashrc
+# kubectl completion bash >/etc/bash_completion.d/kubectl
 
+# k8s deployments son las contrucciones que definen una aplicacion
 
-# Como arrancar minikube
-# ----------------------
-stop libvirtd
-stop docker
-iptables -F de todo
-start libvirtd
-start docker
-minikube start --vm-drive kvm2 --logtostderr
-# ------------------------------------------
+# PODS: son las instancias de un contenedor en un deployment. Puede contener mas de un contenedor
 
-# YAML - k8s
-
-Siempre tiene al menos estos 4 campos (properties)
-
-apiVersion: depende de que queremos crear depende la version
-kind:
-metadata:
-
-
-spec: (Es un diccionario. Especificaciones para el pod. Cambia segun el tipo de pod.)
-
-
-Kind 		 | version
--------------+--------
-POD	 		 |	v1
-service	 	 |	v1
-ReplicaSet	 |	v1
-Deployment	 |	v1
-
-metadata: es un diccionario
-	name: myapp-pod
-	labels: (sirven para filtrar los pods. Aca se puede poner cualquier clave/valor)
-		app: myapp
-		type: front-end
-
-
-spec:
-	containers: (lista de arrays)
-	- name: nginx-container
-	  image: nginx-container
-
-Ejecucion:
-kubectl create -f pod-definition.yml
+# SERVICES: son los endpoints que exportan puertos al mundo exterior
+# ----> Todos se administran con kubectl
 
 
 
+
+minikube start --vm-driver kvm2 --logtostderr
+
+kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+kubectl create deployment mimongo --image=mongo --port=27017
+
+# Generar el YAML
+# ------------------------------------------------------------------------------------------------
+kubectl run <podname> --image <imagename:tag> --dry-run -o yaml --generator=run-pod/v1 
+kubectl create service nodeport myapp --dry-run --tcp=8080:8080 -o yaml > service.yaml
+# ------------------------------------------------------------------------------------------------
+
+
+# run esta casi obsoleto
+kubectl run hello-minikube --image=gcr.io/google_containers/echoserver:1.4 --port=8080
+#
+kubectl expose deployment hello-minikube --type=NodePort
+kubectl get pod
+curl  $(minikube service hello-minikube --url)
+
+kubectl delete deployment hello-minikube
+minikube stop
+
+
+# Aplica las directivas del manifiesto al cluster
+# Crea el servicio
+# 
+ kubectl apply -f ./deployment.yaml -
+--> deployment.apps/tomcat-deployment created
+
+# Luego: Expongo el deployment como un servicio
+
+kubectl expose deployment tomcat-deployment --type=NodePort
+
+# Ip interna del servicio dentro del cluster y puerto expuesto
+minikube service tomcat-deployment --url 
+
+==========
+= kubectl
+==========
+
+# Todos los pods en un namespace
 kubectl get pods
-kubectl describe pod myapp-pod
 
-# Create a new pod with the NGINX image
-kubectl run nginx --image=nginx --generator=run-pod/v1
-# Generar solamente el YAML
-kubectl run --generator=run-pod/v1 nginx --image=nginx --dry-run -o yaml
-kubectl create deployment --image=nginx nginx --dry-run -o yaml
-kubectl run blue --image=nginx --replicas=6            
+# tomcat-deployment-75cc77755c-q7hmb --> sale de get pods
+kubectl describe pod tomcat-deployment-75cc77755c-q7hmb
 
-# What is the image used to create the new pods?
-kubectl describe pod newpod-<id>  
-kubectl get pods -o wide 
+# Exporta puertos tcp/udp
+kubectl expose deployment hello-minikube --type=NodePort
 
-# How many containers are part of the pod 'webapp'?
-kubectl describe pod webapp
+# Port forward
+# Forwardea un puerto de la maquina local donde esta corriendo kubectl
+# a un POD en un host remoto al que kubectl se esta conectando
+kubectl port-forward tomcat2-deployment-75cc77755c-bgh5j 31115:9000
 
-# Why do you think the container 'agentx' in pod 'webapp' is in error?
-# Asi chequeo los logs
-kubectl describe pod webapp
+# Permite attachearme a un pod para ver su salida
+kubectl attach <pod-name>
 
-# Delete the 'webapp' Pod.
-kubectl delete pod webapp
+# Exec
+kubectl exec -it pod-name [-c container] command [args]
+kubectl exec -it tomcat2-deployment-75cc77755c-bgh5j bash
 
-# Create a new pod with the name 'redis' and with the image 'redis123'
-kubectl run redis --image=redis123 --generator=run-pod/v1
+# Label pods para clasificar
+kubectl label <type> key1=val1
+kubectl label pods tomcat2-deployment-75cc77755c-bgh5j healty=false
 
-# redis123 esta intencionalmente mal
-# Now fix the image on the pod to 'redis'.
-# Update the pod-definition file and use 'kubectl apply' command or use 'kubectl edit pod redis' command.
-# Me abre un vim con el yaml autogenerado en ram del pod, luego de editarlo y guardarlo se hace un apply
-kubectl edit pod redis
 
-# Definiendo el archivo pod.yaml
-apiVersion: v1
-kind: Pod
+# Run, para correr una imagen en especial en un cluster
+kubectl run hazelcast --image=hazelcast/hazelcast --port=5701
+
+# kubectl get pods
+# kubectl get pods [pod name]
+ 
+# kubectl expose <type name> <identifier/name> [—port=external port] [—target-port=container-port [—type=service-type]
+# kubectl expose deployment tomcat-deployment --type=NodePort
+ 
+# kubectl port-forward <pod name> [LOCAL_PORT:]REMOTE_PORT]
+ 
+# kubectl attach <pod name> -c <container>
+ 
+# kubectl exec  [-it] <pod name> [-c CONTAINER] — COMMAND [args…]
+# kubectl exec -it <pod name> bash
+ 
+# kubectl label [—overwrite] <type> KEY_1=VAL_1 ….
+# kubectl label pods <pod name> healthy=fasle
+ 
+# kubectl run <name> —image=image
+# kubectl run hazelcast --image=hazelcast/hazelcast --port=5701
+# # the hazelcast docker image has been moved to hazelcast/hazelcast (https://hub.docker.com/r/hazelcast/hazelcast
+ 
+# kubectl describe pod
+
+
+kubernetes nodes: vm o on-premisses
+ - kubelete: corre los pods
+ - kube-proxy: maneja la red en el nodo. Es el NodePort, etc
+
+
+# escalado online sin downtime
+kubectl describe deployments tomcat2-deployment
+
+# 1. escalamos 
+kubectl scale --replicas=4 deployment/tomcat-deployment
+# 2 defino un servicio de load balancer
+kubectl expose deployment tomcat-deployment --type=LoadBalancer --port=8080 --target-port=8080 --name=tomcat-load-balancer
+# 3 veo que ip le asigno al servicio
+kubectl describe services tomcat-load-balancer
+
+
+
+kubectl get deployments
+kubectl rollout status
+kubectl rollout history
+kubectl set image
+  - kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
+
+kubectl rollout history deployment tomcat-deployment --revision=2
+
+-- Labels / selectors --
+
+kubectl get nodes
+# Le pongo ssd de nombre al nodo minikube
+kubectl label node minikube storageType=ssd
+
+# storageType=ssd es todo el nombre de lo que entiendo. Clave/valor son los labels
+kubectl describe node minikube
+
+# En el yaml que define el deployment agrego
+# en la seccion de spec: para indicar que este deployment se tiene que 
+# aplicar en nodos con la clave/valor storageType: ssd
+
+  nodeSelector:
+    storageType: ssd
+
+# Healt checks
+#-------------
+
+# readiness probes: chequea si un pod es ready. Ejemplo luego de iniciarlo.
+# liveness probes: para determinar cuando un pod es healthy o unhealthy, luego
+# de haber sido ready
+
+
+# Basicamente tengo que definir en el yaml del deployment las pruebas. Se 
+# ponen en spec:
+
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 3
+
+
+# Volumenes
+
+kind: PersistentVolume
+apiVersion: v1 
+
+# k8s usa Claim para ver PersistentVolume que satisfaga los requerimientos
+
+kind: PersistentVolumeClaim
 metadata:
-  name: redis
+  name: task-pv-claim
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce # Significa que solo un contenedor puede usarlo
+
+kubectl get deployments
+
+
+kubectl rollout status
+kubectl rollout history
+kubectl set image
+  - kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
+
+kubectl rollout history deployment tomcat-deployment --revision=2
+
+-- Labels / selectors --
+
+kubectl get nodes
+# Le pongo ssd de nombre al nodo minikube
+kubectl label node minikube storageType=ssd
+
+# storageType=ssd es todo el nombre de lo que entiendo. Clave/valor son los labels
+
+kubectl describe node minikube
+
+# Health check
+ livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 3
+
+# Kubernetes web ui
+kubectl proxy
+
+# ejercicio -  mongodb
+
+# ejemplo1
+kubectl run mongo-excercice-1 --image=mongo --port=27017
+kubectl scale --replicas=4 deployment mongo-excercice-1
+
+
+# Volume
+
+kubectl get persistentvolumes
+
+# Secrets
+# Son key/value strings
+
+# de archivo
+kubectl create secret generic db-user-pass --from-file=username.txt --from-file=password.txt
+# de linea de comandos
+kubectl create secret generic mysql-pass --from-literal=password=YOUR_PASSWORD
+
 spec:
   containers:
-  - name: redis
-    image: redis
+  - image: mysql:5.6
+    name: mysql
+    env: 
+    - name: MYSQL_ROOT_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: mysql-pass
+          key: password
 
-<<<<<<< HEAD
-kubectl run -f pod.yaml
-=======
+# Pasos de como setear los pass por linea de comando y en los yml
+# kubectl create secret generic [nombre] --from-literal=clave=valor
+kubectl create secret generic mysql-pass --from-literal=password=MiPass
+kubectl get secret
 
-kubectl apply -f pod.yaml
-# o borrarlo y volverlo a crear
-kubectl run -f pod.yaml
+# Usage & Monitoring
+
+# - heapster  is a performance monitoring and metrics collection system
+#   + InfluxDB
+#   + Grafana
+
+minikube addons enable heapster
+
+kubectl get pods --namespace=kube-system
+
+minikube addons open heapster
+
+# Namespace
+# ---------------------------
+# ---------------------------
+# pueden ser asignados a un objeto ResourceQuota
+# Podemos limitar
+# - compute
+# - storage
+# - memory
+# - cuantos objetos pueden existir
+
+ejemplo:
+
+spec:
+  hard:
+    pods: 4 # max
+    requests.cpu: 1
+    requests.memory: 1Gi
+    limits.cpu: 2       # en todo el namespace no puede exceder
+    limits.memory: 2Gi  # en todo el namespace no puede exceder
+
+kubectl create namespace <nombre>
+kubectl get namespace 
+
+# -----------cpu-limits.yaml------------
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+spec:
+   hard:
+     # 40% de cpu
+     limits.cpu: "400m"
+
+# Agrego la quota que esta arriba en el file cpu-limits.yml al namespace cpu-limited-tomcat
+kubectl create -f cpu-limits.yaml --namespace=cpu-limited-tomcat 
+
+# HPA: Horizontal Pod Autoscaler
+# ------------------------------
+# ------------------------------
+# Ajusta el numero de replicas de un Pod para machear el uso promedio de CPU
+# pedida por el usuario
+# 
+# k8s va a escalar los pods a necesidad para alcanzar los parametros especificados
+
+# Uso del <=50% de cpu x pod
+kubectl autoscale deployment <nombre> --cpu-percent=50 --min=1 --max=10
+# Autoscaling
+# ------------
+ 
+kubectl autoscale deployment wordpress --cpu-percent=50 --min=1 --max=5
+ 
+kubectl get hpa
+
+# simulo una carga
+kubectl run -i --tty load-generator --image=busybox --generator=run-pod/v1 /bin/sh
+while true ; do wget -q -O- http://wordpress.default.svc.cluster.local ; done
+
+# Auditing
+# ------------
+
+# Legacy Auditing
+
+# Advanced Auditing
+
+# -------------------------------------
+# PRODUCTION
+# -------------------------------------
+
+# High Availability
+
+1. Nodos confiables para los masters --> separar cada maquina que va a correr un master
+  - deben correr: kubelet y monit
+
+2. Reliable storaga -> etcd
+
+3. kube-api en los masters y deberia estar detras de un load-balancer
+
+4. De todos los masters uno es el active Master (el master de masters, ja)
 
 
-# REPLICA SETS
-# ----------------------------
-
-Controllers: son los cerebros de k8s, son los ps que monitorean los objetos k8s
-Replication controller (obsoleto:
-	- ayuda a tener varias instancias del mismo pod en el cluster k8s (HA). Se asegura que un numero especifico
-	de pods esten corriendo
-	- Load balancing & scaling: multiple pods en multiples nodos
-
-Replica set: 
-	- Esta reemplazando el Replication controller
-
-Ejercicio: rc-definition.yml
-kubectl
-
-# Obtener el yml de un RS
-# -----------------------
-kubectl get rs mi_replica -o yaml > mi_rs.yml
-
-# Escalar replicas
-# ----------------
-
-kubectl scale rs new-replica-set --replicas=5
-
-
-# Deployments
-# -----------------------------------------------
-# Rolling updates:
-Cuando tengo una nueva version de mi app las voy aplicando de a "una" y no bajo todas las instancias
-y las reemplazo de una y si algo falla tengo que poder hacer un rollback
-
-El deployment incluye aparte de las RS las acciones de cambiar de version, rollback, pausar y aplicar
-cambios y resumir toda app cuando los cambios estan 100% aplicados, etc.
-El deployments crea automaticamente un RS
-Las RS crean automaticamente los PODS
-
-# Definition
-cambia el kind: Deployment
-
-kubectl create -f deployment-definition.yml
-kubectl get deployments
->>>>>>> 34bdd3d8afc54adb2221bc34f0ca3ff71848451b
-
-
-# Notas sobre Edicion de PODs
-# ===========================
-
-No se puede editar specificaciones
-de un POD existente, aparte de las siguientes:
-
-- spec.containers[*].image
-- spec.initContainers[*].image
-- spec.activeDeadlineSeconds
-- spec.tolerations
-
-Por ejemplo, no se puede editar:
-- variables de environment
-- service accounts
-- resource limits
-
-Alternativas:
-
-1. kubectl edit pod <pod-name>
-
-abre el vim y cuando lo guardo se aplica. Salvo que sea un 
-atributo de estos no modificables, al salvarlo dara error
-y sera guardado en un tmp. Entonces solo se puede borrar
-el pod y crearlo con kubectl y el yml temporal.
-
-2. Segunda opcion dumpear el xml del pod que esta corriendo
-
-kubectl get pod pod-name -o yaml > yml
-
-borrar y aplicar
-
-# Notas sobre Edicion de Deployments
-# ==================================
-
-Se puede editar cualquier campo/propiedad del template
-de pod, ya que el pod template es hijo de la especificacion
-del deploy. Con cada cambio el deploy automaticamente borra y
-recrea los pods con los cambios
-
-kubectl edit deployment my-deployment
