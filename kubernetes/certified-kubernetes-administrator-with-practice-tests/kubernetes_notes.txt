@@ -1,3 +1,10 @@
+
+kubernetes nodes: vm o on-premisses
+ - kubelete: corre los pods
+ - kube-proxy: maneja la red en el nodo. Es el NodePort, etc
+
+
+
 # YAML - k8s
 # ------------
 # Siempre tiene al menos estos 4 campos (properties)
@@ -10,7 +17,7 @@ metadata:
 
 # Kind 		     | version
 # ---------------+--------
-# POD	 		 |	v1
+# POD	 		 |	v1		son las instancias de un contenedor en un deployment. Puede contener mas de un contenedor
 # service	 	 |	v1
 # ReplicaSet	 |	v1
 # Deployment	 |	v1
@@ -29,6 +36,7 @@ spec:
 kubectl create -f pod-definition.yml
 
 
+# ------------------
 # EJ KUBECTL
 # ------------------
 
@@ -36,20 +44,31 @@ kubectl get pods
 kubectl describe pod myapp-pod
 # Create a new pod with the NGINX image
 kubectl run nginx --image=nginx --generator=run-pod/v1
+
 # Generar solamente el YAML
+kubectl run <podname> --image <imagename:tag> --dry-run -o yaml --generator=run-pod/v1 
+kubectl create service nodeport myapp --dry-run --tcp=8080:8080 -o yaml > service.yaml
 kubectl run --generator=run-pod/v1 nginx --image=nginx --dry-run -o yaml
 kubectl create deployment --image=nginx nginx --dry-run -o yaml
-kubectl run blue --image=nginx --replicas=6            
+kubectl run blue --image=nginx --replicas=6     
+
+# run esta casi obsoleto
+kubectl run hello-minikube --image=gcr.io/google_containers/echoserver:1.4 --port=8080
+
 # What is the image used to create the new pods?
 kubectl describe pod newpod-<id>  
 kubectl get pods -o wide 
+
 # How many containers are part of the pod 'webapp'?
 kubectl describe pod webapp
+
 # Why do you think the container 'agentx' in pod 'webapp' is in error?
 # Asi chequeo los logs
 kubectl describe pod webapp
+
 # Delete the 'webapp' Pod.
 kubectl delete pod webapp
+
 # Create a new pod with the name 'redis' and with the image 'redis123'
 kubectl run redis --image=redis123 --generator=run-pod/v1
 # redis123 esta intencionalmente mal
@@ -57,25 +76,123 @@ kubectl run redis --image=redis123 --generator=run-pod/v1
 # Update the pod-definition file and use 'kubectl apply' command or use 'kubectl edit pod redis' command.
 # Me abre un vim con el yaml autogenerado en ram del pod, luego de editarlo y guardarlo se hace un apply
 kubectl edit pod redis
+
 # Aplicar el yaml
 kubectl run -f pod.yaml
 kubectl apply -f pod.yaml
 # o borrarlo y volverlo a crear
 kubectl run -f pod.yaml
+
 # Obtener el yml de un RS
 kubectl get rs mi_replica -o yaml > mi_rs.yml
+
 # Escalar replicas
 kubectl scale rs new-replica-set --replicas=5
+
 # Deployments
 kubectl create -f deployment-definition.yml
 kubectl get deployments
-# edit
-kubectl edit deployment my-deployment
+
 # Pod - Edit
+kubectl edit deployment my-deployment
 kubectl edit pod <pod-name>
+
 # Pod - Dump
 kubectl get pod pod-name -o yaml > yml
 
+# Expose port
+kubectl expose <type name> <identifier/name> [—port=external port] [—target-port=container-port [—type=service-type]
+kubectl expose deployment hello-minikube --type=NodePort
+
+# Port forward
+# Forwardea un puerto de la maquina local donde esta corriendo kubectl
+# a un POD en un host remoto al que kubectl se esta conectando
+kubectl port-forward <pod name> [LOCAL_PORT:]REMOTE_PORT]
+kubectl port-forward tomcat2-deployment-75cc77755c-bgh5j 31115:9000
+
+# Permite attachearme a un pod para ver su salida
+kubectl attach <pod name> -c <container>
+
+# Exec
+kubectl exec -it pod-name [-c container] command [args]
+kubectl exec -it tomcat2-deployment-75cc77755c-bgh5j bash
+
+# Label pods para clasificar
+kubectl label [—overwrite] <type> KEY_1=VAL_1 ….
+kubectl label <type> key1=val1
+kubectl label pods tomcat2-deployment-75cc77755c-bgh5j healty=false
+# En el yaml que define el deployment agrego
+# en la seccion de spec: para indicar que este deployment se tiene que 
+# aplicar en nodos con la clave/valor storageType: ssd
+  nodeSelector:
+    storageType: ssd
+
+# Escalado online sin downtime
+# 1. escalamos 
+kubectl scale --replicas=4 deployment/tomcat-deployment
+# 2 defino un servicio de load balancer
+kubectl expose deployment tomcat-deployment --type=LoadBalancer --port=8080 --target-port=8080 --name=tomcat-load-balancer
+# 3 veo que ip le asigno al servicio
+kubectl describe services tomcat-load-balancer
+
+# Volume
+kubectl get persistentvolumes
+# Secrets
+# Son key/value strings
+
+
+# Rollout
+# ------------
+kubectl rollout status
+kubectl rollout history
+kubectl set image
+  - kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
+kubectl rollout history deployment tomcat-deployment --revision=2
+
+# Healt checks
+# ------------
+# - readiness probes: chequea si un pod es ready. Ejemplo luego de iniciarlo.
+# - liveness probes:  para determinar cuando un pod es healthy o unhealthy, luego
+# 					  de haber sido ready
+
+# Basicamente tengo que definir en el yaml del deployment las pruebas. Se 
+# ponen en spec:
+
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    readinessProbe:
+      httpGet:
+        path: /
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 3
+
+# Volumenes
+# ---------
+kind: PersistentVolume
+apiVersion: v1 
+
+# k8s usa Claim para ver PersistentVolume que satisfaga los requerimientos
+
+kind: PersistentVolumeClaim
+metadata:
+  name: task-pv-claim
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce # Significa que solo un contenedor puede usarlo
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
 
 # Definiendo el archivo pod.yaml
 apiVersion: v1
@@ -103,13 +220,16 @@ spec:
 # ----------------------------
 #       DEPLOYMENTS
 # ----------------------------
-# cambia el kind: Deployment
+# Son las contrucciones que definen una aplicacion
+# Cambia el kind: Deployment
 
 # Se puede editar cualquier campo/propiedad del template
 # de pod, ya que el pod template es hijo de la especificacion
 # del deploy. Con cada cambio el deploy automaticamente borra y
 # recrea los pods con los cambios
 
+kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+kubectl create deployment mimongo --image=mongo --port=27017
 kubectl edit deployment my-deployment
 
 # ----------------

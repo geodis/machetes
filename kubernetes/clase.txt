@@ -244,6 +244,7 @@ kubectl scale --replicas=4 deployment mongo-excercice-1
 # Volume
 
 kubectl get persistentvolumes
+# ACAAAA
 
 # Secrets
 # Son key/value strings
