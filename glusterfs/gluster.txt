@@ -59,3 +59,65 @@ To remove a server from the TSP, run the following command from another server i
 
 
 # gluster peer detach <server>
+
+
+---------------------------------------------
+Integracion kubernetes - glusterfs
+---------------------------------------------
+https://github.com/gluster/gluster-kubernetes
+
+En los todos nodos k8s
+/etc/modules-load.d/gluster_modules.conf
+dm_snapshot
+dm_mirror
+dm_thin_pool
+
+
+Instalacion de Heketi en glusterfs1
+
+yum install heketi
+
+sudo -u heketi ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/var/lib/heketi/.ssh/id_rsa):
+
+[root@node1 ~]# vi /etc/heketi/heketi.json 
+reemplazar
+    "executor": "mock", por     "executor": "ssh",
+
+
+    "_sshexec_comment": "SSH username and private key file information",
+    "sshexec": {
+      "keyfile": "/var/lib/heketi/.ssh/id_rsa",
+      "user": "root",
+      "port": "22",
+      "fstab": "/etc/fstab"
+    },
+
+# enable service
+systemctl enable --now heketi
+
+# test
+curl http://127.0.0.1:8080/hello
+Hello from Heketi
+
+Copio la id_rsa.pub en los authorized_key de c/nodo gluster
+
+
+Instalo los client tools de heketi
+yum install heketi-client
+export HEKETI_CLI_SERVER=http://localhost:8080
+
+heketi-cli cluster create gluster_cluster
+Cluster id: 50aabe88586bede30fd9b442122ebe4d
+
+heketi-cli node add --cluster=50aabe88586bede30fd9b442122ebe4d --zone=1 --management-host-name=glusterfs1 --storage-host-name=glusterfs1
+Node information:
+Id: 04b3033fc42000993da1006b85a421ee
+State: online
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Zone: 1
+Management Hostname glusterfs1
+Storage Hostname glusterfs1
+
+
