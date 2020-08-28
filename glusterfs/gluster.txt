@@ -73,7 +73,8 @@ dm_mirror
 dm_thin_pool
 
 
-Instalacion de Heketi en glusterfs1
+Instalacion de Heketi en nodo1 de kubernetes
+--------------------------------------------
 
 yum install heketi
 
@@ -120,4 +121,65 @@ Zone: 1
 Management Hostname glusterfs1
 Storage Hostname glusterfs1
 
+
+# add nodes
+# heketi-cli node add --cluster=50aabe88586bede30fd9b442122ebe4d --zone=1 --management-host-name=glusterfs1 --storage-host-name=glusterfs1                                                            
+Node information:
+Id: 04b3033fc42000993da1006b85a421ee
+State: online
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Zone: 1
+Management Hostname glusterfs1
+Storage Hostname glusterfs1
+[root@node1 ~]# heketi-cli node add --cluster=50aabe88586bede30fd9b442122ebe4d --zone=1 --management-host-name=glusterfs2 --storage-host-name=glusterfs2                                                            
+Node information:
+Id: a746d4444971b70a9b004beec9bf0876
+State: online
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Zone: 1
+Management Hostname glusterfs2
+Storage Hostname glusterfs2
+
+# Add devices to nodes
+----------------------
+
+
+LVM  en los devices
+/dev/vdb: particion en gluster  que contendra los volumes/bricks. No debe estar montado
+En c/nodo gluster donde existe vdb:
+wipefs -a /dev/vdb
+
+ heketi-cli node list
+Id:04b3033fc42000993da1006b85a421ee     Cluster:50aabe88586bede30fd9b442122ebe4d
+Id:a746d4444971b70a9b004beec9bf0876     Cluster:50aabe88586bede30fd9b442122ebe4d
+
+heketi-cli device add --name=/dev/vdb --node=04b3033fc42000993da1006b85a421ee
+Device added successfully
+heketi-cli device add --name=/dev/vdb --node=a746d4444971b70a9b004beec9bf0876
+Device added successfully
+
+Ahora podemos hacer el call para allocar espacio
+------------------------------------------------
+# minimo son 4gigas
+heketi-cli volume create --size=4 --replica=2
+
+Name: vol_291e480acbd42020fdef6cc37c424918
+Size: 4
+Volume Id: 291e480acbd42020fdef6cc37c424918
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Mount: glusterfs1:vol_291e480acbd42020fdef6cc37c424918
+Mount Options: backup-volfile-servers=glusterfs2
+Block: false
+Free Size: 0
+Reserved Size: 0
+Block Hosting Restriction: (none)
+Block Volumes: []
+Durability Type: replicate
+Distribute Count: 1
+Replica Count: 2
+
+# Test
+mount -t glusterfs -o backup-volfile-servers=glusterfs2 glusterfs1:vol_291e480acbd42020fdef6cc37c424918 /mnt
+
+# En el nodo gluster si voy a /var/lib/heketi/mounts puedo ver las carpetas que representan los ids y los archivos
 
