@@ -155,7 +155,13 @@ kubectl rollout status
 kubectl rollout history
 kubectl set image
   - kubectl set image deployment tomcat-deployment tomcat=tomcat:9.0.1
+# Detalles de la revision especifica
 kubectl rollout history deployment tomcat-deployment --revision=2
+# Haciendo un rollback a la version anterior
+kubectl rollout undo deployment tomcat-deployment
+# Haciendo un rollback a la version especifica
+kubectl rollout undo deployment tomcat-deployment --to-revision=2
+
 
 # Autoscaling
 # -----------

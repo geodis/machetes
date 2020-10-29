@@ -59,3 +59,104 @@ To remove a server from the TSP, run the following command from another server i
 
 
 # gluster peer detach <server>
+
+
+
+Heketi
+
+yum -y install heketi
+sudo -u heketi ssh-keygen
+vi /etc/heketi/heketi.json
+
+
+  "jwt": {
+    "_admin": "Admin has access to all APIs",
+    "admin": {
+      "key": "admin"
+    },
+    "_user": "User only has access to /volumes endpoint",
+    "user": {
+      "key": "user"
+    }
+
+
+
+
+ "executor": "ssh",
+
+    "_sshexec_comment": "SSH username and private key file information",
+    "sshexec": {
+      "keyfile": "/var/lib/heketi/.ssh/id_rsa",
+      "user": "root",
+      "port": "22",
+      "fstab": "/etc/fstab"
+    },
+
+systemctl enable --now heketi
+
+# test
+curl http://127.0.0.1:8080/hello
+
+cat /var/lib/heketi/.ssh/id_rsa.pub 
+
+copiar la key en c/nodo en /root/.ssh/authorized_keys
+
+yum -y install heketi-client
+En nodo donde este el heketi server
+
+echo 'HEKETI_CLI_SERVER=http://localhost:8080' >> /etc/environment
+
+Crear el cluster
+
+heketi-cli cluster create mycluster
+Cluster id: b197fce6f47c41bb70926018f94527e0
+
+
+heketi-cli node add --cluster=b197fce6f47c41bb70926018f94527e0 --zone=1 --management-host-name=gluster1 --storage-host-name=gluster1
+Node information:
+Id: 20a3fbb360eab2a9ff5e44cc5d1c0d66
+State: online
+Cluster Id: b197fce6f47c41bb70926018f94527e0
+Zone: 1
+Management Hostname gluster1
+Storage Hostname gluster1
+
+heketi-cli node add --cluster=b197fce6f47c41bb70926018f94527e0 --zone=1 --management-host-name=gluster2 --storage-host-name=gluster2
+Node information:
+Id: 49d8609ddace25226377a8fce982bca1
+State: online
+Cluster Id: b197fce6f47c41bb70926018f94527e0
+Zone: 1
+Management Hostname gluster2
+Storage Hostname gluster2
+
+
+Agrego devices
+
+# en g1
+wipefs -a /dev/vdb1
+heketi-cli device add --name=/dev/vdb1 --node=20a3fbb360eab2a9ff5e44cc5d1c0d66
+
+# en g2
+wipefs -a /dev/vdb1
+
+Create volume 1G
+
+# heketi-cli volume create --size=1 --replica=2
+Name: vol_5cfe7046c8511aadf88fbe54fbf494e5
+Size: 1
+Volume Id: 5cfe7046c8511aadf88fbe54fbf494e5
+Cluster Id: b197fce6f47c41bb70926018f94527e0
+Mount: gluster1:vol_5cfe7046c8511aadf88fbe54fbf494e5
+Mount Options: backup-volfile-servers=gluster2
+Block: false
+Free Size: 0
+Reserved Size: 0
+Block Hosting Restriction: (none)
+Block Volumes: []
+Durability Type: replicate
+Distribute Count: 1
+Replica Count: 2
+
+
+mount -t glusterfs -o backup-volfile-servers=gluster2 gluster1:vol_5cfe7046c8511aadf88fbe54fbf494e5 mnt

@@ -1,11 +1,39 @@
+Manejador de paquetes para k8s
+
+chart: receta que se usa para instalar en el cluster k8s
+repositorio: donde estan los charts
+release: versiones de los paquetes instalados.
+Puedo tener varias copias del mismo paquete con diferentes releases
+EJ: puedo tener 3 mysql de la misma version, pero a cada una le puedo dar
+un diferente uso (release): una por ej para wordpress, otra para otra app, etc
+
+Helm installs charts into Kubernetes, creating a new release for each installation.
+And to find new charts, you can search Helm chart repositories
+
 helm help
 helm install [--values] [--value]
 helm fetch
 helm list
 helm status
 helm search
+
+helm search hub
+---------------
+# searches the Helm Hub, which comprises helm charts from dozens of different repositories.
+helm search hub wordpress
+helm search repo
+----------------
+searches the repositories that you have added to your local helm client
+(with helm repo add). This search is done over local data, and no public network connection is needed
+
 helm repo update
-helm upgrade
-helm rollback
+helm upgrade nombre-deploy
+helm rollback nombre-deploy revision-number
 helm delete [--purge]
 helm reset [--force]
+
+helm inspect values <paquete> > config.yaml
+Modifico lo que necesito e instalo
+helm install mipaquete <paquete> -f config.yaml
+# Si por ejemplo quiero sobre cargar una sola variable (ej: replicaCount) que seria modificable en el config.yaml
+helm install mingnix . --set replicaCount=2

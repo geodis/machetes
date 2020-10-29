@@ -19,7 +19,7 @@ list: ${var.subnets[i]},  ${join(",",var.subnets)}
 
 
 outputs of a module:    module.NAME.output  ${module.aws_vpc.vpcid}
-count information:      count.FIELD         whe using the attribute count = number in a resource, you can use ${count.idex}
+count information:      count.FIELD         when using the attribute count = number in a resource, you can use ${count.index}
 path info   path.TYPE   path.cwd (current directory), path.module (module path), path.root (root module path)
 meta info   terraform.FIELD terraform.env shows active workspace
 
@@ -121,9 +121,9 @@ variable "project_tags" {
   }
 }
 resource "aws_ebs_volume" "example" {
-  availability_zone = "es-west-1"
+  availability_zone = "us-west-1"
   size = 8
-  tags = {for k,v in merge({Name = "MyVolume"}, var.project_tags: k => lower(v)}
+  tags = {for k,v in merge({Name = "MyVolume"}, var.project_tags): k => lower(v)}
 }
 
 
@@ -132,7 +132,7 @@ resource "aws_ebs_volume" "example" {
 variable "ports" {
   type = map(list(string))
   default = {
-    "22" = ["127.0.0.1/320, "192.168.0.0/24""]
+    "22" = ["127.0.0.1/32", "192.168.0.0/24"]
     "443" = ["0.0.0.0/0"]
   }
 }
