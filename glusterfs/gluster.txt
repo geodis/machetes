@@ -61,6 +61,7 @@ To remove a server from the TSP, run the following command from another server i
 # gluster peer detach <server>
 
 
+<<<<<<< HEAD
 
 Heketi
 
@@ -83,6 +84,33 @@ vi /etc/heketi/heketi.json
 
 
  "executor": "ssh",
+=======
+---------------------------------------------
+Integracion kubernetes - glusterfs
+---------------------------------------------
+https://github.com/gluster/gluster-kubernetes
+
+En los todos nodos k8s
+/etc/modules-load.d/gluster_modules.conf
+dm_snapshot
+dm_mirror
+dm_thin_pool
+
+
+Instalacion de Heketi en nodo1 de kubernetes
+--------------------------------------------
+
+yum install heketi
+
+sudo -u heketi ssh-keygen
+Generating public/private rsa key pair.
+Enter file in which to save the key (/var/lib/heketi/.ssh/id_rsa):
+
+[root@node1 ~]# vi /etc/heketi/heketi.json 
+reemplazar
+    "executor": "mock", por     "executor": "ssh",
+
+>>>>>>> 4e4ab985ec5209bca8c783e08be6ab938605c285
 
     "_sshexec_comment": "SSH username and private key file information",
     "sshexec": {
@@ -92,10 +120,15 @@ vi /etc/heketi/heketi.json
       "fstab": "/etc/fstab"
     },
 
+<<<<<<< HEAD
+=======
+# enable service
+>>>>>>> 4e4ab985ec5209bca8c783e08be6ab938605c285
 systemctl enable --now heketi
 
 # test
 curl http://127.0.0.1:8080/hello
+<<<<<<< HEAD
 
 cat /var/lib/heketi/.ssh/id_rsa.pub 
 
@@ -149,6 +182,77 @@ Volume Id: 5cfe7046c8511aadf88fbe54fbf494e5
 Cluster Id: b197fce6f47c41bb70926018f94527e0
 Mount: gluster1:vol_5cfe7046c8511aadf88fbe54fbf494e5
 Mount Options: backup-volfile-servers=gluster2
+=======
+Hello from Heketi
+
+Copio la id_rsa.pub en los authorized_key de c/nodo gluster
+
+
+Instalo los client tools de heketi
+yum install heketi-client
+export HEKETI_CLI_SERVER=http://localhost:8080
+
+heketi-cli cluster create gluster_cluster
+Cluster id: 50aabe88586bede30fd9b442122ebe4d
+
+heketi-cli node add --cluster=50aabe88586bede30fd9b442122ebe4d --zone=1 --management-host-name=glusterfs1 --storage-host-name=glusterfs1
+Node information:
+Id: 04b3033fc42000993da1006b85a421ee
+State: online
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Zone: 1
+Management Hostname glusterfs1
+Storage Hostname glusterfs1
+
+
+# add nodes
+# heketi-cli node add --cluster=50aabe88586bede30fd9b442122ebe4d --zone=1 --management-host-name=glusterfs1 --storage-host-name=glusterfs1                                                            
+Node information:
+Id: 04b3033fc42000993da1006b85a421ee
+State: online
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Zone: 1
+Management Hostname glusterfs1
+Storage Hostname glusterfs1
+[root@node1 ~]# heketi-cli node add --cluster=50aabe88586bede30fd9b442122ebe4d --zone=1 --management-host-name=glusterfs2 --storage-host-name=glusterfs2                                                            
+Node information:
+Id: a746d4444971b70a9b004beec9bf0876
+State: online
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Zone: 1
+Management Hostname glusterfs2
+Storage Hostname glusterfs2
+
+# Add devices to nodes
+----------------------
+
+
+LVM  en los devices
+/dev/vdb: particion en gluster  que contendra los volumes/bricks. No debe estar montado
+En c/nodo gluster donde existe vdb:
+wipefs -a /dev/vdb
+
+ heketi-cli node list
+Id:04b3033fc42000993da1006b85a421ee     Cluster:50aabe88586bede30fd9b442122ebe4d
+Id:a746d4444971b70a9b004beec9bf0876     Cluster:50aabe88586bede30fd9b442122ebe4d
+
+heketi-cli device add --name=/dev/vdb --node=04b3033fc42000993da1006b85a421ee
+Device added successfully
+heketi-cli device add --name=/dev/vdb --node=a746d4444971b70a9b004beec9bf0876
+Device added successfully
+
+Ahora podemos hacer el call para allocar espacio
+------------------------------------------------
+# minimo son 4gigas
+heketi-cli volume create --size=4 --replica=2
+
+Name: vol_291e480acbd42020fdef6cc37c424918
+Size: 4
+Volume Id: 291e480acbd42020fdef6cc37c424918
+Cluster Id: 50aabe88586bede30fd9b442122ebe4d
+Mount: glusterfs1:vol_291e480acbd42020fdef6cc37c424918
+Mount Options: backup-volfile-servers=glusterfs2
+>>>>>>> 4e4ab985ec5209bca8c783e08be6ab938605c285
 Block: false
 Free Size: 0
 Reserved Size: 0
@@ -158,5 +262,13 @@ Durability Type: replicate
 Distribute Count: 1
 Replica Count: 2
 
+<<<<<<< HEAD
 
 mount -t glusterfs -o backup-volfile-servers=gluster2 gluster1:vol_5cfe7046c8511aadf88fbe54fbf494e5 mnt
+=======
+# Test
+mount -t glusterfs -o backup-volfile-servers=glusterfs2 glusterfs1:vol_291e480acbd42020fdef6cc37c424918 /mnt
+
+# En el nodo gluster si voy a /var/lib/heketi/mounts puedo ver las carpetas que representan los ids y los archivos
+
+>>>>>>> 4e4ab985ec5209bca8c783e08be6ab938605c285
