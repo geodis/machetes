@@ -1,0 +1,72 @@
+(???) Regiones y (??) Zonas de disponibilidad
+
+Region: zona geografica. Cada region consiste en 2 o mas zonas de disponibilidad
+Zona de Disponibilidad(AZ): Datacenter (minimo 2 en cada region)
+Ubicacion de Borde: Puntos finales de la red de entrega de contenidos (CDN) para CloudFront
+Hay muchas (??) mas ubicaciones de borde que regiones
+
+Categorias de servicios:
+
+Red
+- VPC: red privada virtual. Datacenter privado virtual
+- Direct Connect: Conexion directa de fibra optica desde la oficina a aws.
+- Route53: DNS
+
+Computing:
+- EC2: Server Virtual
+- ECS: EC2 Container Service. Containers Docker. EC2 con Docker
+- Elastic Beanstalk: Paas. 
+- Lambda: Ejecuta codigo sin necesidad de provisionar infra. Pagas por el tiempo de ejecucion.
+No hay cargos cuando el codigo no esta en funcion.
+
+Almacenamiento:
+- S3: Almacenamiento de objetos. Seguro escalable y altamente disponible. Pagas por el espacion que consumes
+- CloudFront: Red de contenido distribuido. Las ubicaciones de borde almacenan temporalmente los archivos para
+acercar los archivos a los usuarios finales.
+- Glacier: Seguro, alta duracion, bajo costo. Puede tardar horas hasta estar disponible
+- EFS: Permite montar un disco entre multiples instancias EC2
+- Snowball: Parte del servicio importar/exportar. Te permite enviar tus propios discos fisicos a aws y ellos los cargan
+- Storage Gateway: Svc que nos permite conectarnos desde nuestro datacenter hacia una plataforma de Almacenamiento
+en aws. Es una VM que corres en tu infra y replica los datos desde y hacia aws.
+
+Bases de Datos:
+- RDS: Servicios de BD relacionales: sqlserver, oracle, mysql, mariadb, amazon aurora, postgresql
+- DynamoDB: No relacional. 
+- Elasticache: Nos permite hacer cache de los datos y consulta a la bd.
+- Redshift: Sistema de cubo ???
+- DMS: Servicio de migracion de BD. Es una forma de migrar tu BD a aws y hasta migrar una BD de psql a M$ sql por ej.
+
+Estadisticas:
+- EMR: Reductor de mapas elastico. Herramienta para procesar multiples datos
+- Data Pipeline: Nos permite mover datos de un svc a otro
+- Elastic Search: sistema de estadisticas y busqueda de info
+- kinesis: transmite datos en aws
+- Machine Learning
+- Quick Sight: Inteligencia de Negocios
+
+Seguridad  e Identidad:
+- IAM: Usuarios, grupos, roles. MFA, rotacion de pass
+- Directory Service: 
+- Inspector: Inspecciona EC2
+- WAF: 
+- Cloud HSM: Modelo de seguridad de hardware
+- KMS: Servicio de manejo de llaves
+
+Herramientas de Administracion:
+- Cloud Watch: Metricas
+- Cloudformation: 
+- CloudTrail: Auditoria de acceso. Cada vez que se provisiona/cambia una EC2 es logueado.
+- Opsworks: Manejo de configuraciones en EC2 usando Chef.
+- Config: Manejo de config. Ej: Todos los volumenes de datos esten conectados a EC2 y encriptados.
+- Service Catalog: Catalogo de servicios.
+- Trusted Advisor: escanea el entorno e indica seguridad y donde ahorrar $.
+
+Servicios de aplicacion:
+- Api Gateway
+- AppStream: 
+- CloudSearch: servicio para busquedas en un sitio web. 
+- Elastic Transcoder: tareas de transcodificacion de multimedia.
+- SES: Servicio de emails.
+
+
+

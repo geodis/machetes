@@ -93,14 +93,21 @@ git checkout -- CONTRIBUTING.md
 ------------------
 remotes
 ------------------
-git remote -v
-# f you want to fetch all the information 
-# that Paul has but that you don’t yet have in your repository
-git fetch pb
-git fetch <remote>
-# Pushing to Your Remotes
-git push origin master
-# Inspecting a Remote
-git remote show origin
-# Renaming and Removing Remotes
-git remote rename pb paul
+
+------------------
+Undo mistakes
+------------------
+# luego de un git diff quiero restaurar un file
+git restore index.html
+# restore deleted file
+git restore index.html
+# Si en el diff hice varios cambios, pero solo quiero restaurar
+# algunos y no todos
+git restore index.html -p # va a ir preguntando bloque por bloque (chunk)
+# restore to the last commit
+git restore . # everything in this folder will be undone
+# Si quiero hacer un undo de un commit en especifico: 2b504bee
+git revert 2b504bee # me va a deshacer los cambios que hizo en ese commit en un nuevo commit
+# volver en el tiempo, volver a un commit y borrar todo lo que vino despues. Reset
+git reset --hard 2b504bee # vuelvo a este tiempo --hard: no local changes will survive
+git reset --mixed 2b504bee # vuelvo a este tiempo --mixed: no borro en el local los cambios
